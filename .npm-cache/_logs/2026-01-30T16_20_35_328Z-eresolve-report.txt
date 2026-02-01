@@ -1,0 +1,18 @@
+'Log files:
+/Users/marcoidrovo/Desktop/debt-planner/.npm-cache/_logs/2026-01-30T16_20_35_328Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: paycheck-plan@1.0.0
+Found: @capacitor/core@6.2.1
+node_modules/@capacitor/core
+  @capacitor/core@"^6.1.0" from the root project
+
+Could not resolve dependency:
+peer @capacitor/core@"^8.0.0" from @capacitor/ios@8.0.2
+node_modules/@capacitor/ios
+  @capacitor/ios@"*" from the root project
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.

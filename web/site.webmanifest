@@ -1,0 +1,15 @@
+{
+  "name": "Paycheck Plan",
+  "short_name": "Paycheck Plan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f4f0",
+  "theme_color": "#1aa6b7",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}

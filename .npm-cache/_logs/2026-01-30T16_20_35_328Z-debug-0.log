@@ -1,0 +1,67 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@10.9.2
+2 info using node@v22.14.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/marcoidrovo/Desktop/debt-planner/.npmrc
+5 silly config load:file:/Users/marcoidrovo/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm install @capacitor/ios
+8 verbose argv "install" "@capacitor/ios" "--cache" ".npm-cache"
+9 verbose logfile logs-max:10 dir:/Users/marcoidrovo/Desktop/debt-planner/.npm-cache/_logs/2026-01-30T16_20_35_328Z-
+10 verbose logfile /Users/marcoidrovo/Desktop/debt-planner/.npm-cache/_logs/2026-01-30T16_20_35_328Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+13 silly idealTree buildDeps
+14 silly fetch manifest @capacitor/ios@*
+15 silly packumentCache full:https://registry.npmjs.org/@capacitor%2fios cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@capacitor%2fios 368ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/@capacitor%2fios set size:undefined disposed:false
+18 silly fetch manifest @capacitor/core@^6.1.0
+19 silly packumentCache full:https://registry.npmjs.org/@capacitor%2fcore cache-miss
+20 http cache https://registry.npmjs.org/@capacitor%2fcore 10ms (cache hit)
+21 silly packumentCache full:https://registry.npmjs.org/@capacitor%2fcore set size:4056789 disposed:false
+22 silly fetch manifest @capacitor/core@^8.0.0
+23 silly packumentCache full:https://registry.npmjs.org/@capacitor%2fcore cache-miss
+24 http cache https://registry.npmjs.org/@capacitor%2fcore 6ms (cache hit)
+25 silly packumentCache full:https://registry.npmjs.org/@capacitor%2fcore set size:4056789 disposed:false
+26 verbose stack Error: unable to resolve dependency tree
+26 verbose stack     at #failPeerConflict (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1363:25)
+26 verbose stack     at #loadPeerSet (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1329:33)
+26 verbose stack     at async #buildDepStep (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:904:11)
+26 verbose stack     at async Arborist.buildIdealTree (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:181:7)
+26 verbose stack     at async Promise.all (index 1)
+26 verbose stack     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:131:5)
+26 verbose stack     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+26 verbose stack     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:207:9)
+26 verbose stack     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:74:5)
+27 error code ERESOLVE
+28 error ERESOLVE unable to resolve dependency tree
+29 error
+30 error While resolving: paycheck-plan@1.0.0
+30 error Found: @capacitor/core@6.2.1
+30 error node_modules/@capacitor/core
+30 error   @capacitor/core@"^6.1.0" from the root project
+30 error
+30 error Could not resolve dependency:
+30 error peer @capacitor/core@"^8.0.0" from @capacitor/ios@8.0.2
+30 error node_modules/@capacitor/ios
+30 error   @capacitor/ios@"*" from the root project
+30 error
+30 error Fix the upstream dependency conflict, or retry
+30 error this command with --force or --legacy-peer-deps
+30 error to accept an incorrect (and potentially broken) dependency resolution.
+31 error
+31 error
+31 error For a full report see:
+31 error /Users/marcoidrovo/Desktop/debt-planner/.npm-cache/_logs/2026-01-30T16_20_35_328Z-eresolve-report.txt
+32 silly unfinished npm timer reify 1769790035549
+33 silly unfinished npm timer reify:loadTrees 1769790035552
+34 silly unfinished npm timer idealTree:buildDeps 1769790035588
+35 silly unfinished npm timer idealTree:#root 1769790035589
+36 verbose cwd /Users/marcoidrovo/Desktop/debt-planner
+37 verbose os Darwin 20.6.0
+38 verbose node v22.14.0
+39 verbose npm  v10.9.2
+40 verbose exit 1
+41 verbose code 1
+42 error A complete log of this run can be found in: /Users/marcoidrovo/Desktop/debt-planner/.npm-cache/_logs/2026-01-30T16_20_35_328Z-debug-0.log
