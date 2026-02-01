@@ -6,4 +6,10 @@
   <url>
     <loc>https://debtplanner.vercel.app/strategy</loc>
   </url>
+  <url>
+    <loc>https://debtplanner.vercel.app/privacy</loc>
+  </url>
+  <url>
+    <loc>https://debtplanner.vercel.app/terms</loc>
+  </url>
 </urlset>

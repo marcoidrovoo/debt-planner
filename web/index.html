@@ -336,6 +336,21 @@
       .hero { padding: 22px; }
       .page { padding: 32px 16px 60px; }
     }
+
+    .footer {
+      margin-top: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--text); text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -612,6 +627,14 @@
         <ul id="debts-list" class="list"></ul>
         <div id="debts-empty" class="empty hidden">No debts yet. Add your first debt above.</div>
       </section>
+
+      <footer class="card footer">
+        <span>© 2026 Paycheck Plan</span>
+        <span>
+          <a href="/privacy">Privacy</a> ·
+          <a href="/terms">Terms</a>
+        </span>
+      </footer>
     </main>
   </div>
 

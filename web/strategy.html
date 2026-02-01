@@ -161,6 +161,21 @@
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
     }
+
+    .footer {
+      margin-top: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--text); text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -208,6 +223,14 @@
           <a class="cta secondary" href="index.html#step3-title">Choose a Strategy</a>
         </div>
       </section>
+
+      <footer class="card footer">
+        <span>© 2026 Paycheck Plan</span>
+        <span>
+          <a href="/privacy">Privacy</a> ·
+          <a href="/terms">Terms</a>
+        </span>
+      </footer>
     </main>
   </div>
 </body>
