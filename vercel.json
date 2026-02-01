@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/strategy", "dest": "/strategy.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/strategy", "destination": "/strategy.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
