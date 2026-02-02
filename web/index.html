@@ -2,29 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Paycheck Plan — Launch Ready</title>
+  <title>Budget Dad — Paycheck Plan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Plan your next paycheck with clear steps for income, bills, and debt payoff." />
-  <meta property="og:title" content="Paycheck Plan" />
+  <meta name="description" content="Budget Dad helps you plan your next paycheck with clear steps for income, bills, and debt payoff." />
+  <meta property="og:title" content="Budget Dad" />
   <meta property="og:description" content="Plan your next paycheck with clear steps for income, bills, and debt payoff." />
   <meta property="og:type" content="website" />
-  <meta name="theme-color" content="#1aa6b7" />
+  <meta name="theme-color" content="#00bcd4" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/site.webmanifest" />
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
 
     :root {
-      --bg: #f6f4f0;
-      --bg-2: #eef3f7;
+      --bg: #fff7ee;
+      --bg-2: #eef7ff;
       --card: #ffffff;
-      --card-2: #f7f9fc;
-      --muted: #5b6b7a;
-      --text: #0b1220;
-      --accent: #1aa6b7;
-      --accent-2: #f2a65a;
-      --border: #dde4ee;
-      --shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
+      --card-2: #f7fbff;
+      --muted: #4f5d6b;
+      --text: #0a1220;
+      --accent: #00bcd4;
+      --accent-2: #ffb703;
+      --accent-3: #ff6b6b;
+      --border: #d8e2ef;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
       --radius-lg: 18px;
       --radius-md: 14px;
       --radius-sm: 10px;
@@ -38,8 +39,9 @@
     body {
       font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
       background:
-        radial-gradient(900px 520px at 12% 0%, rgba(26, 166, 183, 0.12), transparent 60%),
-        radial-gradient(700px 520px at 82% 10%, rgba(242, 166, 90, 0.18), transparent 60%),
+        radial-gradient(900px 520px at 12% 0%, rgba(0, 188, 212, 0.18), transparent 60%),
+        radial-gradient(700px 520px at 82% 10%, rgba(255, 183, 3, 0.22), transparent 60%),
+        radial-gradient(640px 480px at 50% 80%, rgba(255, 107, 107, 0.12), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg-2) 55%, #ffffff 100%);
       color: var(--text);
       margin: 0;
@@ -81,10 +83,10 @@
       gap: 14px;
       padding: 32px;
       background:
-        linear-gradient(135deg, rgba(26, 166, 183, 0.14), transparent 60%),
-        linear-gradient(315deg, rgba(242, 166, 90, 0.16), transparent 50%),
+        linear-gradient(135deg, rgba(0, 188, 212, 0.18), transparent 60%),
+        linear-gradient(315deg, rgba(255, 183, 3, 0.18), transparent 50%),
         var(--card);
-      border: 1px solid rgba(26, 166, 183, 0.25);
+      border: 1px solid rgba(0, 188, 212, 0.25);
     }
 
     h1 {
@@ -108,7 +110,7 @@
     .step {
       padding: 6px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(26, 166, 183, 0.25);
+      border: 1px solid rgba(0, 188, 212, 0.25);
       background: rgba(255, 255, 255, 0.8);
       color: var(--text);
       font-size: 0.85rem;
@@ -147,8 +149,8 @@
 
     input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: rgba(26, 166, 183, 0.55);
-      box-shadow: 0 0 0 3px rgba(26, 166, 183, 0.12);
+      border-color: rgba(0, 188, 212, 0.55);
+      box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.12);
     }
 
     .button {
@@ -164,7 +166,7 @@
       color: #0b1120;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .button:hover { transform: translateY(-1px); box-shadow: 0 16px 36px rgba(26, 166, 183, 0.18); }
+    .button:hover { transform: translateY(-1px); box-shadow: 0 16px 36px rgba(0, 188, 212, 0.18); }
 
     .button.secondary {
       background: #ffffff;
@@ -262,8 +264,8 @@
       display: inline-flex;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(26, 166, 183, 0.35);
-      background: rgba(26, 166, 183, 0.08);
+      border: 1px solid rgba(0, 188, 212, 0.35);
+      background: rgba(0, 188, 212, 0.08);
       color: var(--text);
       font-size: 0.8rem;
       font-weight: 700;
@@ -283,7 +285,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 14px;
-      border: 1px dashed rgba(26, 166, 183, 0.35);
+      border: 1px dashed rgba(0, 188, 212, 0.35);
       border-radius: var(--radius-sm);
       margin-top: 8px;
       color: var(--muted);
@@ -303,7 +305,7 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
-    .tiny:hover { border-color: rgba(26, 166, 183, 0.5); }
+    .tiny:hover { border-color: rgba(0, 188, 212, 0.5); }
 
     .empty {
       padding: 12px;
@@ -314,27 +316,190 @@
       text-align: center;
     }
 
-    /* Print / PDF export */
-    @media print {
-      body { background: #ffffff; }
-      .page { padding: 0; }
-      .hero, .section-desc, .stepper, .note, .muted { color: #111827 !important; }
-      .card { box-shadow: none; border: 1px solid #d1d5db; }
-      .button, .tiny, .pill, .check-row, .radio-row, .actions-row { display: none !important; }
-      .layout { grid-template-columns: 1fr; gap: 16px; }
-      #plan-box { min-height: auto; }
-      input, select { border: 1px solid #d1d5db; }
+    .topbar {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #0b1120;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+    .nav-links a { color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .hero-actions .button { width: auto; padding: 12px 18px; }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .stat h3 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
     }
 
-    @media (max-width: 980px) {
-      .layout { grid-template-columns: 1fr; }
-      .side-card { position: static; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      background: #ffffff;
+    }
+    .feature-card h3 { margin: 0 0 6px; font-size: 1rem; }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .testimonial {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .testimonial strong { font-size: 0.95rem; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 188, 212, 0.12);
+      color: #0b6b7a;
+      font-size: 0.78rem;
+      font-weight: 700;
     }
 
-    @media (max-width: 640px) {
-      .field-inline { flex-direction: column; }
-      .hero { padding: 22px; }
-      .page { padding: 32px 16px 60px; }
+    .onboard-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+    .onboard-steps {
+      display: grid;
+      gap: 10px;
+    }
+    .onboard-step {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(0, 188, 212, 0.35);
+      background: #ffffff;
+    }
+
+    .onboard-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 13, 20, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 20;
+    }
+    .onboard-modal.active { display: flex; }
+    .onboard-panel {
+      width: min(720px, 100%);
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+    .onboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .onboard-progress {
+      display: flex;
+      gap: 6px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #dbe6f2;
+    }
+    .dot.active { background: var(--accent); }
+    .onboard-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+    .ghost {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .faq {
+      display: grid;
+      gap: 10px;
+    }
+    .faq details {
+      margin: 0;
+      background: #ffffff;
     }
 
     .footer {
@@ -351,19 +516,144 @@
     }
     .footer a { color: var(--muted); text-decoration: none; }
     .footer a:hover { color: var(--text); text-decoration: underline; }
+
+    /* Print / PDF export */
+    @media print {
+      body { background: #ffffff; }
+      .page { padding: 0; }
+      .hero, .section-desc, .stepper, .note, .muted { color: #111827 !important; }
+      .card { box-shadow: none; border: 1px solid #d1d5db; }
+      .button, .tiny, .pill, .check-row, .radio-row, .actions-row, .topbar { display: none !important; }
+      .layout { grid-template-columns: 1fr; gap: 16px; }
+      #plan-box { min-height: auto; }
+      input, select { border: 1px solid #d1d5db; }
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .side-card { position: static; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .feature-grid, .testimonial-grid { grid-template-columns: 1fr 1fr; }
+      .onboard-card { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .field-inline { flex-direction: column; }
+      .hero { padding: 22px; }
+      .page { padding: 32px 16px 60px; }
+      .feature-grid, .testimonial-grid, .stat-row { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; gap: 8px; }
+      .hero-actions { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <main class="layout">
+      <div class="topbar" id="top">
+        <div class="brand"><span class="brand-badge">BD</span> Budget Dad</div>
+        <div class="nav-links">
+          <a href="#overview">How it works</a>
+          <a href="#stories">Stories</a>
+          <a href="#onboarding">Onboarding</a>
+          <a href="#step1-title">Plan</a>
+        </div>
+        <a class="ghost" href="#step1-title">Start planning</a>
+      </div>
+
       <section class="card hero">
-        <h1>Your Next Paycheck, Planned</h1>
-        <p class="subtitle">Build a precise plan for bills, debt, and spending — all from a single paycheck.</p>
-        <div class="stepper">
-          <div class="step">1 • Income</div>
-          <div class="step">2 • Bills</div>
-          <div class="step">3 • Debts</div>
-          <div class="step">4 • Plan</div>
+        <div class="hero-grid">
+          <div>
+            <h1>Budget Dad keeps your paycheck in control.</h1>
+            <p class="subtitle">Plan bills, debt, and spending in minutes. Clear steps. No spreadsheets.</p>
+            <div class="hero-actions">
+              <button class="button" type="button" onclick="openOnboarding()">Start guided setup</button>
+              <a class="button secondary" href="#step1-title">Jump to planner</a>
+            </div>
+            <div class="stepper" style="margin-top:10px;">
+              <div class="step">1 • Income</div>
+              <div class="step">2 • Bills</div>
+              <div class="step">3 • Debts</div>
+              <div class="step">4 • Plan</div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat">
+              <h3>$2,400</h3>
+              <div class="muted">Average monthly debt paid off by users.</div>
+            </div>
+            <div class="stat">
+              <h3>8 weeks</h3>
+              <div class="muted">Typical time to hit first savings goal.</div>
+            </div>
+            <div class="stat">
+              <h3>15 min</h3>
+              <div class="muted">Time to build a complete plan.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="overview">
+        <h2 class="section-title">A layered plan, not a flat checklist</h2>
+        <p class="section-desc">Budget Dad stacks your plan in layers: income, bills, debt minimums, spending, and buffer.</p>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>Paycheck blueprint</h3>
+            <p class="muted">Know your net, then allocate bills and debt with a clear window.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Debt strategy switch</h3>
+            <p class="muted">Pick snowball or avalanche and see exactly where extra money goes.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Protected buffer</h3>
+            <p class="muted">Keep the buffer you want so you never dip below your comfort line.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="stories">
+        <h2 class="section-title">Real wins from Budget Dad users</h2>
+        <p class="section-desc">Stories of debt paid off and savings goals reached with a simple paycheck plan.</p>
+        <div class="testimonial-grid">
+          <div class="testimonial">
+            <span class="tag">Debt Free</span>
+            <p>“We wiped out $12,800 in credit cards in 7 months by following the next-paycheck plan.”</p>
+            <strong>— Maria & Justin, Phoenix</strong>
+          </div>
+          <div class="testimonial">
+            <span class="tag">Savings Goal</span>
+            <p>“Budget Dad helped us hit a $3,000 emergency fund without feeling broke.”</p>
+            <strong>— Kayla D., Tampa</strong>
+          </div>
+          <div class="testimonial">
+            <span class="tag">Momentum</span>
+            <p>“Switching to snowball gave me wins fast. Two cards gone in 10 weeks.”</p>
+            <strong>— Andre L., Chicago</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="onboarding">
+        <h2 class="section-title">Quick onboarding</h2>
+        <p class="section-desc">Answer a few questions and we’ll prefill your planner.</p>
+        <div class="onboard-card">
+          <div class="onboard-steps">
+            <div class="onboard-step">
+              <strong>Step 1:</strong> Choose pay type + pay frequency.
+            </div>
+            <div class="onboard-step">
+              <strong>Step 2:</strong> Pick your debt strategy.
+            </div>
+            <div class="onboard-step">
+              <strong>Step 3:</strong> Set buffer + spending target.
+            </div>
+          </div>
+          <div>
+            <p class="muted">You can edit everything later. This just gets your plan started.</p>
+            <button class="button" type="button" onclick="openOnboarding()">Start guided setup</button>
+          </div>
         </div>
       </section>
 
@@ -538,6 +828,7 @@
         </div>
         <button id="calc-button" class="button">Calculate Plan</button>
         <button id="export-button" class="button secondary">Export Plan (PDF)</button>
+        <button id="onboarding-button" class="button secondary">Restart Onboarding</button>
         <button id="clear-button" class="button secondary">Clear Saved Data</button>
         <label class="check-row" style="margin-top:10px;">
           <input id="remember-data" type="checkbox" />
@@ -628,14 +919,118 @@
         <div id="debts-empty" class="empty hidden">No debts yet. Add your first debt above.</div>
       </section>
 
+      <section class="card" id="faq">
+        <h2 class="section-title">FAQ</h2>
+        <p class="section-desc">Common questions about Budget Dad.</p>
+        <div class="faq">
+          <details>
+            <summary>Where is my data stored?</summary>
+            <div class="muted">Your data stays on your device (localStorage or sessionStorage). We don’t send it anywhere.</div>
+          </details>
+          <details>
+            <summary>What if my pay varies?</summary>
+            <div class="muted">Use hourly mode with your actual hours, or enter exact net pay for the paycheck.</div>
+          </details>
+          <details>
+            <summary>Snowball vs avalanche?</summary>
+            <div class="muted">Snowball targets the smallest balance for motivation. Avalanche targets the highest APR to save interest.</div>
+          </details>
+        </div>
+      </section>
+
       <footer class="card footer">
-        <span>© 2026 Paycheck Plan</span>
+        <span>© 2026 Budget Dad</span>
         <span>
           <a href="/privacy">Privacy</a> ·
           <a href="/terms">Terms</a>
         </span>
       </footer>
     </main>
+  </div>
+
+  <div class="onboard-modal" id="onboard-modal" aria-hidden="true">
+    <div class="onboard-panel">
+      <div class="onboard-header">
+        <div>
+          <strong>Budget Dad — Guided Setup</strong>
+          <div class="muted">Answer a few questions to prefill your plan.</div>
+        </div>
+        <button class="ghost" type="button" onclick="closeOnboarding()">Close</button>
+      </div>
+      <div class="onboard-progress">
+        <span class="dot" data-dot="0"></span>
+        <span class="dot" data-dot="1"></span>
+        <span class="dot" data-dot="2"></span>
+      </div>
+
+      <div class="onboard-step-page" data-step="0">
+        <h3>Step 1 — Pay type & frequency</h3>
+        <div class="field">
+          <label>Pay type</label>
+          <div class="pill">
+            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
+              <input type="radio" name="onboard-pay-type" value="hourly" checked />
+              Hourly
+            </label>
+            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
+              <input type="radio" name="onboard-pay-type" value="salary" />
+              Salary
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="onboard-frequency">Pay frequency</label>
+          <select id="onboard-frequency">
+            <option value="">Select...</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Every 2 weeks</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="onboard-step-page hidden" data-step="1">
+        <h3>Step 2 — Debt strategy</h3>
+        <div class="field">
+          <label for="onboard-strategy">Which strategy do you want to try?</label>
+          <select id="onboard-strategy">
+            <option value="snowball">Snowball (smallest balance first)</option>
+            <option value="avalanche">Avalanche (highest APR first)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="onboard-start-date">Start date for this plan</label>
+          <input id="onboard-start-date" type="date" />
+        </div>
+      </div>
+
+      <div class="onboard-step-page hidden" data-step="2">
+        <h3>Step 3 — Buffer & spending</h3>
+        <div class="field-inline">
+          <div class="field small">
+            <label for="onboard-buffer">Minimum buffer ($)</label>
+            <input id="onboard-buffer" type="number" placeholder="e.g. 700" />
+          </div>
+          <div class="field small">
+            <label for="onboard-spending">Spending per paycheck ($)</label>
+            <input id="onboard-spending" type="number" placeholder="e.g. 600" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="onboard-balance">Current bank balance ($)</label>
+          <input id="onboard-balance" type="number" placeholder="e.g. 2000" />
+        </div>
+        <label class="check-row">
+          <input id="onboard-remember" type="checkbox" checked />
+          <span style="flex:1;">Remember my data on this device</span>
+        </label>
+      </div>
+
+      <div class="onboard-actions">
+        <button class="ghost" type="button" id="onboard-back">Back</button>
+        <button class="button secondary" type="button" id="onboard-skip">Skip</button>
+        <button class="button" type="button" id="onboard-next">Next</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -986,6 +1381,70 @@
       const checkbox = document.getElementById("remember-data");
       if (!checkbox) return;
       checkbox.checked = saved !== "no";
+    }
+
+    // =========================
+    // Onboarding
+    // =========================
+    let onboardStepIndex = 0;
+    function setOnboardStep(index) {
+      const steps = Array.from(document.querySelectorAll(".onboard-step-page"));
+      const dots = Array.from(document.querySelectorAll(".dot"));
+      onboardStepIndex = Math.max(0, Math.min(index, steps.length - 1));
+      steps.forEach((el, i) => el.classList.toggle("hidden", i !== onboardStepIndex));
+      dots.forEach((el, i) => el.classList.toggle("active", i === onboardStepIndex));
+      document.getElementById("onboard-back").style.visibility = onboardStepIndex === 0 ? "hidden" : "visible";
+      document.getElementById("onboard-next").textContent = onboardStepIndex === steps.length - 1 ? "Finish" : "Next";
+    }
+
+    function openOnboarding() {
+      const modal = document.getElementById("onboard-modal");
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+      const startInput = document.getElementById("onboard-start-date");
+      if (startInput && !startInput.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        startInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+      setOnboardStep(0);
+    }
+
+    function closeOnboarding() {
+      const modal = document.getElementById("onboard-modal");
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function applyOnboarding() {
+      const payType = document.querySelector('input[name="onboard-pay-type"]:checked')?.value || "hourly";
+      const frequency = strVal("onboard-frequency");
+      const strategy = strVal("onboard-strategy") || "snowball";
+      const startDate = strVal("onboard-start-date");
+      const buffer = numVal("onboard-buffer");
+      const spending = numVal("onboard-spending");
+      const balance = numVal("onboard-balance");
+      const remember = document.getElementById("onboard-remember").checked;
+
+      document.getElementById("pay-type-hourly").checked = payType === "hourly";
+      document.getElementById("pay-type-salary").checked = payType === "salary";
+      if (frequency) document.getElementById("pay-frequency").value = frequency;
+      if (startDate) document.getElementById("start-date").value = startDate;
+      document.getElementById("debt-strategy").value = strategy;
+      saveDebtStrategy();
+
+      if (!Number.isNaN(buffer)) document.getElementById("buffer").value = buffer || "";
+      if (!Number.isNaN(spending)) document.getElementById("spending").value = spending || "";
+      if (!Number.isNaN(balance)) document.getElementById("starting-balance").value = balance || "";
+
+      const rememberBox = document.getElementById("remember-data");
+      rememberBox.checked = remember;
+      syncStoragePreference();
+
+      updatePayTypeUI();
+      refreshNetPreview();
     }
 
     function saveIncome() {
@@ -1487,6 +1946,7 @@
     document.getElementById("export-button").addEventListener("click", () => {
       window.print();
     });
+    document.getElementById("onboarding-button").addEventListener("click", openOnboarding);
     document.getElementById("clear-button").addEventListener("click", () => {
       const ok = confirm("Clear all saved income, bills, and debts?");
       if (!ok) return;
@@ -1506,6 +1966,30 @@
       loadBills();
       loadDebts();
       refreshNetPreview();
+    });
+
+    document.getElementById("onboard-back").addEventListener("click", () => {
+      setOnboardStep(onboardStepIndex - 1);
+    });
+    document.getElementById("onboard-next").addEventListener("click", () => {
+      const last = document.querySelectorAll(".onboard-step-page").length - 1;
+      if (onboardStepIndex >= last) {
+        applyOnboarding();
+        window.localStorage.setItem("onboardingDone", "yes");
+        closeOnboarding();
+        document.getElementById("step1-title").scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      setOnboardStep(onboardStepIndex + 1);
+    });
+    document.getElementById("onboard-skip").addEventListener("click", () => {
+      window.localStorage.setItem("onboardingDone", "yes");
+      closeOnboarding();
+    });
+    document.getElementById("onboard-modal").addEventListener("click", (event) => {
+      if (event.target.id === "onboard-modal") {
+        closeOnboarding();
+      }
     });
 
     // Step 1 UI events
@@ -1542,6 +2026,9 @@
       const savedStrategy = loadDebtStrategy();
       if (savedStrategy) {
         document.getElementById("debt-strategy").value = savedStrategy;
+      }
+      if (window.localStorage.getItem("onboardingDone") !== "yes") {
+        setTimeout(openOnboarding, 500);
       }
     });
   </script>

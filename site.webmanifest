@@ -3,8 +3,8 @@
   "short_name": "Paycheck Plan",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f4f0",
-  "theme_color": "#1aa6b7",
+  "background_color": "#fff7ee",
+  "theme_color": "#00bcd4",
   "icons": [
     {
       "src": "/favicon.svg",
