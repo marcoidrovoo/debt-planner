@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Budget Dad — Paycheck Plan</title>
+  <title>Budget Dad — Plan Your Paycheck</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Budget Dad helps you plan your next paycheck with clear steps for income, bills, and debt payoff." />
   <meta property="og:title" content="Budget Dad" />
@@ -57,7 +57,7 @@
     .layout {
       width: min(1100px, 100%);
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      grid-template-columns: 1fr;
       gap: var(--space-lg);
     }
 
@@ -76,248 +76,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .hero {
-      grid-column: 1 / -1;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 32px;
-      background:
-        linear-gradient(135deg, rgba(0, 188, 212, 0.18), transparent 60%),
-        linear-gradient(315deg, rgba(255, 183, 3, 0.18), transparent 50%),
-        var(--card);
-      border: 1px solid rgba(0, 188, 212, 0.25);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(1.8rem, 2.4vw, 2.4rem);
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      font-size: 1.05rem;
-      color: var(--muted);
-      margin: 0;
-    }
-
-    .stepper {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .step {
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(0, 188, 212, 0.25);
-      background: rgba(255, 255, 255, 0.8);
-      color: var(--text);
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .section-title {
-      font-size: 1.1rem;
-      margin: 0 0 12px;
-    }
-
-    .section-desc {
-      margin: 0 0 var(--space-md);
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .field { margin-bottom: var(--space-sm); }
-    label {
-      display: block;
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 11px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid #d3dbe6;
-      background: #ffffff;
-      color: var(--text);
-      font-size: 0.95rem;
-      transition: border 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: rgba(0, 188, 212, 0.55);
-      box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.12);
-    }
-
-    .button {
-      width: 100%;
-      padding: 13px 16px;
-      border-radius: 999px;
-      border: none;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 6px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #0b1120;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .button:hover { transform: translateY(-1px); box-shadow: 0 16px 36px rgba(0, 188, 212, 0.18); }
-
-    .button.secondary {
-      background: #ffffff;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .pill {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.9);
-      margin-bottom: 8px;
-    }
-
-    .radio-row, .check-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      background: rgba(255, 255, 255, 0.85);
-    }
-    .radio-row input, .check-row input { width: auto; }
-
-    .field-inline { display: flex; gap: 12px; }
-    .field-inline .field.small { flex: 1; }
-
-    .muted { color: var(--muted); font-size: 0.85rem; }
-    .hidden { display: none; }
-    .note { font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
-    .divider { border: none; border-top: 1px solid rgba(148, 163, 184, 0.15); margin: 12px 0; }
-
-    details {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      background: rgba(255, 255, 255, 0.85);
-      margin-top: 10px;
-    }
-    summary { cursor: pointer; font-weight: 700; }
-
-    .result-box {
-      margin-top: 12px;
-      padding: 18px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      background: rgba(255, 255, 255, 0.9);
-      min-height: 60px;
-      font-size: 0.95rem;
-      color: var(--text);
-    }
-
-    .list {
-      list-style: none;
-      padding-left: 0;
-      margin-top: 14px;
-      font-size: 0.9rem;
-    }
-
-    .list li {
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      background: #ffffff;
-      border: 1px solid var(--border);
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .list-left { display: flex; flex-direction: column; gap: 2px; }
-    .list-title { font-weight: 600; }
-    .list-meta { color: var(--muted); font-size: 0.82rem; }
-
-    .chip {
-      display: inline-flex;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #ffffff;
-      color: var(--text);
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .badge {
-      display: inline-flex;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(0, 188, 212, 0.35);
-      background: rgba(0, 188, 212, 0.08);
-      color: var(--text);
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .side-card {
-      height: fit-content;
-    }
-
-    .mono {
-      font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.92rem;
-    }
-
-    .totals {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      border: 1px dashed rgba(0, 188, 212, 0.35);
-      border-radius: var(--radius-sm);
-      margin-top: 8px;
-      color: var(--muted);
-    }
-
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .tiny {
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #ffffff;
-      color: var(--text);
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-    .tiny:hover { border-color: rgba(0, 188, 212, 0.5); }
-
-    .empty {
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      border: 1px dashed rgba(148, 163, 184, 0.6);
-      color: var(--muted);
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
     .topbar {
-      grid-column: 1 / -1;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -355,19 +114,76 @@
     .nav-links a { color: var(--muted); text-decoration: none; }
     .nav-links a:hover { color: var(--text); }
 
-    .hero-grid {
+    .hero {
       display: grid;
       grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
       gap: 20px;
       align-items: center;
+      background:
+        linear-gradient(135deg, rgba(0, 188, 212, 0.18), transparent 60%),
+        linear-gradient(315deg, rgba(255, 183, 3, 0.18), transparent 50%),
+        var(--card);
+      border: 1px solid rgba(0, 188, 212, 0.25);
     }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 2.8vw, 2.8rem);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .stepper {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .step {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 188, 212, 0.25);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
     .hero-actions {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 8px;
+      margin-top: 10px;
     }
-    .hero-actions .button { width: auto; padding: 12px 18px; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b1120;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .button:hover { transform: translateY(-1px); box-shadow: 0 16px 36px rgba(0, 188, 212, 0.18); }
+
+    .button.secondary {
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
 
     .stat-row {
       display: grid;
@@ -380,10 +196,10 @@
       border: 1px solid var(--border);
       background: #ffffff;
     }
-    .stat h3 {
-      margin: 0 0 4px;
-      font-size: 1.1rem;
-    }
+    .stat h3 { margin: 0 0 4px; font-size: 1.1rem; }
+
+    .section-title { font-size: 1.1rem; margin: 0 0 12px; }
+    .section-desc { margin: 0 0 var(--space-md); color: var(--muted); font-size: 0.92rem; }
 
     .feature-grid {
       display: grid;
@@ -425,74 +241,6 @@
       font-weight: 700;
     }
 
-    .onboard-card {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 18px;
-      align-items: center;
-    }
-    .onboard-steps {
-      display: grid;
-      gap: 10px;
-    }
-    .onboard-step {
-      padding: 12px;
-      border-radius: var(--radius-md);
-      border: 1px dashed rgba(0, 188, 212, 0.35);
-      background: #ffffff;
-    }
-
-    .onboard-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(8, 13, 20, 0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 20;
-    }
-    .onboard-modal.active { display: flex; }
-    .onboard-panel {
-      width: min(720px, 100%);
-      background: #ffffff;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-    .onboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .onboard-progress {
-      display: flex;
-      gap: 6px;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: #dbe6f2;
-    }
-    .dot.active { background: var(--accent); }
-    .onboard-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 12px;
-    }
-    .ghost {
-      border: 1px solid var(--border);
-      background: #ffffff;
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
     .faq {
       display: grid;
       gap: 10px;
@@ -500,7 +248,11 @@
     .faq details {
       margin: 0;
       background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
     }
+    summary { cursor: pointer; font-weight: 700; }
 
     .footer {
       margin-top: 12px;
@@ -517,30 +269,11 @@
     .footer a { color: var(--muted); text-decoration: none; }
     .footer a:hover { color: var(--text); text-decoration: underline; }
 
-    /* Print / PDF export */
-    @media print {
-      body { background: #ffffff; }
-      .page { padding: 0; }
-      .hero, .section-desc, .stepper, .note, .muted { color: #111827 !important; }
-      .card { box-shadow: none; border: 1px solid #d1d5db; }
-      .button, .tiny, .pill, .check-row, .radio-row, .actions-row, .topbar { display: none !important; }
-      .layout { grid-template-columns: 1fr; gap: 16px; }
-      #plan-box { min-height: auto; }
-      input, select { border: 1px solid #d1d5db; }
-    }
-
     @media (max-width: 980px) {
-      .layout { grid-template-columns: 1fr; }
-      .side-card { position: static; }
-      .hero-grid { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
       .feature-grid, .testimonial-grid { grid-template-columns: 1fr 1fr; }
-      .onboard-card { grid-template-columns: 1fr; }
     }
-
     @media (max-width: 640px) {
-      .field-inline { flex-direction: column; }
-      .hero { padding: 22px; }
-      .page { padding: 32px 16px 60px; }
       .feature-grid, .testimonial-grid, .stat-row { grid-template-columns: 1fr; }
       .topbar { flex-direction: column; gap: 8px; }
       .hero-actions { flex-direction: column; }
@@ -555,41 +288,39 @@
         <div class="nav-links">
           <a href="#overview">How it works</a>
           <a href="#stories">Stories</a>
-          <a href="#onboarding">Onboarding</a>
-          <a href="#step1-title">Plan</a>
+          <a href="#faq">FAQ</a>
+          <a href="/strategy">Debt Strategies</a>
         </div>
-        <a class="ghost" href="#step1-title">Start planning</a>
+        <a class="button secondary" href="/planner">Start planning</a>
       </div>
 
-      <section class="card hero">
-        <div class="hero-grid">
-          <div>
-            <h1>Budget Dad keeps your paycheck in control.</h1>
-            <p class="subtitle">Plan bills, debt, and spending in minutes. Clear steps. No spreadsheets.</p>
-            <div class="hero-actions">
-              <button class="button" type="button" onclick="openOnboarding()">Start guided setup</button>
-              <a class="button secondary" href="#step1-title">Jump to planner</a>
-            </div>
-            <div class="stepper" style="margin-top:10px;">
-              <div class="step">1 • Income</div>
-              <div class="step">2 • Bills</div>
-              <div class="step">3 • Debts</div>
-              <div class="step">4 • Plan</div>
-            </div>
+      <section class="card hero" id="hero">
+        <div>
+          <h1>Budget Dad keeps your paycheck in control.</h1>
+          <p class="subtitle">Plan bills, debt, and spending in minutes. Clear steps. No spreadsheets.</p>
+          <div class="hero-actions">
+            <a class="button" href="/planner">Start planning</a>
+            <a class="button secondary" href="/strategy">Compare strategies</a>
           </div>
-          <div class="stat-row">
-            <div class="stat">
-              <h3>$2,400</h3>
-              <div class="muted">Average monthly debt paid off by users.</div>
-            </div>
-            <div class="stat">
-              <h3>8 weeks</h3>
-              <div class="muted">Typical time to hit first savings goal.</div>
-            </div>
-            <div class="stat">
-              <h3>15 min</h3>
-              <div class="muted">Time to build a complete plan.</div>
-            </div>
+          <div class="stepper">
+            <div class="step">1 • Income</div>
+            <div class="step">2 • Bills</div>
+            <div class="step">3 • Debts</div>
+            <div class="step">4 • Plan</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat">
+            <h3>$2,400</h3>
+            <div class="muted">Average monthly debt paid off by users.</div>
+          </div>
+          <div class="stat">
+            <h3>8 weeks</h3>
+            <div class="muted">Typical time to hit first savings goal.</div>
+          </div>
+          <div class="stat">
+            <h3>15 min</h3>
+            <div class="muted">Time to build a complete plan.</div>
           </div>
         </div>
       </section>
@@ -600,15 +331,15 @@
         <div class="feature-grid">
           <div class="feature-card">
             <h3>Paycheck blueprint</h3>
-            <p class="muted">Know your net, then allocate bills and debt with a clear window.</p>
+            <p class="section-desc">Know your net, then allocate bills and debt with a clear window.</p>
           </div>
           <div class="feature-card">
             <h3>Debt strategy switch</h3>
-            <p class="muted">Pick snowball or avalanche and see exactly where extra money goes.</p>
+            <p class="section-desc">Pick snowball or avalanche and see exactly where extra money goes.</p>
           </div>
           <div class="feature-card">
             <h3>Protected buffer</h3>
-            <p class="muted">Keep the buffer you want so you never dip below your comfort line.</p>
+            <p class="section-desc">Keep the buffer you want so you never dip below your comfort line.</p>
           </div>
         </div>
       </section>
@@ -635,305 +366,21 @@
         </div>
       </section>
 
-      <section class="card" id="onboarding">
-        <h2 class="section-title">Quick onboarding</h2>
-        <p class="section-desc">Answer a few questions and we’ll prefill your planner.</p>
-        <div class="onboard-card">
-          <div class="onboard-steps">
-            <div class="onboard-step">
-              <strong>Step 1:</strong> Choose pay type + pay frequency.
-            </div>
-            <div class="onboard-step">
-              <strong>Step 2:</strong> Pick your debt strategy.
-            </div>
-            <div class="onboard-step">
-              <strong>Step 3:</strong> Set buffer + spending target.
-            </div>
-          </div>
-          <div>
-            <p class="muted">You can edit everything later. This just gets your plan started.</p>
-            <button class="button" type="button" onclick="openOnboarding()">Start guided setup</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="card" aria-labelledby="step1-title">
-        <h2 class="section-title" id="step1-title">Step 1 — Paycheck Setup</h2>
-        <p class="section-desc">Build your net paycheck. We’ll allocate bills and debt after.</p>
-
-        <div class="field">
-          <label>Pay type</label>
-          <div class="pill">
-            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
-              <input type="radio" name="pay-type" value="hourly" id="pay-type-hourly" checked />
-              Hourly
-            </label>
-            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
-              <input type="radio" name="pay-type" value="salary" id="pay-type-salary" />
-              Salary
-            </label>
-          </div>
-          <div class="muted">Hourly supports overtime and variable hours.</div>
-        </div>
-
-        <div class="field">
-          <label for="pay-frequency">Pay frequency</label>
-          <select id="pay-frequency">
-            <option value="">Select...</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Every 2 weeks</option>
-          </select>
-        </div>
-
-        <!-- HOURLY SECTION -->
-        <div id="hourly-section">
-          <div class="field">
-            <label for="hourly-rate">Hourly rate ($/hr)</label>
-            <input id="hourly-rate" type="number" step="0.01" placeholder="e.g. 30" />
-          </div>
-
-          <div id="weekly-hours" class="field hidden">
-            <label for="hours-week-1">Hours worked this week</label>
-            <input id="hours-week-1" type="number" step="0.01" placeholder="e.g. 42" />
-          </div>
-
-          <div id="biweekly-hours" class="hidden">
-            <div class="field-inline">
-              <div class="field small">
-                <label for="hours-week-1-bi">Week 1 hours</label>
-                <input id="hours-week-1-bi" type="number" step="0.01" placeholder="e.g. 44" />
-              </div>
-              <div class="field small">
-                <label for="hours-week-2-bi">Week 2 hours</label>
-                <input id="hours-week-2-bi" type="number" step="0.01" placeholder="e.g. 40" />
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Overtime</label>
-            <div class="check-row">
-              <input id="ot-enabled" type="checkbox" checked />
-              <div style="flex:1;">
-                <div style="font-weight:700;">Overtime applies</div>
-                <div class="muted">Auto-convert hours above threshold into OT (per week).</div>
-              </div>
-            </div>
-          </div>
-
-          <div id="ot-options">
-            <div class="field-inline">
-              <div class="field small">
-                <label for="ot-threshold">OT starts after (hrs/week)</label>
-                <input id="ot-threshold" type="number" step="0.01" value="40" />
-              </div>
-              <div class="field small">
-                <label for="ot-multiplier">OT rate (multiplier)</label>
-                <input id="ot-multiplier" type="number" step="0.01" value="1.5" />
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="extra-pay">Extra pay this paycheck ($) <span class="muted">(optional)</span></label>
-            <input id="extra-pay" type="number" step="0.01" placeholder="e.g. 150" />
-          </div>
-
-          <div class="field">
-            <label>Taxes</label>
-            <div class="radio-row" style="margin-bottom:10px;">
-              <input type="radio" name="tax-mode" value="estimate" id="tax-estimate" checked />
-              <div style="flex:1;">
-                <div style="font-weight:700;">Estimate my take-home</div>
-                <div class="muted">Use a simple % you control.</div>
-              </div>
-            </div>
-
-            <div id="tax-estimate-box" class="field-inline">
-              <div class="field small">
-                <label for="tax-rate">Estimated tax %</label>
-                <input id="tax-rate" type="number" step="0.1" value="25" />
-              </div>
-              <div class="field small">
-                <label for="net-preview" title="Auto-calculated net used by the plan">Net paycheck (preview)</label>
-                <input id="net-preview" type="text" readonly />
-              </div>
-            </div>
-
-            <div class="radio-row" style="margin:10px 0;">
-              <input type="radio" name="tax-mode" value="exact" id="tax-exact" />
-              <div style="flex:1;">
-                <div style="font-weight:700;">I know my exact take-home</div>
-                <div class="muted">Skip estimating taxes and just enter net.</div>
-              </div>
-            </div>
-
-            <div id="tax-exact-box" class="field hidden">
-              <label for="exact-net">Exact take-home (net) for this paycheck ($)</label>
-              <input id="exact-net" type="number" step="0.01" placeholder="e.g. 2870" />
-            </div>
-          </div>
-        </div>
-
-        <!-- SALARY SECTION -->
-        <div id="salary-section" class="hidden">
-          <div class="field">
-            <label for="salary-takehome">Take-home pay for this paycheck ($)</label>
-            <input id="salary-takehome" type="number" step="0.01" placeholder="e.g. 2870" />
-          </div>
-          <div class="field">
-            <label for="salary-extra-pay">Extra pay this paycheck ($) <span class="muted">(optional)</span></label>
-            <input id="salary-extra-pay" type="number" step="0.01" placeholder="e.g. 150" />
-          </div>
-          <div class="muted">Salary mode assumes the number you enter is already net.</div>
-        </div>
-
-        <div class="field">
-          <label for="starting-balance">Current bank balance right now ($)</label>
-          <input id="starting-balance" type="number" placeholder="e.g. 2000" />
-        </div>
-
-        <div class="field">
-          <label for="buffer">Minimum bank buffer you want to keep ($)</label>
-          <input id="buffer" type="number" placeholder="e.g. 700" />
-        </div>
-
-        <div class="field">
-          <label for="spending">Spending money per paycheck ($ for groceries, gas, fun)</label>
-          <input id="spending" type="number" placeholder="e.g. 600" />
-        </div>
-
-        <div class="field">
-          <label for="start-date">Start date for this plan (first paycheck you want to follow)</label>
-          <input id="start-date" type="date" />
-        </div>
-
-        <button id="next-button" class="button">Save Step 1</button>
-
-        <div id="step1-summary" class="result-box">
-          👇 Fill Step 1, then click “Save Step 1”. Your net paycheck will appear here.
-        </div>
-
-        <details id="breakdown-details" class="hidden">
-          <summary>Show paycheck breakdown</summary>
-          <div id="breakdown-box" class="muted" style="margin-top:8px;"></div>
-        </details>
-      </section>
-
-      <aside class="card side-card">
-        <h2 class="section-title">Plan Output</h2>
-        <p class="section-desc">This box updates when you calculate your plan.</p>
-        <div id="plan-box" class="result-box">
-          👇 Click the button below to calculate what to do with your next paycheck.
-        </div>
-        <button id="calc-button" class="button">Calculate Plan</button>
-        <button id="export-button" class="button secondary">Export Plan (PDF)</button>
-        <button id="onboarding-button" class="button secondary">Restart Onboarding</button>
-        <button id="clear-button" class="button secondary">Clear Saved Data</button>
-        <label class="check-row" style="margin-top:10px;">
-          <input id="remember-data" type="checkbox" />
-          <span style="flex:1;">Remember my data on this device</span>
-        </label>
-        <p class="muted" style="margin-top:8px;">Turn off to keep data only for this session.</p>
-      </aside>
-
-      <section class="card" aria-labelledby="step2-title">
-        <h2 class="section-title" id="step2-title">Step 2 — Fixed Bills</h2>
-        <p class="section-desc">Add regular monthly bills like rent, HOA, car payments, or internet.</p>
-
-        <div class="field">
-          <label for="bill-name">Bill name</label>
-          <input id="bill-name" type="text" placeholder="e.g. Mortgage" />
-        </div>
-
-        <div class="field-inline">
-          <div class="field small">
-            <label for="bill-amount">Amount ($)</label>
-            <input id="bill-amount" type="number" placeholder="e.g. 2340" />
-          </div>
-          <div class="field small">
-            <label for="bill-due-day">Due day of month</label>
-            <input id="bill-due-day" type="number" min="1" max="31" placeholder="e.g. 16" />
-          </div>
-        </div>
-
-        <button id="add-bill-button" class="button secondary">Add bill</button>
-        <div class="totals">
-          <span>Total bills tracked</span>
-          <span class="mono" id="bills-total">$0.00</span>
-        </div>
-        <ul id="bills-list" class="list"></ul>
-        <div id="bills-empty" class="empty hidden">No bills yet. Add your first bill above.</div>
-        <div class="note">Tip: use “Edit” to update a bill or “Remove” to delete it.</div>
-      </section>
-
-      <section class="card" aria-labelledby="step3-title">
-        <h2 class="section-title" id="step3-title">Step 3 — Debts</h2>
-        <p class="section-desc">Add credit cards or loans you want to pay down. Choose how you want extra payments prioritized.</p>
-
-        <div class="field">
-          <label for="debt-strategy">Debt payoff strategy</label>
-          <select id="debt-strategy">
-            <option value="snowball">Snowball (smallest balance first)</option>
-            <option value="avalanche">Avalanche (highest APR first)</option>
-          </select>
-          <div class="muted">
-            You can switch anytime — the plan will update.
-            <a href="strategy.html">Learn the difference</a>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="debt-name">Debt name</label>
-          <input id="debt-name" type="text" placeholder="e.g. Discover" />
-        </div>
-
-        <div class="field-inline">
-          <div class="field small">
-            <label for="debt-balance">Balance ($)</label>
-            <input id="debt-balance" type="number" placeholder="e.g. 3200" />
-          </div>
-          <div class="field small">
-            <label for="debt-minimum">Minimum payment ($)</label>
-            <input id="debt-minimum" type="number" placeholder="e.g. 120" />
-          </div>
-        </div>
-
-        <div class="field-inline">
-          <div class="field small">
-            <label for="debt-due-day">Minimum due day</label>
-            <input id="debt-due-day" type="number" min="1" max="31" placeholder="e.g. 16" />
-          </div>
-          <div class="field small">
-            <label for="debt-rate">Interest rate (%)</label>
-            <input id="debt-rate" type="number" step="0.01" placeholder="e.g. 24.99" />
-          </div>
-        </div>
-
-        <button id="add-debt-button" class="button secondary">Add debt</button>
-        <div class="totals">
-          <span>Minimums tracked</span>
-          <span class="mono" id="debts-total">$0.00</span>
-        </div>
-        <ul id="debts-list" class="list"></ul>
-        <div id="debts-empty" class="empty hidden">No debts yet. Add your first debt above.</div>
-      </section>
-
       <section class="card" id="faq">
         <h2 class="section-title">FAQ</h2>
-        <p class="section-desc">Common questions about Budget Dad.</p>
+        <p class="section-desc">Quick answers before you start.</p>
         <div class="faq">
           <details>
             <summary>Where is my data stored?</summary>
-            <div class="muted">Your data stays on your device (localStorage or sessionStorage). We don’t send it anywhere.</div>
+            <div class="section-desc">Your data stays on your device (localStorage or sessionStorage). We don’t send it anywhere.</div>
           </details>
           <details>
-            <summary>What if my pay varies?</summary>
-            <div class="muted">Use hourly mode with your actual hours, or enter exact net pay for the paycheck.</div>
+            <summary>How long does setup take?</summary>
+            <div class="section-desc">Most people finish the guided setup in under 5 minutes.</div>
           </details>
           <details>
-            <summary>Snowball vs avalanche?</summary>
-            <div class="muted">Snowball targets the smallest balance for motivation. Avalanche targets the highest APR to save interest.</div>
+            <summary>Can I change strategies later?</summary>
+            <div class="section-desc">Yes — switch between snowball and avalanche any time.</div>
           </details>
         </div>
       </section>
@@ -941,1096 +388,12 @@
       <footer class="card footer">
         <span>© 2026 Budget Dad</span>
         <span>
+          <a href="/planner">Planner</a> ·
           <a href="/privacy">Privacy</a> ·
           <a href="/terms">Terms</a>
         </span>
       </footer>
     </main>
   </div>
-
-  <div class="onboard-modal" id="onboard-modal" aria-hidden="true">
-    <div class="onboard-panel">
-      <div class="onboard-header">
-        <div>
-          <strong>Budget Dad — Guided Setup</strong>
-          <div class="muted">Answer a few questions to prefill your plan.</div>
-        </div>
-        <button class="ghost" type="button" onclick="closeOnboarding()">Close</button>
-      </div>
-      <div class="onboard-progress">
-        <span class="dot" data-dot="0"></span>
-        <span class="dot" data-dot="1"></span>
-        <span class="dot" data-dot="2"></span>
-      </div>
-
-      <div class="onboard-step-page" data-step="0">
-        <h3>Step 1 — Pay type & frequency</h3>
-        <div class="field">
-          <label>Pay type</label>
-          <div class="pill">
-            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
-              <input type="radio" name="onboard-pay-type" value="hourly" checked />
-              Hourly
-            </label>
-            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
-              <input type="radio" name="onboard-pay-type" value="salary" />
-              Salary
-            </label>
-          </div>
-        </div>
-        <div class="field">
-          <label for="onboard-frequency">Pay frequency</label>
-          <select id="onboard-frequency">
-            <option value="">Select...</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Every 2 weeks</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="onboard-step-page hidden" data-step="1">
-        <h3>Step 2 — Debt strategy</h3>
-        <div class="field">
-          <label for="onboard-strategy">Which strategy do you want to try?</label>
-          <select id="onboard-strategy">
-            <option value="snowball">Snowball (smallest balance first)</option>
-            <option value="avalanche">Avalanche (highest APR first)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="onboard-start-date">Start date for this plan</label>
-          <input id="onboard-start-date" type="date" />
-        </div>
-      </div>
-
-      <div class="onboard-step-page hidden" data-step="2">
-        <h3>Step 3 — Buffer & spending</h3>
-        <div class="field-inline">
-          <div class="field small">
-            <label for="onboard-buffer">Minimum buffer ($)</label>
-            <input id="onboard-buffer" type="number" placeholder="e.g. 700" />
-          </div>
-          <div class="field small">
-            <label for="onboard-spending">Spending per paycheck ($)</label>
-            <input id="onboard-spending" type="number" placeholder="e.g. 600" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="onboard-balance">Current bank balance ($)</label>
-          <input id="onboard-balance" type="number" placeholder="e.g. 2000" />
-        </div>
-        <label class="check-row">
-          <input id="onboard-remember" type="checkbox" checked />
-          <span style="flex:1;">Remember my data on this device</span>
-        </label>
-      </div>
-
-      <div class="onboard-actions">
-        <button class="ghost" type="button" id="onboard-back">Back</button>
-        <button class="button secondary" type="button" id="onboard-skip">Skip</button>
-        <button class="button" type="button" id="onboard-next">Next</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // =========================
-    // Helpers
-    // =========================
-    function money(n) {
-      const num = Number(n || 0);
-      return num.toFixed(2);
-    }
-    function numVal(id) {
-      return Number(document.getElementById(id).value || 0);
-    }
-    function strVal(id) {
-      return String(document.getElementById(id).value || "").trim();
-    }
-    function parseLocalDate(dateStr) {
-      // "YYYY-MM-DD" -> local midnight (no UTC shift)
-      const [y, m, d] = dateStr.split("-").map(Number);
-      return new Date(y, m - 1, d);
-    }
-    function addDays(dateObj, days) {
-      const d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-      d.setDate(d.getDate() + days);
-      return d;
-    }
-    function getNextPaycheckDate(startDateStr, frequency) {
-      const start = parseLocalDate(startDateStr);
-      if (frequency === "weekly") return addDays(start, 7);
-      if (frequency === "biweekly") return addDays(start, 14);
-      return addDays(start, 14);
-    }
-
-    // =========================
-    // STEP 1: Paycheck Calc
-    // =========================
-    function setVisible(el, show) {
-      el.classList.toggle("hidden", !show);
-    }
-
-    function getPayType() {
-      return document.getElementById("pay-type-salary").checked ? "salary" : "hourly";
-    }
-
-    function updatePayTypeUI() {
-      const type = getPayType();
-      const freq = strVal("pay-frequency");
-
-      setVisible(document.getElementById("hourly-section"), type === "hourly");
-      setVisible(document.getElementById("salary-section"), type === "salary");
-
-      // Hours blocks
-      setVisible(document.getElementById("weekly-hours"), type === "hourly" && freq === "weekly");
-      setVisible(document.getElementById("biweekly-hours"), type === "hourly" && freq === "biweekly");
-
-      // OT options
-      const otOn = document.getElementById("ot-enabled").checked;
-      setVisible(document.getElementById("ot-options"), type === "hourly" && otOn);
-
-      // Tax mode boxes
-      const estimateOn = document.getElementById("tax-estimate").checked;
-      setVisible(document.getElementById("tax-estimate-box"), type === "hourly" && estimateOn);
-      setVisible(document.getElementById("tax-exact-box"), type === "hourly" && !estimateOn);
-
-      // Preview net
-      refreshNetPreview();
-    }
-
-    function calcWeek(hourlyRate, hours, otEnabled, otThreshold, otMultiplier) {
-      const h = Number(hours || 0);
-      let regularHours = h;
-      let otHours = 0;
-
-      if (otEnabled) {
-        const thresh = Number(otThreshold || 40);
-        if (h > thresh) {
-          regularHours = thresh;
-          otHours = h - thresh;
-        }
-      }
-
-      const regPay = regularHours * hourlyRate;
-      const otPay = otHours * hourlyRate * (otEnabled ? otMultiplier : 1);
-
-      return {
-        hours: h,
-        regularHours,
-        otHours,
-        regPay,
-        otPay,
-        gross: regPay + otPay
-      };
-    }
-
-    function calculateIncomeFromForm() {
-      const payType = getPayType();
-      const frequency = strVal("pay-frequency");
-      const startDate = strVal("start-date");
-
-      // Also store these from Step 1 section (bank/buffer/spending)
-      const startingBalance = numVal("starting-balance");
-      const buffer = numVal("buffer");
-      const spending = numVal("spending");
-
-      if (!frequency) {
-        return { ok: false, message: "⚠️ Choose pay frequency first." };
-      }
-      if (!startDate) {
-        return { ok: false, message: "⚠️ Choose a start date for the plan (first paycheck)." };
-      }
-
-      // SALARY
-      if (payType === "salary") {
-        const takeHome = numVal("salary-takehome");
-        const extraPay = numVal("salary-extra-pay");
-        const net = takeHome + extraPay;
-
-        if (!takeHome || takeHome <= 0) {
-          return { ok: false, message: "⚠️ Enter your salary take-home pay for this paycheck." };
-        }
-
-        return {
-          ok: true,
-          data: {
-            payType,
-            frequency,
-            startDate,
-            startingBalance,
-            buffer,
-            spending,
-            payAmountForThisCheck: net, // NET used by plan
-            debtStrategy: strVal("debt-strategy") || "snowball",
-            breakdown: {
-              mode: "salary",
-              takeHome,
-              extraPay,
-              net
-            }
-          }
-        };
-      }
-
-      // HOURLY
-      const hourlyRate = numVal("hourly-rate");
-      if (!hourlyRate || hourlyRate <= 0) {
-        return { ok: false, message: "⚠️ Enter your hourly rate." };
-      }
-
-      // hours by frequency
-      let week1Hours = 0;
-      let week2Hours = 0;
-
-      if (frequency === "weekly") {
-        week1Hours = numVal("hours-week-1");
-        if (week1Hours <= 0) return { ok: false, message: "⚠️ Enter hours worked this week." };
-      } else if (frequency === "biweekly") {
-        week1Hours = numVal("hours-week-1-bi");
-        week2Hours = numVal("hours-week-2-bi");
-        if (week1Hours <= 0 && week2Hours <= 0) return { ok: false, message: "⚠️ Enter hours for Week 1 and/or Week 2." };
-      }
-
-      const otEnabled = document.getElementById("ot-enabled").checked;
-      const otThreshold = numVal("ot-threshold") || 40;
-      const otMultiplier = numVal("ot-multiplier") || 1.5;
-      const extraPay = numVal("extra-pay");
-
-      // compute weeks
-      const w1 = calcWeek(hourlyRate, week1Hours, otEnabled, otThreshold, otMultiplier);
-      const w2 = calcWeek(hourlyRate, week2Hours, otEnabled, otThreshold, otMultiplier);
-
-      const gross = w1.gross + w2.gross + extraPay;
-
-      // tax mode
-      const taxMode = document.getElementById("tax-exact").checked ? "exact" : "estimate";
-
-      let taxRatePct = numVal("tax-rate");
-      if (taxMode === "estimate" && (taxRatePct < 0 || taxRatePct > 60)) {
-        return { ok: false, message: "⚠️ Tax % looks off. Use something like 20–35." };
-      }
-
-      let taxes = 0;
-      let net = 0;
-
-      if (taxMode === "exact") {
-        const exactNet = numVal("exact-net");
-        if (!exactNet || exactNet <= 0) return { ok: false, message: "⚠️ Enter your exact take-home net for this paycheck." };
-        net = exactNet;
-        taxes = null; // unknown (since user entered net)
-      } else {
-        taxes = gross * (taxRatePct / 100);
-        net = gross - taxes;
-      }
-
-      return {
-        ok: true,
-        data: {
-          payType,
-          frequency,
-          startDate,
-          startingBalance,
-          buffer,
-          spending,
-          payAmountForThisCheck: net, // NET used by plan
-          debtStrategy: strVal("debt-strategy") || "snowball",
-          breakdown: {
-            mode: "hourly",
-            hourlyRate,
-            frequency,
-            otEnabled,
-            otThreshold,
-            otMultiplier,
-            week1: w1,
-            week2: w2,
-            extraPay,
-            gross,
-            taxMode,
-            taxRatePct: taxMode === "estimate" ? taxRatePct : null,
-            taxes,
-            net
-          }
-        }
-      };
-    }
-
-    function refreshNetPreview() {
-      const payType = getPayType();
-      const netPreview = document.getElementById("net-preview");
-
-      if (payType !== "hourly") {
-        netPreview.value = "";
-        return;
-      }
-
-      const res = calculateIncomeFromForm();
-      if (!res.ok) {
-        netPreview.value = "";
-        return;
-      }
-
-      const bd = res.data.breakdown;
-      if (bd.mode !== "hourly") {
-        netPreview.value = "";
-        return;
-      }
-
-      netPreview.value = "$" + money(bd.net);
-    }
-
-    function renderStep1Summary(savedIncomeData) {
-      const box = document.getElementById("step1-summary");
-      const details = document.getElementById("breakdown-details");
-      const breakdownBox = document.getElementById("breakdown-box");
-
-      const net = savedIncomeData.payAmountForThisCheck;
-      const bd = savedIncomeData.breakdown;
-
-      box.innerHTML = `
-        <span class="badge">Saved</span><br><br>
-        <strong>Paycheck used for this plan (NET):</strong> $${money(net)}<br>
-        <span class="muted">This is the number Step 4 uses for bills/debts/spending.</span>
-      `;
-
-      // breakdown html
-      let html = "";
-
-      if (bd.mode === "salary") {
-        html = `
-          <div><strong>Mode:</strong> Salary</div>
-          <div><strong>Take-home entered:</strong> $${money(bd.takeHome)}</div>
-          <div><strong>Extra pay:</strong> $${money(bd.extraPay)}</div>
-          <div><strong>NET used:</strong> $${money(bd.net)}</div>
-        `;
-      } else {
-        const w1 = bd.week1 || {};
-        const w2 = bd.week2 || {};
-
-        const week2Line = (bd.frequency === "biweekly")
-          ? `
-            <hr class="divider" style="margin:10px 0;">
-            <div><strong>Week 2 hours:</strong> ${money(w2.hours)} hrs</div>
-            <div class="muted">Regular: ${money(w2.regularHours)} hrs • OT: ${money(w2.otHours)} hrs</div>
-            <div><strong>Week 2 pay:</strong> $${money(w2.gross)}</div>
-          `
-          : "";
-
-        const taxesLine = (bd.taxMode === "estimate")
-          ? `<div><strong>Estimated taxes (${bd.taxRatePct}%):</strong> $${money(bd.taxes)}</div>`
-          : `<div><strong>Taxes:</strong> (skipped — exact net entered)</div>`;
-
-        html = `
-          <div><strong>Mode:</strong> Hourly</div>
-          <div><strong>Hourly rate:</strong> $${money(bd.hourlyRate)}/hr</div>
-          <div><strong>OT enabled:</strong> ${bd.otEnabled ? "Yes" : "No"}</div>
-          ${bd.otEnabled ? `<div class="muted">OT after ${money(bd.otThreshold)} hrs/week • OT rate ${money(bd.otMultiplier)}×</div>` : ""}
-
-          <hr class="divider" style="margin:10px 0;">
-
-          <div><strong>Week 1 hours:</strong> ${money(w1.hours)} hrs</div>
-          <div class="muted">Regular: ${money(w1.regularHours)} hrs • OT: ${money(w1.otHours)} hrs</div>
-          <div><strong>Week 1 pay:</strong> $${money(w1.gross)}</div>
-
-          ${week2Line}
-
-          <hr class="divider" style="margin:10px 0;">
-
-          <div><strong>Extra pay:</strong> $${money(bd.extraPay)}</div>
-          <div><strong>Gross total:</strong> $${money(bd.gross)}</div>
-          ${taxesLine}
-          <div><strong>NET used:</strong> $${money(bd.net)}</div>
-        `;
-      }
-
-      breakdownBox.innerHTML = html;
-      details.classList.remove("hidden");
-    }
-
-    // =========================
-    // Storage (local or session)
-    // =========================
-    function getStorage() {
-      const preferLocal = document.getElementById("remember-data")?.checked;
-      return preferLocal ? window.localStorage : window.sessionStorage;
-    }
-    function saveDebtStrategy() {
-      const strategy = strVal("debt-strategy") || "snowball";
-      getStorage().setItem("debtStrategy", strategy);
-    }
-    function loadDebtStrategy() {
-      const saved = getStorage().getItem("debtStrategy");
-      return saved || null;
-    }
-    function syncStoragePreference() {
-      const preferLocal = document.getElementById("remember-data")?.checked;
-      window.localStorage.setItem("rememberData", preferLocal ? "yes" : "no");
-      // Move data to the selected storage so behavior matches UI.
-      const source = preferLocal ? window.sessionStorage : window.localStorage;
-      const target = preferLocal ? window.localStorage : window.sessionStorage;
-      ["incomeData", "billsData", "debtsData", "debtStrategy"].forEach(key => {
-        const val = source.getItem(key);
-        if (val) {
-          target.setItem(key, val);
-          source.removeItem(key);
-        }
-      });
-    }
-    function initStoragePreference() {
-      const saved = window.localStorage.getItem("rememberData");
-      const checkbox = document.getElementById("remember-data");
-      if (!checkbox) return;
-      checkbox.checked = saved !== "no";
-    }
-
-    // =========================
-    // Onboarding
-    // =========================
-    let onboardStepIndex = 0;
-    function setOnboardStep(index) {
-      const steps = Array.from(document.querySelectorAll(".onboard-step-page"));
-      const dots = Array.from(document.querySelectorAll(".dot"));
-      onboardStepIndex = Math.max(0, Math.min(index, steps.length - 1));
-      steps.forEach((el, i) => el.classList.toggle("hidden", i !== onboardStepIndex));
-      dots.forEach((el, i) => el.classList.toggle("active", i === onboardStepIndex));
-      document.getElementById("onboard-back").style.visibility = onboardStepIndex === 0 ? "hidden" : "visible";
-      document.getElementById("onboard-next").textContent = onboardStepIndex === steps.length - 1 ? "Finish" : "Next";
-    }
-
-    function openOnboarding() {
-      const modal = document.getElementById("onboard-modal");
-      modal.classList.add("active");
-      modal.setAttribute("aria-hidden", "false");
-      const startInput = document.getElementById("onboard-start-date");
-      if (startInput && !startInput.value) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, "0");
-        const dd = String(today.getDate()).padStart(2, "0");
-        startInput.value = `${yyyy}-${mm}-${dd}`;
-      }
-      setOnboardStep(0);
-    }
-
-    function closeOnboarding() {
-      const modal = document.getElementById("onboard-modal");
-      modal.classList.remove("active");
-      modal.setAttribute("aria-hidden", "true");
-    }
-
-    function applyOnboarding() {
-      const payType = document.querySelector('input[name="onboard-pay-type"]:checked')?.value || "hourly";
-      const frequency = strVal("onboard-frequency");
-      const strategy = strVal("onboard-strategy") || "snowball";
-      const startDate = strVal("onboard-start-date");
-      const buffer = numVal("onboard-buffer");
-      const spending = numVal("onboard-spending");
-      const balance = numVal("onboard-balance");
-      const remember = document.getElementById("onboard-remember").checked;
-
-      document.getElementById("pay-type-hourly").checked = payType === "hourly";
-      document.getElementById("pay-type-salary").checked = payType === "salary";
-      if (frequency) document.getElementById("pay-frequency").value = frequency;
-      if (startDate) document.getElementById("start-date").value = startDate;
-      document.getElementById("debt-strategy").value = strategy;
-      saveDebtStrategy();
-
-      if (!Number.isNaN(buffer)) document.getElementById("buffer").value = buffer || "";
-      if (!Number.isNaN(spending)) document.getElementById("spending").value = spending || "";
-      if (!Number.isNaN(balance)) document.getElementById("starting-balance").value = balance || "";
-
-      const rememberBox = document.getElementById("remember-data");
-      rememberBox.checked = remember;
-      syncStoragePreference();
-
-      updatePayTypeUI();
-      refreshNetPreview();
-    }
-
-    function saveIncome() {
-      const result = calculateIncomeFromForm();
-      const summaryBox = document.getElementById("step1-summary");
-
-      if (!result.ok) {
-        summaryBox.innerHTML = result.message;
-        document.getElementById("breakdown-details").classList.add("hidden");
-        return;
-      }
-
-      getStorage().setItem("incomeData", JSON.stringify(result.data));
-      renderStep1Summary(result.data);
-      summaryBox.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function loadIncome() {
-      const storage = getStorage();
-      const saved = storage.getItem("incomeData");
-      if (!saved) return;
-      const data = JSON.parse(saved);
-
-      // shared fields
-      if (data.frequency) document.getElementById("pay-frequency").value = data.frequency;
-      if (data.startingBalance !== undefined) document.getElementById("starting-balance").value = data.startingBalance;
-      if (data.buffer !== undefined) document.getElementById("buffer").value = data.buffer;
-      if (data.spending !== undefined) document.getElementById("spending").value = data.spending;
-      if (data.startDate) document.getElementById("start-date").value = data.startDate;
-
-      // pay type + details
-      if (data.payType === "salary") {
-        document.getElementById("pay-type-salary").checked = true;
-        document.getElementById("pay-type-hourly").checked = false;
-
-        const bd = data.breakdown || {};
-        document.getElementById("salary-takehome").value = bd.takeHome ?? data.payAmountForThisCheck ?? "";
-        document.getElementById("salary-extra-pay").value = bd.extraPay ?? 0;
-      } else {
-        document.getElementById("pay-type-hourly").checked = true;
-        document.getElementById("pay-type-salary").checked = false;
-
-        const bd = data.breakdown || {};
-        document.getElementById("hourly-rate").value = bd.hourlyRate ?? "";
-        document.getElementById("ot-enabled").checked = bd.otEnabled ?? true;
-        document.getElementById("ot-threshold").value = bd.otThreshold ?? 40;
-        document.getElementById("ot-multiplier").value = bd.otMultiplier ?? 1.5;
-        document.getElementById("extra-pay").value = bd.extraPay ?? 0;
-
-        // hours
-        if (data.frequency === "weekly") {
-          document.getElementById("hours-week-1").value = bd.week1?.hours ?? "";
-        } else if (data.frequency === "biweekly") {
-          document.getElementById("hours-week-1-bi").value = bd.week1?.hours ?? "";
-          document.getElementById("hours-week-2-bi").value = bd.week2?.hours ?? "";
-        }
-
-        // tax mode
-        if (bd.taxMode === "exact") {
-          document.getElementById("tax-exact").checked = true;
-          document.getElementById("tax-estimate").checked = false;
-          document.getElementById("exact-net").value = bd.net ?? data.payAmountForThisCheck ?? "";
-        } else {
-          document.getElementById("tax-estimate").checked = true;
-          document.getElementById("tax-exact").checked = false;
-          document.getElementById("tax-rate").value = bd.taxRatePct ?? 25;
-        }
-      }
-
-      if (data.debtStrategy) {
-        document.getElementById("debt-strategy").value = data.debtStrategy;
-      }
-
-      updatePayTypeUI();
-      renderStep1Summary(data);
-    }
-
-    // =========================
-    // Step 2: Bills
-    // =========================
-    let bills = [];
-
-    function setEmptyState(id, show) {
-      document.getElementById(id).classList.toggle("hidden", !show);
-    }
-
-    function getBillsData() {
-      const saved = getStorage().getItem("billsData");
-      return saved ? JSON.parse(saved) : [];
-    }
-    function saveBills() {
-      getStorage().setItem("billsData", JSON.stringify(bills));
-    }
-    function renderBills() {
-      const list = document.getElementById("bills-list");
-      const totalEl = document.getElementById("bills-total");
-      list.innerHTML = "";
-
-      if (!bills.length) {
-        setEmptyState("bills-empty", true);
-        totalEl.textContent = "$0.00";
-        return;
-      }
-
-      setEmptyState("bills-empty", false);
-
-      const total = bills.reduce((sum, bill) => sum + Number(bill.amount || 0), 0);
-      totalEl.textContent = "$" + money(total);
-
-      bills.forEach((bill, index) => {
-        const li = document.createElement("li");
-
-        const left = document.createElement("div");
-        left.className = "list-left";
-
-        const title = document.createElement("div");
-        title.className = "list-title";
-        title.textContent = bill.name;
-
-        const meta = document.createElement("div");
-        meta.className = "list-meta";
-        meta.textContent = `$${money(bill.amount)} • due ${bill.dueDay}`;
-
-        left.appendChild(title);
-        left.appendChild(meta);
-
-        const right = document.createElement("div");
-        right.className = "actions-row";
-
-        const editBtn = document.createElement("button");
-        editBtn.className = "tiny";
-        editBtn.type = "button";
-        editBtn.textContent = "Edit";
-
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "tiny";
-        removeBtn.type = "button";
-        removeBtn.textContent = "Remove";
-
-        li.appendChild(left);
-        li.appendChild(right);
-
-        right.appendChild(editBtn);
-        right.appendChild(removeBtn);
-
-        editBtn.addEventListener("click", () => {
-          document.getElementById("bill-name").value = bill.name;
-          document.getElementById("bill-amount").value = bill.amount;
-          document.getElementById("bill-due-day").value = bill.dueDay;
-
-          bills.splice(index, 1);
-          saveBills();
-          renderBills();
-        });
-
-        removeBtn.addEventListener("click", () => {
-          bills.splice(index, 1);
-          saveBills();
-          renderBills();
-        });
-
-        list.appendChild(li);
-      });
-    }
-    function addBill() {
-      const name = strVal("bill-name");
-      const amount = numVal("bill-amount");
-      const dueDay = numVal("bill-due-day");
-
-      if (!name || !amount || !dueDay) {
-        alert("Please fill in all bill fields first.");
-        return;
-      }
-
-      bills.push({ name, amount: Number(amount), dueDay: Number(dueDay) });
-      saveBills();
-      renderBills();
-
-      document.getElementById("bill-name").value = "";
-      document.getElementById("bill-amount").value = "";
-      document.getElementById("bill-due-day").value = "";
-    }
-    function loadBills() {
-      const saved = getStorage().getItem("billsData");
-      if (!saved) {
-        bills = [];
-        renderBills();
-        return;
-      }
-      bills = JSON.parse(saved);
-      renderBills();
-    }
-
-    // =========================
-    // Step 3: Debts
-    // =========================
-    let debts = [];
-
-    function getDebtsData() {
-      const saved = getStorage().getItem("debtsData");
-      return saved ? JSON.parse(saved) : [];
-    }
-    function saveDebts() {
-      getStorage().setItem("debtsData", JSON.stringify(debts));
-    }
-    function renderDebts() {
-      const list = document.getElementById("debts-list");
-      const totalEl = document.getElementById("debts-total");
-      list.innerHTML = "";
-
-      if (!debts.length) {
-        setEmptyState("debts-empty", true);
-        totalEl.textContent = "$0.00";
-        return;
-      }
-
-      setEmptyState("debts-empty", false);
-
-      const total = debts.reduce((sum, debt) => sum + Number(debt.minimum || 0), 0);
-      totalEl.textContent = "$" + money(total);
-
-      debts.forEach((debt, index) => {
-        const li = document.createElement("li");
-
-        const left = document.createElement("div");
-        left.className = "list-left";
-
-        const title = document.createElement("div");
-        title.className = "list-title";
-        title.textContent = debt.name;
-
-        const meta = document.createElement("div");
-        meta.className = "list-meta";
-        meta.textContent = `$${money(debt.balance)} • min $${money(debt.minimum)} • due ${debt.dueDay} • ${money(debt.rate)}% APR`;
-
-        left.appendChild(title);
-        left.appendChild(meta);
-
-        const right = document.createElement("div");
-        right.className = "actions-row";
-
-        const editBtn = document.createElement("button");
-        editBtn.className = "tiny";
-        editBtn.type = "button";
-        editBtn.textContent = "Edit";
-
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "tiny";
-        removeBtn.type = "button";
-        removeBtn.textContent = "Remove";
-
-        li.appendChild(left);
-        li.appendChild(right);
-
-        right.appendChild(editBtn);
-        right.appendChild(removeBtn);
-
-        editBtn.addEventListener("click", () => {
-          document.getElementById("debt-name").value = debt.name;
-          document.getElementById("debt-balance").value = debt.balance;
-          document.getElementById("debt-minimum").value = debt.minimum;
-          document.getElementById("debt-rate").value = debt.rate;
-          document.getElementById("debt-due-day").value = debt.dueDay;
-
-          debts.splice(index, 1);
-          saveDebts();
-          renderDebts();
-        });
-
-        removeBtn.addEventListener("click", () => {
-          debts.splice(index, 1);
-          saveDebts();
-          renderDebts();
-        });
-
-        list.appendChild(li);
-      });
-    }
-    function addDebt() {
-      const name = strVal("debt-name");
-      const balance = numVal("debt-balance");
-      const minimum = numVal("debt-minimum");
-      const rate = numVal("debt-rate");
-      const dueDay = numVal("debt-due-day");
-
-      if (!name || !balance || !minimum || !rate || !dueDay) {
-        alert("Please fill in all debt fields first (including due day).");
-        return;
-      }
-
-      debts.push({ name, balance: Number(balance), minimum: Number(minimum), rate: Number(rate), dueDay: Number(dueDay) });
-      saveDebts();
-      renderDebts();
-
-      document.getElementById("debt-name").value = "";
-      document.getElementById("debt-balance").value = "";
-      document.getElementById("debt-minimum").value = "";
-      document.getElementById("debt-rate").value = "";
-      document.getElementById("debt-due-day").value = "";
-    }
-    function loadDebts() {
-      const saved = getStorage().getItem("debtsData");
-      if (!saved) {
-        debts = [];
-        renderDebts();
-        return;
-      }
-      debts = JSON.parse(saved);
-      renderDebts();
-    }
-    function getTargetDebt(debts, strategy) {
-      if (!debts.length) return null;
-      if (strategy === "avalanche") {
-        return debts.slice().sort((a, b) => b.rate - a.rate)[0];
-      }
-      return debts.slice().sort((a, b) => a.balance - b.balance)[0];
-    }
-
-    // =========================
-    // Window logic for bills/minimums
-    // =========================
-    function getDueItemsInWindow(startDateStr, endDateObj, items, amountKey) {
-      const start = parseLocalDate(startDateStr);
-      const end = endDateObj;
-
-      const startDay = start.getDate();
-      const endDay = end.getDate();
-
-      const crossesMonth =
-        start.getMonth() !== end.getMonth() || start.getFullYear() !== end.getFullYear();
-
-      const dueItems = items.filter(item => {
-        const d = Number(item.dueDay);
-        if (!d) return false;
-
-        // include start day, exclude end day
-        if (!crossesMonth) {
-          return d >= startDay && d < endDay;
-        } else {
-          return d >= startDay || d < endDay;
-        }
-      });
-
-      const total = dueItems.reduce((sum, item) => sum + Number(item[amountKey] || 0), 0);
-
-      const rangeText = crossesMonth
-        ? `${start.toLocaleDateString()} → ${end.toLocaleDateString()} (crosses month)`
-        : `${start.toLocaleDateString()} → ${end.toLocaleDateString()}`;
-
-      return { dueItems, total, rangeText };
-    }
-
-    // =========================
-    // Plan
-    // =========================
-    function getIncomeData() {
-      const saved = getStorage().getItem("incomeData");
-      return saved ? JSON.parse(saved) : null;
-    }
-
-    function calculatePlanUI() {
-      const box = document.getElementById("plan-box");
-
-      const income = getIncomeData();
-      const bills = getBillsData();
-      const debts = getDebtsData();
-      const strategySelect = document.getElementById("debt-strategy");
-      const storedStrategy = loadDebtStrategy();
-      const strategy = strVal("debt-strategy") || storedStrategy || income?.debtStrategy || "snowball";
-      if (strategySelect) {
-        strategySelect.value = strategy;
-      }
-
-      if (!income) {
-        box.innerHTML = "⚠️ Add your income first, then click Save Step 1.";
-        return;
-      }
-
-      const payAmount = Number(income.payAmountForThisCheck || 0); // NET
-      const frequency = income.frequency;
-      const startingBalance = Number(income.startingBalance) || 0;
-      const buffer = Number(income.buffer) || 0;
-      const spendingPerCheck = Number(income.spending) || 0;
-      const startDateStr = income.startDate;
-
-      if (!payAmount || !frequency) {
-        box.innerHTML = "⚠️ Please complete Step 1 and save it.";
-        return;
-      }
-      if (!startDateStr) {
-        box.innerHTML = "⚠️ Please choose a start date for the plan (first paycheck).";
-        return;
-      }
-
-      const start = parseLocalDate(startDateStr);
-      const startDateText = start.toLocaleDateString();
-
-      const nextPayDate = getNextPaycheckDate(startDateStr, frequency);
-
-      // window totals
-      const billsWindow = getDueItemsInWindow(startDateStr, nextPayDate, bills, "amount");
-      const billsThisCheck = billsWindow.total;
-      const dueBills = billsWindow.dueItems;
-      const rangeText = billsWindow.rangeText;
-
-      const debtWindow = getDueItemsInWindow(startDateStr, nextPayDate, debts, "minimum");
-      const minsThisCheck = debtWindow.total;
-      const dueMinDebts = debtWindow.dueItems;
-
-      const billsListHtml = dueBills.length
-        ? "<ul>" + dueBills.map(b => `<li>${b.name}: $${money(b.amount)} (due ${b.dueDay})</li>`).join("") + "</ul>"
-        : "No bills due in this window. 🎉";
-
-      const minsListHtml = dueMinDebts.length
-        ? "<ul>" + dueMinDebts.map(d => `<li>${d.name}: $${money(d.minimum)} (due ${d.dueDay})</li>`).join("") + "</ul>"
-        : "No minimum payments due in this window. 🎉";
-
-      // available cash
-      const totalAvailable = payAmount + startingBalance;
-
-      const neededForBillsAndSpending = billsThisCheck + minsThisCheck + spendingPerCheck + buffer;
-      const extra = totalAvailable - neededForBillsAndSpending;
-
-      if (extra <= 0) {
-        const endBalance = totalAvailable - billsThisCheck - minsThisCheck - spendingPerCheck;
-
-        box.innerHTML = `
-          <strong>Paycheck used (NET):</strong> $${money(payAmount)}<br>
-          <strong>Current bank balance:</strong> $${money(startingBalance)}<br>
-          <strong>Total available (balance + paycheck):</strong> $${money(totalAvailable)}<br>
-          <strong>Target buffer to keep:</strong> $${money(buffer)}<br><br>
-
-          <strong>This paycheck date:</strong> ${startDateText}<br>
-          <strong>Window:</strong> ${rangeText}<br><br>
-
-          <strong>Bills due this window:</strong> $${money(billsThisCheck)}<br>
-          <strong>Debt minimums due this window:</strong> $${money(minsThisCheck)}<br>
-          <strong>Spending money this paycheck:</strong> $${money(spendingPerCheck)}<br><br>
-
-          <strong>Bills to pay now:</strong><br>
-          ${billsListHtml}<br><br>
-
-          <strong>Minimum payments due this paycheck:</strong><br>
-          ${minsListHtml}<br><br>
-
-          ⚠️ If you pay all of this and keep your buffer of $${money(buffer)},
-          you don’t have extra for additional debt this paycheck.<br>
-          Estimated bank balance after following this plan: $${money(endBalance)}.
-        `;
-        return;
-      }
-
-      const targetDebt = getTargetDebt(debts, strategy);
-      if (!targetDebt) {
-        box.innerHTML = `
-          You have about <strong>$${money(extra)}</strong> left this paycheck
-          after bills, minimums, and spending money. Add at least one debt to aim this at.
-        `;
-        return;
-      }
-
-      const endBalance = buffer;
-
-      box.innerHTML = `
-        <strong>Paycheck used (NET):</strong> $${money(payAmount)}<br>
-        <strong>Current bank balance:</strong> $${money(startingBalance)}<br>
-        <strong>Total available (balance + paycheck):</strong> $${money(totalAvailable)}<br>
-        <strong>Target buffer to keep:</strong> $${money(buffer)}<br><br>
-
-        <strong>This paycheck date:</strong> ${startDateText}<br>
-        <strong>Window:</strong> ${rangeText}<br><br>
-
-        <strong>Bills due this window:</strong> $${money(billsThisCheck)}<br>
-        <strong>Debt minimums due this window:</strong> $${money(minsThisCheck)}<br>
-        <strong>Spending money this paycheck:</strong> $${money(spendingPerCheck)}<br>
-        <strong>Extra left for extra debt:</strong> $${money(extra)}<br>
-        <strong>Strategy:</strong> ${strategy === "avalanche" ? "Avalanche (highest APR first)" : "Snowball (smallest balance first)"}<br><br>
-
-        <strong>Bills to pay now:</strong><br>
-        ${billsListHtml}<br><br>
-
-        <strong>Minimum payments due this paycheck:</strong><br>
-        ${minsListHtml}<br><br>
-
-        👉 After paying these bills and setting aside your spending money,
-        send <strong>$${money(extra)}</strong> to <strong>${targetDebt.name}</strong>
-        (${strategy === "avalanche" ? "highest APR" : "smallest balance"}) this paycheck.<br>
-        💰 Estimated bank balance after doing this: $${money(endBalance)} (your buffer).
-      `;
-    }
-
-    // =========================
-    // Events
-    // =========================
-    document.getElementById("next-button").addEventListener("click", saveIncome);
-    document.getElementById("add-bill-button").addEventListener("click", addBill);
-    document.getElementById("add-debt-button").addEventListener("click", addDebt);
-    document.getElementById("calc-button").addEventListener("click", calculatePlanUI);
-    document.getElementById("export-button").addEventListener("click", () => {
-      window.print();
-    });
-    document.getElementById("onboarding-button").addEventListener("click", openOnboarding);
-    document.getElementById("clear-button").addEventListener("click", () => {
-      const ok = confirm("Clear all saved income, bills, and debts?");
-      if (!ok) return;
-      window.localStorage.removeItem("incomeData");
-      window.localStorage.removeItem("billsData");
-      window.localStorage.removeItem("debtsData");
-      window.localStorage.removeItem("debtStrategy");
-      window.sessionStorage.removeItem("incomeData");
-      window.sessionStorage.removeItem("billsData");
-      window.sessionStorage.removeItem("debtsData");
-      window.sessionStorage.removeItem("debtStrategy");
-      window.location.reload();
-    });
-    document.getElementById("remember-data").addEventListener("change", () => {
-      syncStoragePreference();
-      loadIncome();
-      loadBills();
-      loadDebts();
-      refreshNetPreview();
-    });
-
-    document.getElementById("onboard-back").addEventListener("click", () => {
-      setOnboardStep(onboardStepIndex - 1);
-    });
-    document.getElementById("onboard-next").addEventListener("click", () => {
-      const last = document.querySelectorAll(".onboard-step-page").length - 1;
-      if (onboardStepIndex >= last) {
-        applyOnboarding();
-        window.localStorage.setItem("onboardingDone", "yes");
-        closeOnboarding();
-        document.getElementById("step1-title").scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
-      }
-      setOnboardStep(onboardStepIndex + 1);
-    });
-    document.getElementById("onboard-skip").addEventListener("click", () => {
-      window.localStorage.setItem("onboardingDone", "yes");
-      closeOnboarding();
-    });
-    document.getElementById("onboard-modal").addEventListener("click", (event) => {
-      if (event.target.id === "onboard-modal") {
-        closeOnboarding();
-      }
-    });
-
-    // Step 1 UI events
-    document.getElementById("pay-frequency").addEventListener("change", updatePayTypeUI);
-    document.getElementById("pay-type-hourly").addEventListener("change", updatePayTypeUI);
-    document.getElementById("pay-type-salary").addEventListener("change", updatePayTypeUI);
-    document.getElementById("debt-strategy").addEventListener("change", () => {
-      saveDebtStrategy();
-      calculatePlanUI();
-    });
-
-    document.getElementById("ot-enabled").addEventListener("change", updatePayTypeUI);
-    document.getElementById("tax-estimate").addEventListener("change", updatePayTypeUI);
-    document.getElementById("tax-exact").addEventListener("change", updatePayTypeUI);
-
-    // live net preview updates
-    const liveIds = [
-      "hourly-rate", "hours-week-1", "hours-week-1-bi", "hours-week-2-bi",
-      "ot-threshold", "ot-multiplier", "extra-pay", "tax-rate", "exact-net"
-    ];
-    liveIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener("input", refreshNetPreview);
-    });
-
-    // Load on start
-    window.addEventListener("load", () => {
-      initStoragePreference();
-      loadIncome();
-      loadBills();
-      loadDebts();
-      updatePayTypeUI();
-      refreshNetPreview();
-      const savedStrategy = loadDebtStrategy();
-      if (savedStrategy) {
-        document.getElementById("debt-strategy").value = savedStrategy;
-      }
-      if (window.localStorage.getItem("onboardingDone") !== "yes") {
-        setTimeout(openOnboarding, 500);
-      }
-    });
-  </script>
 </body>
 </html>
