@@ -12,22 +12,22 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/site.webmanifest" />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
 
     :root {
-      --bg: #fff7ee;
-      --bg-2: #eef7ff;
+      --bg: #f6f3ee;
+      --bg-2: #ffffff;
       --card: #ffffff;
-      --card-2: #f7fbff;
-      --muted: #4f5d6b;
-      --text: #0a1220;
-      --accent: #00bcd4;
-      --accent-2: #ffb703;
-      --accent-3: #ff6b6b;
-      --border: #d8e2ef;
-      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-      --radius-lg: 18px;
-      --radius-md: 14px;
+      --card-2: #f5f1ea;
+      --muted: #5b6672;
+      --text: #121722;
+      --accent: #0f6f6a;
+      --accent-2: #d5b47a;
+      --accent-3: #1f2937;
+      --border: #e3dcd1;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+      --radius-lg: 16px;
+      --radius-md: 12px;
       --radius-sm: 10px;
       --space-lg: 28px;
       --space-md: 20px;
@@ -37,12 +37,8 @@
     * { box-sizing: border-box; }
 
     body {
-      font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
-      background:
-        radial-gradient(900px 520px at 12% 0%, rgba(0, 188, 212, 0.18), transparent 60%),
-        radial-gradient(700px 520px at 82% 10%, rgba(255, 183, 3, 0.22), transparent 60%),
-        radial-gradient(640px 480px at 50% 80%, rgba(255, 107, 107, 0.12), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg-2) 55%, #ffffff 100%);
+      font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, var(--bg), var(--bg-2) 60%);
       color: var(--text);
       margin: 0;
       min-height: 100vh;
@@ -62,12 +58,11 @@
     }
 
     .card {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 249, 252, 0.95));
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 26px;
       box-shadow: var(--shadow);
-      backdrop-filter: blur(6px);
       animation: fadeUp 0.6s ease both;
     }
 
@@ -82,17 +77,17 @@
       flex-direction: column;
       gap: 14px;
       padding: 32px;
-      background:
-        linear-gradient(135deg, rgba(0, 188, 212, 0.18), transparent 60%),
-        linear-gradient(315deg, rgba(255, 183, 3, 0.18), transparent 50%),
-        var(--card);
-      border: 1px solid rgba(0, 188, 212, 0.25);
+      background: linear-gradient(135deg, rgba(15, 111, 106, 0.08), transparent 55%), var(--card);
+      border: 1px solid var(--border);
     }
 
+    h1, h2, h3 {
+      font-family: "Fraunces", "DM Sans", serif;
+      letter-spacing: -0.01em;
+    }
     h1 {
       margin: 0;
-      font-size: clamp(1.8rem, 2.4vw, 2.4rem);
-      letter-spacing: -0.02em;
+      font-size: clamp(1.8rem, 2.3vw, 2.35rem);
     }
 
     .subtitle {
@@ -108,12 +103,12 @@
     }
 
     .step {
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(0, 188, 212, 0.25);
-      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border);
+      background: #ffffff;
       color: var(--text);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
     }
 
@@ -149,24 +144,24 @@
 
     input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: rgba(0, 188, 212, 0.55);
-      box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.12);
+      border-color: rgba(15, 111, 106, 0.55);
+      box-shadow: 0 0 0 3px rgba(15, 111, 106, 0.12);
     }
 
     .button {
       width: 100%;
-      padding: 13px 16px;
-      border-radius: 999px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
       border: none;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
       margin-top: 6px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #0b1120;
+      background: var(--accent);
+      color: #ffffff;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .button:hover { transform: translateY(-1px); box-shadow: 0 16px 36px rgba(0, 188, 212, 0.18); }
+    .button:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12); }
     .button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
@@ -270,8 +265,8 @@
       display: inline-flex;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(0, 188, 212, 0.35);
-      background: rgba(0, 188, 212, 0.08);
+      border: 1px solid rgba(15, 111, 106, 0.35);
+      background: rgba(15, 111, 106, 0.08);
       color: var(--text);
       font-size: 0.8rem;
       font-weight: 700;
@@ -291,7 +286,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 14px;
-      border: 1px dashed rgba(0, 188, 212, 0.35);
+      border: 1px dashed rgba(15, 111, 106, 0.35);
       border-radius: var(--radius-sm);
       margin-top: 8px;
       color: var(--muted);
@@ -311,7 +306,7 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
-    .tiny:hover { border-color: rgba(0, 188, 212, 0.5); }
+    .tiny:hover { border-color: rgba(15, 111, 106, 0.5); }
 
     .empty {
       padding: 12px;
@@ -342,8 +337,8 @@
     }
     .toggle-pill input { width: auto; }
     .toggle-pill.active {
-      border-color: rgba(0, 188, 212, 0.45);
-      box-shadow: 0 10px 22px rgba(0, 188, 212, 0.12);
+      border-color: rgba(15, 111, 106, 0.45);
+      box-shadow: 0 10px 22px rgba(15, 111, 106, 0.12);
     }
 
     .tooltip {
@@ -454,11 +449,11 @@
       width: 26px;
       height: 26px;
       border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      background: var(--accent);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #0b1120;
+      color: #ffffff;
       font-weight: 800;
       font-size: 0.9rem;
     }
