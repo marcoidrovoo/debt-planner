@@ -941,7 +941,7 @@
 
       <section class="card" aria-labelledby="step5-title">
         <h2 class="section-title" id="step5-title">Step 5 — Plan Output</h2>
-        <p class="section-desc">Calculate what to do with your next paycheck and share the summary.</p>
+        <p class="section-desc">Calculate what to do with your next paycheck and export the summary.</p>
         <div class="field" style="margin-top:6px;">
           <label>Plan focus
             <span class="tooltip" tabindex="0" data-tooltip="Controls how extra cash is split after bills and minimums.">?</span>
@@ -967,8 +967,6 @@
         </div>
         <button id="calc-button" class="button">Calculate Plan</button>
         <button id="export-button" class="button secondary">Export Plan (PDF)</button>
-        <button id="share-button" class="button secondary" disabled>Share Plan Summary</button>
-        <div id="share-feedback" class="muted" role="status" aria-live="polite" style="margin-top:8px;"></div>
         <button id="clear-button" class="button secondary">Clear Saved Data</button>
         <label class="check-row" style="margin-top:10px;">
           <input id="remember-data" type="checkbox" />
@@ -1018,7 +1016,7 @@
       </div>
       <div class="card" style="padding:14px; background:var(--card-2); border:1px solid var(--border);">
         <div style="font-weight:700;">Budget Dad Pro</div>
-        <div class="paywall-muted">Get the full plan, sharing, and PDF export.</div>
+        <div class="paywall-muted">Get the full plan and PDF export.</div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
           <span class="badge">$5 / month</span>
           <span class="badge">$50 / year (2 months free)</span>
@@ -1071,55 +1069,10 @@
       if (!dateObj) return "—";
       return dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     }
-    let lastPlanSummary = null;
-    function setShareReady(isReady) {
-      const btn = document.getElementById("share-button");
-      if (!btn) return;
-      btn.disabled = !isReady;
-    }
-    function setShareFeedback(message) {
-      const feedback = document.getElementById("share-feedback");
-      if (feedback) feedback.textContent = message || "";
-    }
-    function getShareUrl() {
-      if (window.location.origin && window.location.origin !== "null") {
-        return `${window.location.origin}/planner`;
-      }
-      return window.location.href;
-    }
-    function buildShareText(details) {
-      const summaryParts = [
-        `Budget Dad plan (${details.rangeText}):`,
-        `Bills $${money(details.billsThisCheck)}, minimums $${money(details.minsThisCheck)}, spending $${money(details.spendingPerCheck)}, buffer $${money(details.buffer)}.`
-      ];
-
-      if (details.extra <= 0) {
-        summaryParts.push("No extra for additional debt or savings this paycheck.");
-      } else {
-        if (details.debtShare > 0 && details.targetDebtName) {
-          summaryParts.push(`Extra $${money(details.debtShare)} to ${details.targetDebtName} (${details.strategyLabel}).`);
-        } else if (details.debtShare > 0) {
-          summaryParts.push(`Extra $${money(details.debtShare)} to debt (${details.strategyLabel}).`);
-        }
-        if (details.savingsShare > 0) {
-          summaryParts.push(`Savings set aside $${money(details.savingsShare)} across goals.`);
-        }
-        if (details.debtShare <= 0 && details.savingsShare <= 0) {
-          summaryParts.push(`Extra $${money(details.extra)} available after bills, minimums, and spending.`);
-        }
-      }
-
-      return summaryParts.join(" ");
-    }
 
     function lockPremiumActions(isLocked) {
       const exportButton = document.getElementById("export-button");
-      const shareButton = document.getElementById("share-button");
       if (exportButton) exportButton.disabled = isLocked;
-      if (shareButton) shareButton.disabled = isLocked || !lastPlanSummary;
-      if (isLocked) {
-        setShareFeedback("Unlock Pro to export or share your full plan.");
-      }
     }
     function getNextPaycheckDate(startDateStr, frequency) {
       const start = parseLocalDate(startDateStr);
@@ -2255,9 +2208,6 @@
 
     function calculatePlanUI() {
       const box = document.getElementById("plan-box");
-      setShareReady(false);
-      setShareFeedback("");
-      lastPlanSummary = null;
 
       const income = getIncomeData();
       const bills = getBillsData();
@@ -2300,7 +2250,6 @@
 
       const nextPayDate = getNextPaycheckDate(startDateStr, frequency);
       const nextPayDateText = nextPayDate.toLocaleDateString();
-      const shareRangeText = `${startDateText} → ${nextPayDateText}`;
       const strategyLabel = strategy === "avalanche"
         ? "Avalanche (highest APR first)"
         : "Snowball (smallest balance first)";
@@ -2428,23 +2377,6 @@
         </div>
       `;
 
-      lastPlanSummary = {
-        text: buildShareText({
-          rangeText: shareRangeText,
-          billsThisCheck,
-          minsThisCheck,
-          spendingPerCheck,
-          buffer,
-          extra,
-          targetDebtName: targetDebt?.name || null,
-          strategyLabel,
-          debtShare: allocation.debtExtra || 0,
-          savingsShare: allocation.savingsExtra || 0
-        }),
-        url: getShareUrl()
-      };
-      setShareReady(true);
-
       const proUnlocked = getStorage().getItem("bdPro") === "yes";
       if (!proUnlocked) {
         box.innerHTML = `
@@ -2454,7 +2386,7 @@
           </div>
           ${extra > 0 ? `<div class="muted" style="margin-top:6px;">Extra remaining: $${money(extra)}.</div>` : ""}
           <div class="muted" style="margin-top:6px;">
-            Unlock Pro to see the full plan details, export, and share.
+            Unlock Pro to see the full plan details and export.
           </div>
         `;
         lockPremiumActions(true);
@@ -2564,54 +2496,6 @@
         return;
       }
       window.print();
-    });
-    document.getElementById("share-button").addEventListener("click", async () => {
-      setShareFeedback("");
-      trackEvent("share_clicked", { surface: "planner" });
-
-      const proUnlocked = getStorage().getItem("bdPro") === "yes";
-      if (!proUnlocked) {
-        openPaywall();
-        return;
-      }
-      if (!lastPlanSummary) {
-        setShareFeedback("Calculate your plan first to share it.");
-        return;
-      }
-
-      const shareData = {
-        title: "Budget Dad Plan Summary",
-        text: lastPlanSummary.text,
-        url: lastPlanSummary.url
-      };
-
-      if (navigator.share) {
-        try {
-          await navigator.share(shareData);
-          trackEvent("share_completed", { method: "web_share" });
-          setShareFeedback("Share sheet opened.");
-          return;
-        } catch (err) {
-          if (err && err.name === "AbortError") {
-            setShareFeedback("Share canceled.");
-            return;
-          }
-        }
-      }
-
-      const fallbackText = `${lastPlanSummary.text} ${lastPlanSummary.url}`.trim();
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(fallbackText);
-          setShareFeedback("Copied plan summary to clipboard.");
-        } else {
-          window.prompt("Copy this plan summary:", fallbackText);
-          setShareFeedback("Copy the plan summary from the prompt.");
-        }
-        trackEvent("share_completed", { method: "clipboard" });
-      } catch (err) {
-        setShareFeedback("Unable to share automatically. You can copy the plan summary from the Plan Output box.");
-      }
     });
     document.getElementById("clear-button").addEventListener("click", () => {
       const ok = confirm("Clear all saved income, bills, and debts?");
