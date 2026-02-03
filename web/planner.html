@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <title>Budget Dad — Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Build your Budget Dad paycheck plan in minutes." />
+  <meta name="description" content="Build your Budget Dad paycheck plan in minutes. Pay off debt and build savings." />
   <meta property="og:title" content="Budget Dad — Planner" />
-  <meta property="og:description" content="Plan your next paycheck with clear steps for income, bills, and debt payoff." />
+  <meta property="og:description" content="Plan your next paycheck with clear steps for income, bills, debt payoff, and savings goals." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#00bcd4" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -322,6 +322,116 @@
       text-align: center;
     }
 
+    .toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .toggle-pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      cursor: pointer;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    .toggle-pill input { width: auto; }
+    .toggle-pill.active {
+      border-color: rgba(0, 188, 212, 0.45);
+      box-shadow: 0 10px 22px rgba(0, 188, 212, 0.12);
+    }
+
+    .tooltip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: #ffffff;
+      margin-left: 6px;
+      position: relative;
+      cursor: help;
+    }
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 50%;
+      bottom: 135%;
+      transform: translateX(-50%) translateY(0);
+      background: #0a1220;
+      color: #ffffff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      width: max-content;
+      max-width: 230px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 10;
+    }
+    .tooltip:hover::after,
+    .tooltip:focus::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .plan-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+    .progress-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: #ffffff;
+      margin-bottom: 10px;
+    }
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 600;
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.2);
+      overflow: hidden;
+    }
+    .progress-bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .progress-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
     .topbar {
       grid-column: 1 / -1;
       display: flex;
@@ -529,6 +639,7 @@
       .page { padding: 32px 16px 60px; }
       .topbar { flex-direction: column; gap: 8px; }
       .hero-actions { flex-direction: column; }
+      .plan-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -557,8 +668,8 @@
           </div>
           <div class="stat-row">
             <div class="stat">
-              <h3>4 steps</h3>
-              <div class="muted">Income → Bills → Debts → Plan</div>
+              <h3>5 steps</h3>
+              <div class="muted">Income → Bills → Debts → Savings → Plan</div>
             </div>
             <div class="stat">
               <h3>2 modes</h3>
@@ -574,7 +685,7 @@
 
       <section class="card" aria-labelledby="step1-title">
         <h2 class="section-title" id="step1-title">Step 1 — Paycheck Setup</h2>
-        <p class="section-desc">Build your net paycheck. We’ll allocate bills and debt after.</p>
+        <p class="section-desc">Build your net paycheck. We’ll allocate bills, debt, and savings after.</p>
 
         <div class="field">
           <label>Pay type</label>
@@ -818,8 +929,83 @@
       </section>
 
       <section class="card" aria-labelledby="step4-title">
-        <h2 class="section-title" id="step4-title">Step 4 — Plan Output</h2>
+        <h2 class="section-title" id="step4-title">Step 4 — Savings Goals</h2>
+        <p class="section-desc">Build savings goals alongside debt payoff. Extra money is weighted by priority and deadline.</p>
+
+        <div class="field">
+          <label for="goal-type">Goal type</label>
+          <select id="goal-type">
+            <option value="Emergency Fund">Emergency Fund</option>
+            <option value="Vacation">Vacation</option>
+            <option value="House Down Payment">House Down Payment</option>
+            <option value="Car">Car</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </div>
+
+        <div class="field hidden" id="goal-name-field">
+          <label for="goal-name">Goal name</label>
+          <input id="goal-name" type="text" placeholder="e.g. Wedding Fund" />
+        </div>
+
+        <div class="field-inline">
+          <div class="field small">
+            <label for="goal-target">Target amount ($)</label>
+            <input id="goal-target" type="number" placeholder="e.g. 5000" />
+          </div>
+          <div class="field small">
+            <label for="goal-deadline">Deadline
+              <span class="tooltip" tabindex="0" data-tooltip="Deadlines help the planner weight near-term goals more.">?</span>
+            </label>
+            <input id="goal-deadline" type="date" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="goal-priority">Priority level
+            <span class="tooltip" tabindex="0" data-tooltip="High priority + closer deadlines get a bigger slice of savings.">?</span>
+          </label>
+          <select id="goal-priority">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <div class="muted">Priority and deadline work together to split savings automatically.</div>
+        </div>
+
+        <button id="add-goal-button" class="button secondary">Add goal</button>
+        <div class="totals">
+          <span>Total goal targets</span>
+          <span class="mono" id="goals-total">$0.00</span>
+        </div>
+        <ul id="goals-list" class="list"></ul>
+        <div id="goals-empty" class="empty hidden">No goals yet. Add your first goal above.</div>
+        <div class="note">Tip: set close deadlines for urgent goals like emergency savings.</div>
+      </section>
+
+      <section class="card" aria-labelledby="step5-title">
+        <h2 class="section-title" id="step5-title">Step 5 — Plan Output</h2>
         <p class="section-desc">Calculate what to do with your next paycheck and share the summary.</p>
+        <div class="field" style="margin-top:6px;">
+          <label>Plan focus
+            <span class="tooltip" tabindex="0" data-tooltip="Controls how extra cash is split after bills and minimums.">?</span>
+          </label>
+          <div class="toggle-group" id="focus-toggle">
+            <label class="toggle-pill">
+              <input type="radio" name="focus-mode" value="debt" id="focus-debt" />
+              Focus on Debt
+            </label>
+            <label class="toggle-pill">
+              <input type="radio" name="focus-mode" value="balanced" id="focus-balanced" checked />
+              Balanced
+            </label>
+            <label class="toggle-pill">
+              <input type="radio" name="focus-mode" value="saving" id="focus-saving" />
+              Focus on Saving
+            </label>
+          </div>
+          <div class="muted">Focus on Debt sends ~80% of extra to debt. Balanced is 50/50. Focus on Saving sends ~80% to goals.</div>
+        </div>
         <div id="plan-box" class="result-box">
           👇 Click the button below to calculate what to do with your next paycheck.
         </div>
@@ -1001,6 +1187,20 @@
       d.setDate(d.getDate() + days);
       return d;
     }
+    function formatDateInput(dateObj) {
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateObj.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function formatMonthYear(dateObj) {
+      if (!dateObj) return "—";
+      return dateObj.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+    }
+    function formatFullDate(dateObj) {
+      if (!dateObj) return "—";
+      return dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    }
     let lastPlanSummary = null;
     function setShareReady(isReady) {
       const btn = document.getElementById("share-button");
@@ -1024,11 +1224,19 @@
       ];
 
       if (details.extra <= 0) {
-        summaryParts.push("No extra for additional debt this paycheck.");
-      } else if (!details.targetDebtName) {
-        summaryParts.push(`Extra $${money(details.extra)} available after bills, minimums, and spending.`);
+        summaryParts.push("No extra for additional debt or savings this paycheck.");
       } else {
-        summaryParts.push(`Extra $${money(details.extra)} to ${details.targetDebtName} (${details.strategyLabel}).`);
+        if (details.debtShare > 0 && details.targetDebtName) {
+          summaryParts.push(`Extra $${money(details.debtShare)} to ${details.targetDebtName} (${details.strategyLabel}).`);
+        } else if (details.debtShare > 0) {
+          summaryParts.push(`Extra $${money(details.debtShare)} to debt (${details.strategyLabel}).`);
+        }
+        if (details.savingsShare > 0) {
+          summaryParts.push(`Savings set aside $${money(details.savingsShare)} across goals.`);
+        }
+        if (details.debtShare <= 0 && details.savingsShare <= 0) {
+          summaryParts.push(`Extra $${money(details.extra)} available after bills, minimums, and spending.`);
+        }
       }
 
       return summaryParts.join(" ");
@@ -1276,7 +1484,7 @@
       box.innerHTML = `
         <span class="badge">Saved</span><br><br>
         <strong>Paycheck used for this plan (NET):</strong> $${money(net)}<br>
-        <span class="muted">This is the number Step 4 uses for bills/debts/spending.</span>
+        <span class="muted">This is the number the planner uses for bills, debts, savings, and spending.</span>
       `;
 
       // breakdown html
@@ -1354,7 +1562,7 @@
       // Move data to the selected storage so behavior matches UI.
       const source = preferLocal ? window.sessionStorage : window.localStorage;
       const target = preferLocal ? window.localStorage : window.sessionStorage;
-      ["incomeData", "billsData", "debtsData", "debtStrategy"].forEach(key => {
+      ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode"].forEach(key => {
         const val = source.getItem(key);
         if (val) {
           target.setItem(key, val);
@@ -1792,11 +2000,145 @@
       renderDebts();
     }
     function getTargetDebt(debts, strategy) {
-      if (!debts.length) return null;
+      const active = debts.filter(debt => Number(debt.balance) > 0);
+      if (!active.length) return null;
       if (strategy === "avalanche") {
-        return debts.slice().sort((a, b) => b.rate - a.rate)[0];
+        return active.slice().sort((a, b) => b.rate - a.rate)[0];
       }
-      return debts.slice().sort((a, b) => a.balance - b.balance)[0];
+      return active.slice().sort((a, b) => a.balance - b.balance)[0];
+    }
+
+    // =========================
+    // Step 4: Savings Goals
+    // =========================
+    let savingsGoals = [];
+
+    function getSavingsGoalsData() {
+      const saved = getStorage().getItem("savingsGoalsData");
+      return saved ? JSON.parse(saved) : [];
+    }
+    function saveSavingsGoals() {
+      getStorage().setItem("savingsGoalsData", JSON.stringify(savingsGoals));
+    }
+    function updateGoalTypeUI() {
+      const type = strVal("goal-type");
+      const field = document.getElementById("goal-name-field");
+      if (!field) return;
+      setVisible(field, type === "Custom");
+    }
+    function renderSavingsGoals() {
+      const list = document.getElementById("goals-list");
+      const totalEl = document.getElementById("goals-total");
+      list.innerHTML = "";
+
+      if (!savingsGoals.length) {
+        setEmptyState("goals-empty", true);
+        totalEl.textContent = "$0.00";
+        return;
+      }
+
+      setEmptyState("goals-empty", false);
+
+      const total = savingsGoals.reduce((sum, goal) => sum + Number(goal.target || 0), 0);
+      totalEl.textContent = "$" + money(total);
+
+      savingsGoals.forEach((goal, index) => {
+        const li = document.createElement("li");
+
+        const left = document.createElement("div");
+        left.className = "list-left";
+
+        const title = document.createElement("div");
+        title.className = "list-title";
+        title.textContent = goal.name;
+
+        const meta = document.createElement("div");
+        meta.className = "list-meta";
+        const deadlineText = goal.deadline ? formatFullDate(parseLocalDate(goal.deadline)) : "no deadline";
+        meta.textContent = `$${money(goal.target)} • by ${deadlineText} • ${goal.priority} priority`;
+
+        left.appendChild(title);
+        left.appendChild(meta);
+
+        const right = document.createElement("div");
+        right.className = "actions-row";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "tiny";
+        editBtn.type = "button";
+        editBtn.textContent = "Edit";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "tiny";
+        removeBtn.type = "button";
+        removeBtn.textContent = "Remove";
+
+        li.appendChild(left);
+        li.appendChild(right);
+
+        right.appendChild(editBtn);
+        right.appendChild(removeBtn);
+
+        editBtn.addEventListener("click", () => {
+          document.getElementById("goal-type").value = goal.type || "Custom";
+          updateGoalTypeUI();
+          document.getElementById("goal-name").value = goal.type === "Custom" ? goal.name : "";
+          document.getElementById("goal-target").value = goal.target;
+          document.getElementById("goal-deadline").value = goal.deadline || "";
+          document.getElementById("goal-priority").value = goal.priority || "medium";
+
+          savingsGoals.splice(index, 1);
+          saveSavingsGoals();
+          renderSavingsGoals();
+        });
+
+        removeBtn.addEventListener("click", () => {
+          savingsGoals.splice(index, 1);
+          saveSavingsGoals();
+          renderSavingsGoals();
+        });
+
+        list.appendChild(li);
+      });
+    }
+    function addSavingsGoal() {
+      const type = strVal("goal-type");
+      const customName = strVal("goal-name");
+      const target = numVal("goal-target");
+      const deadline = strVal("goal-deadline");
+      const priority = strVal("goal-priority") || "medium";
+
+      const name = type === "Custom" ? customName : type;
+
+      if (!name || !target || !deadline || !priority) {
+        alert("Please fill in all savings goal fields first.");
+        return;
+      }
+
+      savingsGoals.push({
+        type,
+        name,
+        target: Number(target),
+        deadline,
+        priority
+      });
+      saveSavingsGoals();
+      renderSavingsGoals();
+
+      document.getElementById("goal-name").value = "";
+      document.getElementById("goal-target").value = "";
+      document.getElementById("goal-deadline").value = "";
+      document.getElementById("goal-priority").value = "medium";
+    }
+    function loadSavingsGoals() {
+      const saved = getStorage().getItem("savingsGoalsData");
+      if (!saved) {
+        savingsGoals = [];
+        renderSavingsGoals();
+        return;
+      }
+      savingsGoals = JSON.parse(saved);
+      renderSavingsGoals();
     }
 
     // =========================
@@ -1833,6 +2175,270 @@
       return { dueItems, total, rangeText };
     }
 
+    function getFocusMode() {
+      return document.querySelector('input[name="focus-mode"]:checked')?.value
+        || loadFocusMode()
+        || "balanced";
+    }
+    function saveFocusMode(mode) {
+      getStorage().setItem("focusMode", mode);
+    }
+    function loadFocusMode() {
+      return getStorage().getItem("focusMode");
+    }
+    function setFocusModeUI(mode) {
+      const targetId = mode === "debt" ? "focus-debt" : mode === "saving" ? "focus-saving" : "focus-balanced";
+      const input = document.getElementById(targetId);
+      if (input) input.checked = true;
+      updateFocusToggleStyles();
+    }
+    function updateFocusToggleStyles() {
+      document.querySelectorAll("#focus-toggle .toggle-pill").forEach(label => {
+        const input = label.querySelector("input");
+        label.classList.toggle("active", Boolean(input?.checked));
+      });
+    }
+    function getFocusSplit(mode, hasDebts, hasGoals) {
+      if (!hasDebts && !hasGoals) return { debtRatio: 0, savingsRatio: 0 };
+      if (!hasDebts) return { debtRatio: 0, savingsRatio: 1 };
+      if (!hasGoals) return { debtRatio: 1, savingsRatio: 0 };
+      if (mode === "debt") return { debtRatio: 0.8, savingsRatio: 0.2 };
+      if (mode === "saving") return { debtRatio: 0.2, savingsRatio: 0.8 };
+      return { debtRatio: 0.5, savingsRatio: 0.5 };
+    }
+    function priorityWeight(priority) {
+      if (priority === "high") return 1.4;
+      if (priority === "low") return 0.85;
+      return 1.1;
+    }
+    function deadlineUrgencyWeight(deadlineDate, currentDate) {
+      if (!deadlineDate || Number.isNaN(deadlineDate.getTime())) return 1;
+      const days = (deadlineDate - currentDate) / (1000 * 60 * 60 * 24);
+      if (days <= 0) return 2;
+      const months = days / 30;
+      return 1 + Math.max(0, (12 - months)) / 12;
+    }
+    function goalWeight(goal, currentDate) {
+      return priorityWeight(goal.priority) * deadlineUrgencyWeight(goal.deadlineDate, currentDate);
+    }
+    function mergeAllocationMaps(base, add) {
+      Object.entries(add).forEach(([key, value]) => {
+        base[key] = (base[key] || 0) + value;
+      });
+    }
+    function applyExtraToDebts(debts, amount, strategy) {
+      const allocations = {};
+      let remaining = amount;
+      let guard = 0;
+
+      while (remaining > 0.01 && debts.some(debt => debt.balance > 0) && guard < 200) {
+        const target = getTargetDebt(debts, strategy);
+        if (!target) break;
+        const pay = Math.min(remaining, target.balance);
+        target.balance -= pay;
+        allocations[target.name] = (allocations[target.name] || 0) + pay;
+        remaining -= pay;
+        guard += 1;
+      }
+
+      return { allocations, remaining };
+    }
+    function allocateSavings(goals, amount, currentDate) {
+      const allocations = {};
+      let remaining = amount;
+      let guard = 0;
+      let active = goals.filter(goal => goal.saved < goal.target);
+
+      while (remaining > 0.01 && active.length && guard < 20) {
+        const totalWeight = active.reduce((sum, goal) => sum + goalWeight(goal, currentDate), 0);
+        let usedThisRound = 0;
+
+        active.forEach(goal => {
+          const weight = totalWeight ? goalWeight(goal, currentDate) : 0;
+          const share = totalWeight ? remaining * (weight / totalWeight) : 0;
+          const cap = goal.target - goal.saved;
+          const allocation = Math.min(share, cap);
+          if (allocation > 0) {
+            goal.saved += allocation;
+            allocations[goal.name] = (allocations[goal.name] || 0) + allocation;
+            usedThisRound += allocation;
+          }
+        });
+
+        if (usedThisRound <= 0) break;
+        remaining -= usedThisRound;
+        active = goals.filter(goal => goal.saved < goal.target);
+        guard += 1;
+      }
+
+      return { allocations, remaining };
+    }
+    function calculateAllocationForCheck(extra, debts, goals, strategy, focusMode, currentDate) {
+      const hasDebts = debts.some(debt => debt.balance > 0);
+      const hasGoals = goals.length > 0;
+      const split = getFocusSplit(focusMode, hasDebts, hasGoals);
+      let debtPool = extra * split.debtRatio;
+      let savingsPool = extra * split.savingsRatio;
+
+      const debtClone = debts.map(debt => ({
+        ...debt,
+        balance: Number(debt.balance)
+      }));
+      const goalsClone = goals.map(goal => ({
+        ...goal,
+        target: Number(goal.target),
+        saved: 0,
+        deadlineDate: goal.deadline ? parseLocalDate(goal.deadline) : null
+      }));
+
+      const debtAlloc = applyExtraToDebts(debtClone, debtPool, strategy);
+      const debtAllocations = { ...debtAlloc.allocations };
+
+      if (debtAlloc.remaining > 0 && hasGoals) {
+        savingsPool += debtAlloc.remaining;
+      }
+
+      const savingsAlloc = allocateSavings(goalsClone, savingsPool, currentDate);
+      const savingsAllocations = { ...savingsAlloc.allocations };
+
+      if (savingsAlloc.remaining > 0 && hasDebts) {
+        const extraDebtAlloc = applyExtraToDebts(debtClone, savingsAlloc.remaining, strategy);
+        mergeAllocationMaps(debtAllocations, extraDebtAlloc.allocations);
+      }
+
+      const debtExtra = Object.values(debtAllocations).reduce((sum, amt) => sum + amt, 0);
+      const savingsExtra = Object.values(savingsAllocations).reduce((sum, amt) => sum + amt, 0);
+
+      return { debtAllocations, savingsAllocations, debtExtra, savingsExtra, split };
+    }
+    function simulateProjection(income, bills, debts, goals, strategy, focusMode) {
+      if (!income) return null;
+      const payAmount = Number(income.payAmountForThisCheck || 0);
+      const frequency = income.frequency;
+      const buffer = Number(income.buffer) || 0;
+      const spending = Number(income.spending) || 0;
+      const startingBalance = Number(income.startingBalance) || 0;
+      const startDateStr = income.startDate;
+
+      if (!payAmount || !frequency || !startDateStr) return null;
+
+      const payDays = frequency === "weekly" ? 7 : 14;
+      const maxIterations = frequency === "weekly" ? 520 : 260;
+
+      let currentStart = parseLocalDate(startDateStr);
+      let currentBalance = startingBalance;
+
+      const simDebts = debts.map(debt => ({
+        ...debt,
+        balance: Number(debt.balance)
+      }));
+      const simGoals = goals.map(goal => ({
+        ...goal,
+        target: Number(goal.target),
+        saved: 0,
+        deadlineDate: goal.deadline ? parseLocalDate(goal.deadline) : null,
+        completedDate: null,
+        amountAtDeadline: null
+      }));
+
+      let debtFreeDate = null;
+      let noProgressStreak = 0;
+      let lastRemaining = simDebts.reduce((sum, debt) => sum + Math.max(0, debt.balance), 0)
+        + simGoals.reduce((sum, goal) => sum + Math.max(0, goal.target - goal.saved), 0);
+      let lastEndDate = currentStart;
+
+      for (let i = 0; i < maxIterations; i += 1) {
+        const endDate = addDays(currentStart, payDays);
+        lastEndDate = endDate;
+
+        const startStr = formatDateInput(currentStart);
+        const billsWindow = getDueItemsInWindow(startStr, endDate, bills, "amount");
+        const activeDebts = simDebts.filter(debt => debt.balance > 0);
+        const debtWindow = getDueItemsInWindow(startStr, endDate, activeDebts, "minimum");
+        const minsThisCheck = debtWindow.dueItems.reduce((sum, debt) => sum + Math.min(debt.minimum, debt.balance), 0);
+
+        debtWindow.dueItems.forEach(debt => {
+          const pay = Math.min(debt.minimum, debt.balance);
+          debt.balance -= pay;
+        });
+
+        const totalAvailable = payAmount + currentBalance;
+        const required = billsWindow.total + minsThisCheck + spending + buffer;
+        let extra = totalAvailable - required;
+        if (extra < 0) extra = 0;
+
+        const hasDebts = simDebts.some(debt => debt.balance > 0);
+        const hasGoals = simGoals.some(goal => goal.saved < goal.target);
+        const split = getFocusSplit(focusMode, hasDebts, hasGoals);
+
+        let debtPool = extra * split.debtRatio;
+        let savingsPool = extra * split.savingsRatio;
+
+        const debtAlloc = applyExtraToDebts(simDebts, debtPool, strategy);
+        if (debtAlloc.remaining > 0 && hasGoals) {
+          savingsPool += debtAlloc.remaining;
+        }
+
+        const savingsAlloc = allocateSavings(simGoals, savingsPool, currentStart);
+        if (savingsAlloc.remaining > 0 && hasDebts) {
+          applyExtraToDebts(simDebts, savingsAlloc.remaining, strategy);
+        }
+
+        if (!debtFreeDate && !simDebts.some(debt => debt.balance > 0)) {
+          debtFreeDate = endDate;
+        }
+
+        simGoals.forEach(goal => {
+          if (!goal.completedDate && goal.saved >= goal.target - 0.01) {
+            goal.saved = goal.target;
+            goal.completedDate = endDate;
+          }
+          if (goal.amountAtDeadline === null && goal.deadlineDate && endDate >= goal.deadlineDate) {
+            goal.amountAtDeadline = Math.min(goal.saved, goal.target);
+          }
+        });
+
+        if (totalAvailable >= required) {
+          currentBalance = buffer;
+        } else {
+          currentBalance = totalAvailable - billsWindow.total - minsThisCheck - spending;
+        }
+
+        const remaining = simDebts.reduce((sum, debt) => sum + Math.max(0, debt.balance), 0)
+          + simGoals.reduce((sum, goal) => sum + Math.max(0, goal.target - goal.saved), 0);
+
+        if (Math.abs(remaining - lastRemaining) < 0.01) {
+          noProgressStreak += 1;
+        } else {
+          noProgressStreak = 0;
+        }
+        lastRemaining = remaining;
+
+        if (!simDebts.some(debt => debt.balance > 0) && !simGoals.some(goal => goal.saved < goal.target)) {
+          break;
+        }
+
+        if (noProgressStreak >= 6) {
+          break;
+        }
+
+        currentStart = endDate;
+      }
+
+      simGoals.forEach(goal => {
+        if (goal.amountAtDeadline === null) {
+          goal.amountAtDeadline = Math.min(goal.saved, goal.target);
+        }
+      });
+
+      return {
+        debtFreeDate,
+        goals: simGoals,
+        stalled: noProgressStreak >= 6,
+        lastDate: lastEndDate
+      };
+    }
+
     // =========================
     // Plan
     // =========================
@@ -1850,6 +2456,11 @@
       const income = getIncomeData();
       const bills = getBillsData();
       const debts = getDebtsData();
+      const goals = getSavingsGoalsData();
+      const focusMode = getFocusMode();
+      saveFocusMode(focusMode);
+      updateFocusToggleStyles();
+
       const strategySelect = document.getElementById("debt-strategy");
       const storedStrategy = loadDebtStrategy();
       const strategy = strVal("debt-strategy") || storedStrategy || income?.debtStrategy || "snowball";
@@ -1888,6 +2499,12 @@
         ? "Avalanche (highest APR first)"
         : "Snowball (smallest balance first)";
 
+      const focusLabel = focusMode === "debt"
+        ? "Focus on Debt"
+        : focusMode === "saving"
+          ? "Focus on Saving"
+          : "Balanced";
+
       // window totals
       const billsWindow = getDueItemsInWindow(startDateStr, nextPayDate, bills, "amount");
       const billsThisCheck = billsWindow.total;
@@ -1910,43 +2527,138 @@
       const totalAvailable = payAmount + startingBalance;
 
       const neededForBillsAndSpending = billsThisCheck + minsThisCheck + spendingPerCheck + buffer;
-      const extra = totalAvailable - neededForBillsAndSpending;
+      const extraRaw = totalAvailable - neededForBillsAndSpending;
+      const extra = Math.max(0, extraRaw);
 
-      if (extra <= 0) {
-        const endBalance = totalAvailable - billsThisCheck - minsThisCheck - spendingPerCheck;
+      const hasDebts = debts.length > 0;
+      const hasGoals = goals.length > 0;
 
-        lastPlanSummary = {
-          text: buildShareText({
-            rangeText: shareRangeText,
-            billsThisCheck,
-            minsThisCheck,
-            spendingPerCheck,
-            buffer,
-            extra,
-            targetDebtName: null,
-            strategyLabel
-          }),
-          url: getShareUrl()
-        };
-        setShareReady(true);
+      let allocation = {
+        debtAllocations: {},
+        savingsAllocations: {},
+        debtExtra: 0,
+        savingsExtra: 0,
+        split: { debtRatio: 0, savingsRatio: 0 }
+      };
 
-        const proUnlocked = getStorage().getItem("bdPro") === "yes";
-        if (!proUnlocked) {
-          box.innerHTML = `
-            <strong>Plan preview:</strong> This paycheck is fully allocated.<br>
-            <div class="muted" style="margin-top:8px;">
-              Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
-            </div>
-            <div class="muted" style="margin-top:6px;">
-              Unlock Pro to see the full plan details, export, and share.
+      if (extra > 0 && (hasDebts || hasGoals)) {
+        allocation = calculateAllocationForCheck(extra, debts, goals, strategy, focusMode, start);
+      }
+
+      const targetDebt = getTargetDebt(debts, strategy);
+      const endBalance = totalAvailable >= neededForBillsAndSpending
+        ? buffer
+        : totalAvailable - billsThisCheck - minsThisCheck - spendingPerCheck;
+
+      const debtExtraListHtml = Object.keys(allocation.debtAllocations).length
+        ? "<ul>" + Object.entries(allocation.debtAllocations).map(([name, amt]) => `<li>${name}: $${money(amt)}</li>`).join("") + "</ul>"
+        : "No extra debt payments this paycheck.";
+
+      const savingsAllocListHtml = Object.keys(allocation.savingsAllocations).length
+        ? "<ul>" + Object.entries(allocation.savingsAllocations).map(([name, amt]) => `<li>${name}: $${money(amt)}</li>`).join("") + "</ul>"
+        : "No savings contributions this paycheck.";
+
+      const projection = simulateProjection(income, bills, debts, goals, strategy, focusMode);
+      const projectionNote = projection?.stalled
+        ? "Projection paused — there’s no extra after bills, minimums, spending, and buffer."
+        : "Projection assumes the same paycheck, bills, and minimums each cycle and ignores interest.";
+
+      const debtFreeText = !hasDebts
+        ? "No debts tracked."
+        : projection?.debtFreeDate
+          ? formatMonthYear(projection.debtFreeDate)
+          : "Not reachable yet";
+
+      const goalProjectionRows = projection && projection.goals?.length
+        ? projection.goals.map(goal => {
+          const deadlineDate = goal.deadlineDate && !Number.isNaN(goal.deadlineDate.getTime()) ? goal.deadlineDate : null;
+          const deadlineText = deadlineDate ? formatMonthYear(deadlineDate) : "no deadline";
+          const completionText = goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet";
+          const afterDeadline = goal.completedDate && deadlineDate && goal.completedDate > deadlineDate;
+          const amountAtDeadline = goal.amountAtDeadline ?? 0;
+          const percentAtDeadline = goal.target > 0
+            ? Math.min(100, Math.round((amountAtDeadline / goal.target) * 100))
+            : 0;
+          const thisCheckSaved = allocation.savingsAllocations[goal.name] || 0;
+          return `
+            <div class="progress-row">
+              <div class="progress-head">
+                <span>${goal.name}</span>
+                <span class="mono">$${money(goal.target)}</span>
+              </div>
+              <div class="progress-bar"><span style="width:${percentAtDeadline}%"></span></div>
+              <div class="progress-meta">
+                Projected ${percentAtDeadline}% by ${deadlineText} • Completion ${completionText}${afterDeadline ? " (after deadline)" : ""} • This paycheck $${money(thisCheckSaved)}
+              </div>
             </div>
           `;
-          lockPremiumActions(true);
-          openPaywall();
-          return;
-        }
+        }).join("")
+        : `<div class="muted">No savings goals yet. Add one in Step 4.</div>`;
 
-        lockPremiumActions(false);
+      const debtRowsHtml = debts.length
+        ? debts.map(debt => `
+          <div class="progress-row">
+            <div class="progress-head">
+              <span>${debt.name}</span>
+              <span class="mono">$${money(debt.balance)}</span>
+            </div>
+            <div class="progress-meta">Minimum $${money(debt.minimum)} • Due ${debt.dueDay} • ${money(debt.rate)}% APR</div>
+          </div>
+        `).join("")
+        : `<div class="muted">No debts tracked. Add one in Step 3.</div>`;
+
+      const planGridHtml = `
+        <div class="plan-grid">
+          <div class="plan-card">
+            <strong>Debts</strong>
+            <div class="muted" style="margin-top:4px;">Balances and minimums.</div>
+            ${debtRowsHtml}
+          </div>
+          <div class="plan-card">
+            <strong>Savings goals</strong>
+            <div class="muted" style="margin-top:4px;">Progress bars show projected progress by deadline.</div>
+            ${goalProjectionRows}
+          </div>
+        </div>
+      `;
+
+      lastPlanSummary = {
+        text: buildShareText({
+          rangeText: shareRangeText,
+          billsThisCheck,
+          minsThisCheck,
+          spendingPerCheck,
+          buffer,
+          extra,
+          targetDebtName: targetDebt?.name || null,
+          strategyLabel,
+          debtShare: allocation.debtExtra || 0,
+          savingsShare: allocation.savingsExtra || 0
+        }),
+        url: getShareUrl()
+      };
+      setShareReady(true);
+
+      const proUnlocked = getStorage().getItem("bdPro") === "yes";
+      if (!proUnlocked) {
+        box.innerHTML = `
+          <strong>Plan preview:</strong> ${extra <= 0 ? "This paycheck is fully allocated." : "You have extra available this paycheck."}<br>
+          <div class="muted" style="margin-top:8px;">
+            Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
+          </div>
+          ${extra > 0 ? `<div class="muted" style="margin-top:6px;">Extra remaining: $${money(extra)}.</div>` : ""}
+          <div class="muted" style="margin-top:6px;">
+            Unlock Pro to see the full plan details, export, and share.
+          </div>
+        `;
+        lockPremiumActions(true);
+        openPaywall();
+        return;
+      }
+
+      lockPremiumActions(false);
+
+      if (extra <= 0) {
         box.innerHTML = `
           <strong>Paycheck used (NET):</strong> $${money(payAmount)}<br>
           <strong>Current bank balance:</strong> $${money(startingBalance)}<br>
@@ -1967,93 +2679,27 @@
           ${minsListHtml}<br><br>
 
           ⚠️ If you pay all of this and keep your buffer of $${money(buffer)},
-          you don’t have extra for additional debt this paycheck.<br>
-          Estimated bank balance after following this plan: $${money(endBalance)}.
+          you don’t have extra for additional debt or savings this paycheck.<br>
+          Estimated bank balance after following this plan: $${money(endBalance)}.<br><br>
+          ${planGridHtml}
+          <div style="margin-top:14px;">
+            <strong>Monthly projection</strong>
+            <div class="muted" style="margin-top:6px;">Debt-free date: ${debtFreeText}</div>
+            ${projection?.goals?.length ? projection.goals.map(goal => `<div class="muted">${goal.name}: ${goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet"}</div>`).join("") : ""}
+            <div class="muted" style="margin-top:6px;">${projectionNote}</div>
+          </div>
         `;
         return;
       }
 
-      const targetDebt = getTargetDebt(debts, strategy);
-      if (!targetDebt) {
-        lastPlanSummary = {
-          text: buildShareText({
-            rangeText: shareRangeText,
-            billsThisCheck,
-            minsThisCheck,
-            spendingPerCheck,
-            buffer,
-            extra,
-            targetDebtName: null,
-            strategyLabel
-          }),
-          url: getShareUrl()
-        };
-        setShareReady(true);
-
-        const proUnlocked = getStorage().getItem("bdPro") === "yes";
-        if (!proUnlocked) {
-          box.innerHTML = `
-            <strong>Plan preview:</strong> You have extra available this paycheck.<br>
-            <div class="muted" style="margin-top:8px;">
-              Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
-            </div>
-            <div class="muted" style="margin-top:6px;">
-              Extra remaining: $${money(extra)}.
-            </div>
-            <div class="muted" style="margin-top:6px;">
-              Unlock Pro to see the full plan details, export, and share.
-            </div>
-          `;
-          lockPremiumActions(true);
-          openPaywall();
-          return;
-        }
-
-        lockPremiumActions(false);
+      if (!hasDebts && !hasGoals) {
         box.innerHTML = `
           You have about <strong>$${money(extra)}</strong> left this paycheck
-          after bills, minimums, and spending money. Add at least one debt to aim this at.
+          after bills, minimums, and spending money. Add at least one debt or savings goal to aim this at.
         `;
         return;
       }
 
-      const endBalance = buffer;
-
-      lastPlanSummary = {
-        text: buildShareText({
-          rangeText: shareRangeText,
-          billsThisCheck,
-          minsThisCheck,
-          spendingPerCheck,
-          buffer,
-          extra,
-          targetDebtName: targetDebt.name,
-          strategyLabel
-        }),
-        url: getShareUrl()
-      };
-      setShareReady(true);
-
-      const proUnlocked = getStorage().getItem("bdPro") === "yes";
-      if (!proUnlocked) {
-        box.innerHTML = `
-          <strong>Plan preview:</strong> You have extra available for debt this paycheck.<br>
-          <div class="muted" style="margin-top:8px;">
-            Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
-          </div>
-          <div class="muted" style="margin-top:6px;">
-            Extra remaining: $${money(extra)}.
-          </div>
-          <div class="muted" style="margin-top:6px;">
-            Unlock Pro to see the full plan details, export, and share.
-          </div>
-        `;
-        lockPremiumActions(true);
-        openPaywall();
-        return;
-      }
-
-      lockPremiumActions(false);
       box.innerHTML = `
         <strong>Paycheck used (NET):</strong> $${money(payAmount)}<br>
         <strong>Current bank balance:</strong> $${money(startingBalance)}<br>
@@ -2066,8 +2712,11 @@
         <strong>Bills due this window:</strong> $${money(billsThisCheck)}<br>
         <strong>Debt minimums due this window:</strong> $${money(minsThisCheck)}<br>
         <strong>Spending money this paycheck:</strong> $${money(spendingPerCheck)}<br>
-        <strong>Extra left for extra debt:</strong> $${money(extra)}<br>
+        <strong>Extra available this paycheck:</strong> $${money(extra)}<br>
+        <strong>Focus:</strong> ${focusLabel}<br>
         <strong>Strategy:</strong> ${strategyLabel}<br><br>
+
+        <strong>Extra split:</strong> $${money(allocation.debtExtra)} to debt • $${money(allocation.savingsExtra)} to savings<br><br>
 
         <strong>Bills to pay now:</strong><br>
         ${billsListHtml}<br><br>
@@ -2075,10 +2724,22 @@
         <strong>Minimum payments due this paycheck:</strong><br>
         ${minsListHtml}<br><br>
 
+        <strong>Extra debt payments this paycheck:</strong><br>
+        ${debtExtraListHtml}<br><br>
+
+        <strong>Savings contributions this paycheck:</strong><br>
+        ${savingsAllocListHtml}<br><br>
+
         👉 After paying these bills and setting aside your spending money,
-        send <strong>$${money(extra)}</strong> to <strong>${targetDebt.name}</strong>
-        (${strategy === "avalanche" ? "highest APR" : "smallest balance"}) this paycheck.<br>
-        💰 Estimated bank balance after doing this: $${money(endBalance)} (your buffer).
+        send the extra to debt and savings as shown above.<br>
+        💰 Estimated bank balance after doing this: $${money(endBalance)} (your buffer).<br><br>
+        ${planGridHtml}
+        <div style="margin-top:14px;">
+          <strong>Monthly projection</strong>
+          <div class="muted" style="margin-top:6px;">Debt-free date: ${debtFreeText}</div>
+          ${projection?.goals?.length ? projection.goals.map(goal => `<div class="muted">${goal.name}: ${goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet"}</div>`).join("") : ""}
+          <div class="muted" style="margin-top:6px;">${projectionNote}</div>
+        </div>
       `;
     }
 
@@ -2088,6 +2749,7 @@
     document.getElementById("next-button").addEventListener("click", saveIncome);
     document.getElementById("add-bill-button").addEventListener("click", addBill);
     document.getElementById("add-debt-button").addEventListener("click", addDebt);
+    document.getElementById("add-goal-button").addEventListener("click", addSavingsGoal);
     document.getElementById("calc-button").addEventListener("click", calculatePlanUI);
     document.getElementById("export-button").addEventListener("click", () => {
       const proUnlocked = getStorage().getItem("bdPro") === "yes";
@@ -2152,11 +2814,15 @@
       window.localStorage.removeItem("incomeData");
       window.localStorage.removeItem("billsData");
       window.localStorage.removeItem("debtsData");
+      window.localStorage.removeItem("savingsGoalsData");
       window.localStorage.removeItem("debtStrategy");
+      window.localStorage.removeItem("focusMode");
       window.sessionStorage.removeItem("incomeData");
       window.sessionStorage.removeItem("billsData");
       window.sessionStorage.removeItem("debtsData");
+      window.sessionStorage.removeItem("savingsGoalsData");
       window.sessionStorage.removeItem("debtStrategy");
+      window.sessionStorage.removeItem("focusMode");
       window.location.reload();
     });
     document.getElementById("remember-data").addEventListener("change", () => {
@@ -2164,6 +2830,8 @@
       loadIncome();
       loadBills();
       loadDebts();
+      loadSavingsGoals();
+      setFocusModeUI(loadFocusMode() || "balanced");
       refreshNetPreview();
     });
 
@@ -2204,6 +2872,15 @@
       saveDebtStrategy();
       calculatePlanUI();
     });
+    document.getElementById("goal-type").addEventListener("change", updateGoalTypeUI);
+    document.querySelectorAll('input[name="focus-mode"]').forEach(input => {
+      input.addEventListener("change", () => {
+        const mode = getFocusMode();
+        saveFocusMode(mode);
+        updateFocusToggleStyles();
+        calculatePlanUI();
+      });
+    });
 
     document.getElementById("ot-enabled").addEventListener("change", updatePayTypeUI);
     document.getElementById("tax-estimate").addEventListener("change", updatePayTypeUI);
@@ -2225,9 +2902,12 @@
       loadIncome();
       loadBills();
       loadDebts();
+      loadSavingsGoals();
       lockPremiumActions(true);
       updatePayTypeUI();
       refreshNetPreview();
+      updateGoalTypeUI();
+      setFocusModeUI(loadFocusMode() || "balanced");
       const savedStrategy = loadDebtStrategy();
       if (savedStrategy) {
         document.getElementById("debt-strategy").value = savedStrategy;
