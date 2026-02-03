@@ -941,7 +941,7 @@
 
       <section class="card" aria-labelledby="step5-title">
         <h2 class="section-title" id="step5-title">Step 5 — Plan Output</h2>
-        <p class="section-desc">Calculate what to do with your next paycheck and export the summary.</p>
+        <p class="section-desc">Calculate what to do with your next paycheck. We’ll email the same plan before every paycheck until you change it.</p>
         <div class="field" style="margin-top:6px;">
           <label>Plan focus
             <span class="tooltip" tabindex="0" data-tooltip="Controls how extra cash is split after bills and minimums.">?</span>
@@ -966,7 +966,6 @@
           👇 Click the button below to calculate what to do with your next paycheck.
         </div>
         <button id="calc-button" class="button">Calculate Plan</button>
-        <button id="export-button" class="button secondary">Export Plan (PDF)</button>
         <button id="clear-button" class="button secondary">Clear Saved Data</button>
         <label class="check-row" style="margin-top:10px;">
           <input id="remember-data" type="checkbox" />
@@ -1016,7 +1015,7 @@
       </div>
       <div class="card" style="padding:14px; background:var(--card-2); border:1px solid var(--border);">
         <div style="font-weight:700;">Budget Dad Pro</div>
-        <div class="paywall-muted">Get the full plan and PDF export.</div>
+        <div class="paywall-muted">Get the full plan and email delivery before each paycheck.</div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
           <span class="badge">$5 / month</span>
           <span class="badge">$50 / year (2 months free)</span>
@@ -1071,8 +1070,7 @@
     }
 
     function lockPremiumActions(isLocked) {
-      const exportButton = document.getElementById("export-button");
-      if (exportButton) exportButton.disabled = isLocked;
+      // placeholder for premium actions
     }
     function getNextPaycheckDate(startDateStr, frequency) {
       const start = parseLocalDate(startDateStr);
@@ -2489,14 +2487,6 @@
     document.getElementById("add-debt-button").addEventListener("click", addDebt);
     document.getElementById("add-goal-button").addEventListener("click", addSavingsGoal);
     document.getElementById("calc-button").addEventListener("click", calculatePlanUI);
-    document.getElementById("export-button").addEventListener("click", () => {
-      const proUnlocked = getStorage().getItem("bdPro") === "yes";
-      if (!proUnlocked) {
-        openPaywall();
-        return;
-      }
-      window.print();
-    });
     document.getElementById("clear-button").addEventListener("click", () => {
       const ok = confirm("Clear all saved income, bills, and debts?");
       if (!ok) return;
