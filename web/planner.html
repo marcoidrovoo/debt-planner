@@ -57,7 +57,7 @@
     .layout {
       width: min(1100px, 100%);
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      grid-template-columns: 1fr;
       gap: var(--space-lg);
     }
 
@@ -167,6 +167,12 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .button:hover { transform: translateY(-1px); box-shadow: 0 16px 36px rgba(0, 188, 212, 0.18); }
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
 
     .button.secondary {
       background: #ffffff;
@@ -462,13 +468,50 @@
     .footer a { color: var(--muted); text-decoration: none; }
     .footer a:hover { color: var(--text); text-decoration: underline; }
 
+    .paywall-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 18, 32, 0.55);
+      z-index: 40;
+      padding: 20px;
+    }
+    .paywall-modal.active { display: flex; }
+    .paywall-panel {
+      width: min(520px, 100%);
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+    }
+    .paywall-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .paywall-actions {
+      display: grid;
+      gap: 10px;
+    }
+    .paywall-actions .button { margin-top: 0; }
+    .paywall-muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
     /* Print / PDF export */
     @media print {
       body { background: #ffffff; }
       .page { padding: 0; }
       .hero, .section-desc, .stepper, .note, .muted { color: #111827 !important; }
       .card { box-shadow: none; border: 1px solid #d1d5db; }
-      .button, .tiny, .pill, .check-row, .radio-row, .actions-row, .topbar { display: none !important; }
+      .button, .tiny, .pill, .check-row, .radio-row, .actions-row, .topbar, .paywall-modal { display: none !important; }
       .layout { grid-template-columns: 1fr; gap: 16px; }
       #plan-box { min-height: auto; }
       input, select { border: 1px solid #d1d5db; }
@@ -692,23 +735,6 @@
         </details>
       </section>
 
-      <aside class="card side-card">
-        <h2 class="section-title">Plan Output</h2>
-        <p class="section-desc">This box updates when you calculate your plan.</p>
-        <div id="plan-box" class="result-box">
-          👇 Click the button below to calculate what to do with your next paycheck.
-        </div>
-        <button id="calc-button" class="button">Calculate Plan</button>
-        <button id="export-button" class="button secondary">Export Plan (PDF)</button>
-        <button id="onboarding-button" class="button secondary">Restart Onboarding</button>
-        <button id="clear-button" class="button secondary">Clear Saved Data</button>
-        <label class="check-row" style="margin-top:10px;">
-          <input id="remember-data" type="checkbox" />
-          <span style="flex:1;">Remember my data on this device</span>
-        </label>
-        <p class="muted" style="margin-top:8px;">Turn off to keep data only for this session.</p>
-      </aside>
-
       <section class="card" aria-labelledby="step2-title">
         <h2 class="section-title" id="step2-title">Step 2 — Fixed Bills</h2>
         <p class="section-desc">Add regular monthly bills like rent, HOA, car payments, or internet.</p>
@@ -789,6 +815,25 @@
         </div>
         <ul id="debts-list" class="list"></ul>
         <div id="debts-empty" class="empty hidden">No debts yet. Add your first debt above.</div>
+      </section>
+
+      <section class="card" aria-labelledby="step4-title">
+        <h2 class="section-title" id="step4-title">Step 4 — Plan Output</h2>
+        <p class="section-desc">Calculate what to do with your next paycheck and share the summary.</p>
+        <div id="plan-box" class="result-box">
+          👇 Click the button below to calculate what to do with your next paycheck.
+        </div>
+        <button id="calc-button" class="button">Calculate Plan</button>
+        <button id="export-button" class="button secondary">Export Plan (PDF)</button>
+        <button id="share-button" class="button secondary" disabled>Share Plan Summary</button>
+        <div id="share-feedback" class="muted" role="status" aria-live="polite" style="margin-top:8px;"></div>
+        <button id="onboarding-button" class="button secondary">Restart Onboarding</button>
+        <button id="clear-button" class="button secondary">Clear Saved Data</button>
+        <label class="check-row" style="margin-top:10px;">
+          <input id="remember-data" type="checkbox" />
+          <span style="flex:1;">Remember my data on this device</span>
+        </label>
+        <p class="muted" style="margin-top:8px;">Turn off to keep data only for this session.</p>
       </section>
 
       <section class="card" id="faq">
@@ -906,6 +951,32 @@
     </div>
   </div>
 
+  <div class="paywall-modal" id="paywall-modal" aria-hidden="true">
+    <div class="paywall-panel">
+      <div class="paywall-header">
+        <div>
+          <strong>Unlock the full plan</strong>
+          <div class="paywall-muted">Preview is ready — subscribe to see the full plan.</div>
+        </div>
+        <button class="ghost" type="button" onclick="closePaywall()">Close</button>
+      </div>
+      <div class="card" style="padding:14px; background:var(--card-2); border:1px solid var(--border);">
+        <div style="font-weight:700;">Budget Dad Pro</div>
+        <div class="paywall-muted">Get the full plan, sharing, and PDF export.</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+          <span class="badge">$5 / month</span>
+          <span class="badge">$50 / year (2 months free)</span>
+        </div>
+      </div>
+      <div class="paywall-actions">
+        <button class="button" type="button" onclick="startCheckout('monthly')">Start monthly — $5/mo</button>
+        <button class="button secondary" type="button" onclick="startCheckout('yearly')">Start yearly — $50/yr</button>
+        <button class="button secondary" type="button" onclick="startCheckout('demo')">I already subscribed</button>
+      </div>
+      <div class="paywall-muted">We don’t store your financial data. Cancel anytime.</div>
+    </div>
+  </div>
+
   <script>
     // =========================
     // Helpers
@@ -929,6 +1000,48 @@
       const d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
       d.setDate(d.getDate() + days);
       return d;
+    }
+    let lastPlanSummary = null;
+    function setShareReady(isReady) {
+      const btn = document.getElementById("share-button");
+      if (!btn) return;
+      btn.disabled = !isReady;
+    }
+    function setShareFeedback(message) {
+      const feedback = document.getElementById("share-feedback");
+      if (feedback) feedback.textContent = message || "";
+    }
+    function getShareUrl() {
+      if (window.location.origin && window.location.origin !== "null") {
+        return `${window.location.origin}/planner`;
+      }
+      return window.location.href;
+    }
+    function buildShareText(details) {
+      const summaryParts = [
+        `Budget Dad plan (${details.rangeText}):`,
+        `Bills $${money(details.billsThisCheck)}, minimums $${money(details.minsThisCheck)}, spending $${money(details.spendingPerCheck)}, buffer $${money(details.buffer)}.`
+      ];
+
+      if (details.extra <= 0) {
+        summaryParts.push("No extra for additional debt this paycheck.");
+      } else if (!details.targetDebtName) {
+        summaryParts.push(`Extra $${money(details.extra)} available after bills, minimums, and spending.`);
+      } else {
+        summaryParts.push(`Extra $${money(details.extra)} to ${details.targetDebtName} (${details.strategyLabel}).`);
+      }
+
+      return summaryParts.join(" ");
+    }
+
+    function lockPremiumActions(isLocked) {
+      const exportButton = document.getElementById("export-button");
+      const shareButton = document.getElementById("share-button");
+      if (exportButton) exportButton.disabled = isLocked;
+      if (shareButton) shareButton.disabled = isLocked || !lastPlanSummary;
+      if (isLocked) {
+        setShareFeedback("Unlock Pro to export or share your full plan.");
+      }
     }
     function getNextPaycheckDate(startDateStr, frequency) {
       const start = parseLocalDate(startDateStr);
@@ -1257,6 +1370,31 @@
     }
 
     // =========================
+    // Metrics
+    // =========================
+    function trackEvent(name, props = {}) {
+      const payload = { event: name, ...props };
+
+      if (Array.isArray(window.dataLayer)) {
+        window.dataLayer.push(payload);
+      }
+      if (typeof window.gtag === "function") {
+        window.gtag("event", name, props);
+      }
+
+      try {
+        const store = getStorage();
+        const raw = store.getItem("bdMetrics");
+        const metrics = raw ? JSON.parse(raw) : {};
+        metrics[name] = (metrics[name] || 0) + 1;
+        metrics._last = { name, props, at: new Date().toISOString() };
+        store.setItem("bdMetrics", JSON.stringify(metrics));
+      } catch (err) {
+        // Ignore storage errors (private mode, full storage, etc.)
+      }
+    }
+
+    // =========================
     // Onboarding
     // =========================
     let onboardStepIndex = 0;
@@ -1289,6 +1427,31 @@
       const modal = document.getElementById("onboard-modal");
       modal.classList.remove("active");
       modal.setAttribute("aria-hidden", "true");
+    }
+
+    // =========================
+    // Paywall
+    // =========================
+    function openPaywall() {
+      const modal = document.getElementById("paywall-modal");
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+    }
+    function closePaywall() {
+      const modal = document.getElementById("paywall-modal");
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    }
+    function startCheckout(plan) {
+      trackEvent("paywall_clicked", { plan });
+      if (plan === "demo") {
+        getStorage().setItem("bdPro", "yes");
+        closePaywall();
+        lockPremiumActions(false);
+        setShareFeedback("Pro unlocked on this device.");
+        return;
+      }
+      alert("Checkout isn’t wired yet. Tell me your payment provider and I’ll connect it.");
     }
 
     function applyOnboarding() {
@@ -1680,6 +1843,9 @@
 
     function calculatePlanUI() {
       const box = document.getElementById("plan-box");
+      setShareReady(false);
+      setShareFeedback("");
+      lastPlanSummary = null;
 
       const income = getIncomeData();
       const bills = getBillsData();
@@ -1716,6 +1882,11 @@
       const startDateText = start.toLocaleDateString();
 
       const nextPayDate = getNextPaycheckDate(startDateStr, frequency);
+      const nextPayDateText = nextPayDate.toLocaleDateString();
+      const shareRangeText = `${startDateText} → ${nextPayDateText}`;
+      const strategyLabel = strategy === "avalanche"
+        ? "Avalanche (highest APR first)"
+        : "Snowball (smallest balance first)";
 
       // window totals
       const billsWindow = getDueItemsInWindow(startDateStr, nextPayDate, bills, "amount");
@@ -1744,6 +1915,38 @@
       if (extra <= 0) {
         const endBalance = totalAvailable - billsThisCheck - minsThisCheck - spendingPerCheck;
 
+        lastPlanSummary = {
+          text: buildShareText({
+            rangeText: shareRangeText,
+            billsThisCheck,
+            minsThisCheck,
+            spendingPerCheck,
+            buffer,
+            extra,
+            targetDebtName: null,
+            strategyLabel
+          }),
+          url: getShareUrl()
+        };
+        setShareReady(true);
+
+        const proUnlocked = getStorage().getItem("bdPro") === "yes";
+        if (!proUnlocked) {
+          box.innerHTML = `
+            <strong>Plan preview:</strong> This paycheck is fully allocated.<br>
+            <div class="muted" style="margin-top:8px;">
+              Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
+            </div>
+            <div class="muted" style="margin-top:6px;">
+              Unlock Pro to see the full plan details, export, and share.
+            </div>
+          `;
+          lockPremiumActions(true);
+          openPaywall();
+          return;
+        }
+
+        lockPremiumActions(false);
         box.innerHTML = `
           <strong>Paycheck used (NET):</strong> $${money(payAmount)}<br>
           <strong>Current bank balance:</strong> $${money(startingBalance)}<br>
@@ -1772,6 +1975,41 @@
 
       const targetDebt = getTargetDebt(debts, strategy);
       if (!targetDebt) {
+        lastPlanSummary = {
+          text: buildShareText({
+            rangeText: shareRangeText,
+            billsThisCheck,
+            minsThisCheck,
+            spendingPerCheck,
+            buffer,
+            extra,
+            targetDebtName: null,
+            strategyLabel
+          }),
+          url: getShareUrl()
+        };
+        setShareReady(true);
+
+        const proUnlocked = getStorage().getItem("bdPro") === "yes";
+        if (!proUnlocked) {
+          box.innerHTML = `
+            <strong>Plan preview:</strong> You have extra available this paycheck.<br>
+            <div class="muted" style="margin-top:8px;">
+              Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
+            </div>
+            <div class="muted" style="margin-top:6px;">
+              Extra remaining: $${money(extra)}.
+            </div>
+            <div class="muted" style="margin-top:6px;">
+              Unlock Pro to see the full plan details, export, and share.
+            </div>
+          `;
+          lockPremiumActions(true);
+          openPaywall();
+          return;
+        }
+
+        lockPremiumActions(false);
         box.innerHTML = `
           You have about <strong>$${money(extra)}</strong> left this paycheck
           after bills, minimums, and spending money. Add at least one debt to aim this at.
@@ -1781,6 +2019,41 @@
 
       const endBalance = buffer;
 
+      lastPlanSummary = {
+        text: buildShareText({
+          rangeText: shareRangeText,
+          billsThisCheck,
+          minsThisCheck,
+          spendingPerCheck,
+          buffer,
+          extra,
+          targetDebtName: targetDebt.name,
+          strategyLabel
+        }),
+        url: getShareUrl()
+      };
+      setShareReady(true);
+
+      const proUnlocked = getStorage().getItem("bdPro") === "yes";
+      if (!proUnlocked) {
+        box.innerHTML = `
+          <strong>Plan preview:</strong> You have extra available for debt this paycheck.<br>
+          <div class="muted" style="margin-top:8px;">
+            Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            Extra remaining: $${money(extra)}.
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            Unlock Pro to see the full plan details, export, and share.
+          </div>
+        `;
+        lockPremiumActions(true);
+        openPaywall();
+        return;
+      }
+
+      lockPremiumActions(false);
       box.innerHTML = `
         <strong>Paycheck used (NET):</strong> $${money(payAmount)}<br>
         <strong>Current bank balance:</strong> $${money(startingBalance)}<br>
@@ -1794,7 +2067,7 @@
         <strong>Debt minimums due this window:</strong> $${money(minsThisCheck)}<br>
         <strong>Spending money this paycheck:</strong> $${money(spendingPerCheck)}<br>
         <strong>Extra left for extra debt:</strong> $${money(extra)}<br>
-        <strong>Strategy:</strong> ${strategy === "avalanche" ? "Avalanche (highest APR first)" : "Snowball (smallest balance first)"}<br><br>
+        <strong>Strategy:</strong> ${strategyLabel}<br><br>
 
         <strong>Bills to pay now:</strong><br>
         ${billsListHtml}<br><br>
@@ -1817,7 +2090,60 @@
     document.getElementById("add-debt-button").addEventListener("click", addDebt);
     document.getElementById("calc-button").addEventListener("click", calculatePlanUI);
     document.getElementById("export-button").addEventListener("click", () => {
+      const proUnlocked = getStorage().getItem("bdPro") === "yes";
+      if (!proUnlocked) {
+        openPaywall();
+        return;
+      }
       window.print();
+    });
+    document.getElementById("share-button").addEventListener("click", async () => {
+      setShareFeedback("");
+      trackEvent("share_clicked", { surface: "planner" });
+
+      const proUnlocked = getStorage().getItem("bdPro") === "yes";
+      if (!proUnlocked) {
+        openPaywall();
+        return;
+      }
+      if (!lastPlanSummary) {
+        setShareFeedback("Calculate your plan first to share it.");
+        return;
+      }
+
+      const shareData = {
+        title: "Budget Dad Plan Summary",
+        text: lastPlanSummary.text,
+        url: lastPlanSummary.url
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          trackEvent("share_completed", { method: "web_share" });
+          setShareFeedback("Share sheet opened.");
+          return;
+        } catch (err) {
+          if (err && err.name === "AbortError") {
+            setShareFeedback("Share canceled.");
+            return;
+          }
+        }
+      }
+
+      const fallbackText = `${lastPlanSummary.text} ${lastPlanSummary.url}`.trim();
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(fallbackText);
+          setShareFeedback("Copied plan summary to clipboard.");
+        } else {
+          window.prompt("Copy this plan summary:", fallbackText);
+          setShareFeedback("Copy the plan summary from the prompt.");
+        }
+        trackEvent("share_completed", { method: "clipboard" });
+      } catch (err) {
+        setShareFeedback("Unable to share automatically. You can copy the plan summary from the Plan Output box.");
+      }
     });
     document.getElementById("onboarding-button").addEventListener("click", openOnboarding);
     document.getElementById("clear-button").addEventListener("click", () => {
@@ -1864,6 +2190,11 @@
         closeOnboarding();
       }
     });
+    document.getElementById("paywall-modal").addEventListener("click", (event) => {
+      if (event.target.id === "paywall-modal") {
+        closePaywall();
+      }
+    });
 
     // Step 1 UI events
     document.getElementById("pay-frequency").addEventListener("change", updatePayTypeUI);
@@ -1894,6 +2225,7 @@
       loadIncome();
       loadBills();
       loadDebts();
+      lockPremiumActions(true);
       updatePayTypeUI();
       refreshNetPreview();
       const savedStrategy = loadDebtStrategy();
@@ -1902,6 +2234,10 @@
       }
       if (window.localStorage.getItem("onboardingDone") !== "yes") {
         setTimeout(openOnboarding, 500);
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("paywall") === "1") {
+        setTimeout(openPaywall, 200);
       }
     });
   </script>

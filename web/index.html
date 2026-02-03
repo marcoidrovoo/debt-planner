@@ -214,6 +214,38 @@
     }
     .feature-card h3 { margin: 0 0 6px; font-size: 1rem; }
 
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .pricing-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      background: #ffffff;
+      display: grid;
+      gap: 10px;
+    }
+    .pricing-card h3 { margin: 0; font-size: 1.1rem; }
+    .pricing-price { font-size: 1.6rem; font-weight: 700; }
+    .pricing-note { color: var(--muted); font-size: 0.9rem; }
+
+    .email-capture {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .email-capture input {
+      flex: 1;
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
     .testimonial-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -271,10 +303,10 @@
 
     @media (max-width: 980px) {
       .hero { grid-template-columns: 1fr; }
-      .feature-grid, .testimonial-grid { grid-template-columns: 1fr 1fr; }
+      .feature-grid, .testimonial-grid, .pricing-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 640px) {
-      .feature-grid, .testimonial-grid, .stat-row { grid-template-columns: 1fr; }
+      .feature-grid, .testimonial-grid, .stat-row, .pricing-grid { grid-template-columns: 1fr; }
       .topbar { flex-direction: column; gap: 8px; }
       .hero-actions { flex-direction: column; }
     }
@@ -287,6 +319,7 @@
         <div class="brand"><span class="brand-badge">BD</span> Budget Dad</div>
         <div class="nav-links">
           <a href="#overview">How it works</a>
+          <a href="#pricing">Pricing</a>
           <a href="#stories">Stories</a>
           <a href="#faq">FAQ</a>
           <a href="/strategy">Debt Strategies</a>
@@ -344,6 +377,27 @@
         </div>
       </section>
 
+      <section class="card" id="pricing">
+        <h2 class="section-title">Simple pricing</h2>
+        <p class="section-desc">Start free, upgrade when you’re ready to export or share your full plan.</p>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Monthly</h3>
+            <div class="pricing-price">$5</div>
+            <div class="pricing-note">per month</div>
+            <div class="section-desc">Full plan details, PDF export, and sharing.</div>
+            <a class="button" href="/planner?paywall=1">Start monthly</a>
+          </div>
+          <div class="pricing-card">
+            <h3>Yearly</h3>
+            <div class="pricing-price">$50</div>
+            <div class="pricing-note">per year (2 months free)</div>
+            <div class="section-desc">Everything in monthly, billed once per year.</div>
+            <a class="button secondary" href="/planner?paywall=1">Start yearly</a>
+          </div>
+        </div>
+      </section>
+
       <section class="card" id="stories">
         <h2 class="section-title">Real wins from Budget Dad users</h2>
         <p class="section-desc">Stories of debt paid off and savings goals reached with a simple paycheck plan.</p>
@@ -364,6 +418,16 @@
             <strong>— Andre L., Chicago</strong>
           </div>
         </div>
+      </section>
+
+      <section class="card" id="updates">
+        <h2 class="section-title">Get updates or ask a question</h2>
+        <p class="section-desc">Drop your email and I’ll personally follow up. No spam.</p>
+        <form id="email-capture-form" class="email-capture">
+          <input id="email-input" type="email" name="email" placeholder="you@example.com" required />
+          <button class="button secondary" type="submit">Get updates</button>
+        </form>
+        <div id="email-feedback" class="section-desc" style="margin-top:10px;"></div>
       </section>
 
       <section class="card" id="faq">
@@ -395,5 +459,25 @@
       </footer>
     </main>
   </div>
+
+  <script>
+    const EMAIL_TO = "hello@debtplanner.vercel.app";
+    const form = document.getElementById("email-capture-form");
+    const feedback = document.getElementById("email-feedback");
+
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const email = document.getElementById("email-input").value.trim();
+        if (!email) return;
+        const subject = encodeURIComponent("Budget Dad updates");
+        const body = encodeURIComponent(`Please add me to updates: ${email}`);
+        window.location.href = `mailto:${EMAIL_TO}?subject=${subject}&body=${body}`;
+        if (feedback) {
+          feedback.textContent = "Thanks! Your email client should open now.";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
