@@ -502,49 +502,6 @@
     }
 
     /* landing-only blocks removed on planner page */
-
-    .onboard-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(8, 13, 20, 0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 20;
-    }
-    .onboard-modal.active { display: flex; }
-    .onboard-panel {
-      width: min(720px, 100%);
-      background: #ffffff;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-    .onboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .onboard-progress {
-      display: flex;
-      gap: 6px;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: #dbe6f2;
-    }
-    .dot.active { background: var(--accent); }
-    .onboard-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 12px;
-    }
     .ghost {
       border: 1px solid var(--border);
       background: #ffffff;
@@ -653,7 +610,6 @@
           <a href="#step1-title">Planner</a>
           <a href="/strategy">Debt Strategies</a>
         </div>
-        <button class="ghost" type="button" onclick="openOnboarding()">Guided setup</button>
       </div>
 
       <section class="card hero">
@@ -1013,7 +969,6 @@
         <button id="export-button" class="button secondary">Export Plan (PDF)</button>
         <button id="share-button" class="button secondary" disabled>Share Plan Summary</button>
         <div id="share-feedback" class="muted" role="status" aria-live="polite" style="margin-top:8px;"></div>
-        <button id="onboarding-button" class="button secondary">Restart Onboarding</button>
         <button id="clear-button" class="button secondary">Clear Saved Data</button>
         <label class="check-row" style="margin-top:10px;">
           <input id="remember-data" type="checkbox" />
@@ -1050,91 +1005,6 @@
         </span>
       </footer>
     </main>
-  </div>
-
-  <div class="onboard-modal" id="onboard-modal" aria-hidden="true">
-    <div class="onboard-panel">
-      <div class="onboard-header">
-        <div>
-          <strong>Budget Dad — Guided Setup</strong>
-          <div class="muted">Answer a few questions to prefill your plan.</div>
-        </div>
-        <button class="ghost" type="button" onclick="closeOnboarding()">Close</button>
-      </div>
-      <div class="onboard-progress">
-        <span class="dot" data-dot="0"></span>
-        <span class="dot" data-dot="1"></span>
-        <span class="dot" data-dot="2"></span>
-      </div>
-
-      <div class="onboard-step-page" data-step="0">
-        <h3>Step 1 — Pay type & frequency</h3>
-        <div class="field">
-          <label>Pay type</label>
-          <div class="pill">
-            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
-              <input type="radio" name="onboard-pay-type" value="hourly" checked />
-              Hourly
-            </label>
-            <label class="check-row" style="padding:6px 10px; background:transparent; border:none;">
-              <input type="radio" name="onboard-pay-type" value="salary" />
-              Salary
-            </label>
-          </div>
-        </div>
-        <div class="field">
-          <label for="onboard-frequency">Pay frequency</label>
-          <select id="onboard-frequency">
-            <option value="">Select...</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Every 2 weeks</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="onboard-step-page hidden" data-step="1">
-        <h3>Step 2 — Debt strategy</h3>
-        <div class="field">
-          <label for="onboard-strategy">Which strategy do you want to try?</label>
-          <select id="onboard-strategy">
-            <option value="snowball">Snowball (smallest balance first)</option>
-            <option value="avalanche">Avalanche (highest APR first)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="onboard-start-date">Start date for this plan</label>
-          <input id="onboard-start-date" type="date" />
-        </div>
-      </div>
-
-      <div class="onboard-step-page hidden" data-step="2">
-        <h3>Step 3 — Buffer & spending</h3>
-        <div class="field-inline">
-          <div class="field small">
-            <label for="onboard-buffer">Minimum buffer ($)</label>
-            <input id="onboard-buffer" type="number" placeholder="e.g. 700" />
-          </div>
-          <div class="field small">
-            <label for="onboard-spending">Spending per paycheck ($)</label>
-            <input id="onboard-spending" type="number" placeholder="e.g. 600" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="onboard-balance">Current bank balance ($)</label>
-          <input id="onboard-balance" type="number" placeholder="e.g. 2000" />
-        </div>
-        <label class="check-row">
-          <input id="onboard-remember" type="checkbox" checked />
-          <span style="flex:1;">Remember my data on this device</span>
-        </label>
-      </div>
-
-      <div class="onboard-actions">
-        <button class="ghost" type="button" id="onboard-back">Back</button>
-        <button class="button secondary" type="button" id="onboard-skip">Skip</button>
-        <button class="button" type="button" id="onboard-next">Next</button>
-      </div>
-    </div>
   </div>
 
   <div class="paywall-modal" id="paywall-modal" aria-hidden="true">
@@ -1603,41 +1473,6 @@
     }
 
     // =========================
-    // Onboarding
-    // =========================
-    let onboardStepIndex = 0;
-    function setOnboardStep(index) {
-      const steps = Array.from(document.querySelectorAll(".onboard-step-page"));
-      const dots = Array.from(document.querySelectorAll(".dot"));
-      onboardStepIndex = Math.max(0, Math.min(index, steps.length - 1));
-      steps.forEach((el, i) => el.classList.toggle("hidden", i !== onboardStepIndex));
-      dots.forEach((el, i) => el.classList.toggle("active", i === onboardStepIndex));
-      document.getElementById("onboard-back").style.visibility = onboardStepIndex === 0 ? "hidden" : "visible";
-      document.getElementById("onboard-next").textContent = onboardStepIndex === steps.length - 1 ? "Finish" : "Next";
-    }
-
-    function openOnboarding() {
-      const modal = document.getElementById("onboard-modal");
-      modal.classList.add("active");
-      modal.setAttribute("aria-hidden", "false");
-      const startInput = document.getElementById("onboard-start-date");
-      if (startInput && !startInput.value) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, "0");
-        const dd = String(today.getDate()).padStart(2, "0");
-        startInput.value = `${yyyy}-${mm}-${dd}`;
-      }
-      setOnboardStep(0);
-    }
-
-    function closeOnboarding() {
-      const modal = document.getElementById("onboard-modal");
-      modal.classList.remove("active");
-      modal.setAttribute("aria-hidden", "true");
-    }
-
-    // =========================
     // Paywall
     // =========================
     function openPaywall() {
@@ -1660,35 +1495,6 @@
         return;
       }
       alert("Checkout isn’t wired yet. Tell me your payment provider and I’ll connect it.");
-    }
-
-    function applyOnboarding() {
-      const payType = document.querySelector('input[name="onboard-pay-type"]:checked')?.value || "hourly";
-      const frequency = strVal("onboard-frequency");
-      const strategy = strVal("onboard-strategy") || "snowball";
-      const startDate = strVal("onboard-start-date");
-      const buffer = numVal("onboard-buffer");
-      const spending = numVal("onboard-spending");
-      const balance = numVal("onboard-balance");
-      const remember = document.getElementById("onboard-remember").checked;
-
-      document.getElementById("pay-type-hourly").checked = payType === "hourly";
-      document.getElementById("pay-type-salary").checked = payType === "salary";
-      if (frequency) document.getElementById("pay-frequency").value = frequency;
-      if (startDate) document.getElementById("start-date").value = startDate;
-      document.getElementById("debt-strategy").value = strategy;
-      saveDebtStrategy();
-
-      if (!Number.isNaN(buffer)) document.getElementById("buffer").value = buffer || "";
-      if (!Number.isNaN(spending)) document.getElementById("spending").value = spending || "";
-      if (!Number.isNaN(balance)) document.getElementById("starting-balance").value = balance || "";
-
-      const rememberBox = document.getElementById("remember-data");
-      rememberBox.checked = remember;
-      syncStoragePreference();
-
-      updatePayTypeUI();
-      refreshNetPreview();
     }
 
     function saveIncome() {
@@ -2807,7 +2613,6 @@
         setShareFeedback("Unable to share automatically. You can copy the plan summary from the Plan Output box.");
       }
     });
-    document.getElementById("onboarding-button").addEventListener("click", openOnboarding);
     document.getElementById("clear-button").addEventListener("click", () => {
       const ok = confirm("Clear all saved income, bills, and debts?");
       if (!ok) return;
@@ -2835,29 +2640,6 @@
       refreshNetPreview();
     });
 
-    document.getElementById("onboard-back").addEventListener("click", () => {
-      setOnboardStep(onboardStepIndex - 1);
-    });
-    document.getElementById("onboard-next").addEventListener("click", () => {
-      const last = document.querySelectorAll(".onboard-step-page").length - 1;
-      if (onboardStepIndex >= last) {
-        applyOnboarding();
-        window.localStorage.setItem("onboardingDone", "yes");
-        closeOnboarding();
-        document.getElementById("step1-title").scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
-      }
-      setOnboardStep(onboardStepIndex + 1);
-    });
-    document.getElementById("onboard-skip").addEventListener("click", () => {
-      window.localStorage.setItem("onboardingDone", "yes");
-      closeOnboarding();
-    });
-    document.getElementById("onboard-modal").addEventListener("click", (event) => {
-      if (event.target.id === "onboard-modal") {
-        closeOnboarding();
-      }
-    });
     document.getElementById("paywall-modal").addEventListener("click", (event) => {
       if (event.target.id === "paywall-modal") {
         closePaywall();
@@ -2911,9 +2693,6 @@
       const savedStrategy = loadDebtStrategy();
       if (savedStrategy) {
         document.getElementById("debt-strategy").value = savedStrategy;
-      }
-      if (window.localStorage.getItem("onboardingDone") !== "yes") {
-        setTimeout(openOnboarding, 500);
       }
       const params = new URLSearchParams(window.location.search);
       if (params.get("paywall") === "1") {
