@@ -1,6 +1,16 @@
 (function () {
   const config = window.BUDGET_DAD_CONFIG || {};
-  const hasConfig = !!(config.SUPABASE_URL && config.SUPABASE_ANON_KEY);
+  function isConfiguredValue(value) {
+    if (!value) return false;
+    const normalized = String(value).trim();
+    if (!normalized) return false;
+    if (normalized.includes("YOUR_PROJECT")) return false;
+    if (normalized.includes("YOUR_SUPABASE_ANON_KEY")) return false;
+    if (normalized.includes("your-domain.com")) return false;
+    return true;
+  }
+
+  const hasConfig = isConfiguredValue(config.SUPABASE_URL) && isConfiguredValue(config.SUPABASE_ANON_KEY);
   const state = {
     client: null,
     user: null,
@@ -8,20 +18,28 @@
     paid: false,
     ready: false
   };
+  let resolveReady = null;
+  const readyPromise = new Promise(resolve => {
+    resolveReady = resolve;
+  });
 
-  function safeLocalStorageGet(key) {
+  function getConfiguredAppUrl() {
+    if (!isConfiguredValue(config.APP_URL)) return null;
     try {
-      return window.localStorage.getItem(key);
-    } catch (err) {
+      const parsed = new URL(String(config.APP_URL).trim());
+      const basePath = parsed.pathname.replace(/\/$/, "");
+      return `${parsed.origin}${basePath}`;
+    } catch (_err) {
       return null;
     }
   }
 
-  function safeLocalStorageSet(key, value) {
-    try {
-      window.localStorage.setItem(key, value);
-    } catch (err) {
-      // ignore storage errors
+  function markReady() {
+    if (state.ready) return;
+    state.ready = true;
+    if (resolveReady) {
+      resolveReady();
+      resolveReady = null;
     }
   }
 
@@ -65,7 +83,6 @@
     if (!state.client || !state.user) {
       state.profile = null;
       state.paid = false;
-      safeLocalStorageSet("bdPro", "no");
       return null;
     }
 
@@ -79,13 +96,11 @@
       console.warn("Failed to load profile", error);
       state.profile = null;
       state.paid = false;
-      safeLocalStorageSet("bdPro", "no");
       return null;
     }
 
     state.profile = data;
     state.paid = isPaidProfile(data);
-    safeLocalStorageSet("bdPro", state.paid ? "yes" : "no");
     return data;
   }
 
@@ -99,6 +114,20 @@
     return state.profile;
   }
 
+  async function waitUntilReady(timeoutMs = 4000) {
+    if (state.ready) return;
+    try {
+      await Promise.race([
+        readyPromise,
+        new Promise((_, reject) => {
+          window.setTimeout(() => reject(new Error("timeout")), timeoutMs);
+        })
+      ]);
+    } catch (_err) {
+      // Allow fallback behavior when readiness times out.
+    }
+  }
+
   async function getSession() {
     if (!state.client) return null;
     const { data } = await state.client.auth.getSession();
@@ -108,6 +137,18 @@
   function buildRedirectParam() {
     const url = window.location.pathname + window.location.search;
     return encodeURIComponent(url);
+  }
+  function safeRedirect(value, fallback = "/account") {
+    if (!value) return fallback;
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.origin === window.location.origin) {
+        return url.pathname + url.search + url.hash;
+      }
+    } catch (_err) {
+      // ignore invalid URLs
+    }
+    return fallback;
   }
 
   function requireAuth(redirectTo) {
@@ -163,7 +204,6 @@
           state.user = null;
           state.profile = null;
           state.paid = false;
-          safeLocalStorageSet("bdPro", "no");
           updateAuthUI();
           applyPaidGate();
           if (window.location.pathname === "/account") {
@@ -182,6 +222,12 @@
     box.style.display = message ? "block" : "none";
   }
 
+  function showConfigWarningOnForms() {
+    document.querySelectorAll("[data-auth-form]").forEach(form => {
+      showFormMessage(form, "Auth is not configured. Add real values in /assets/app-config.js.", "error");
+    });
+  }
+
   async function handleLogin(form) {
     if (!state.client) return;
     const email = form.querySelector("input[name='email']")?.value?.trim();
@@ -197,7 +243,7 @@
     await refreshUser();
     await refreshProfile();
     const params = new URLSearchParams(window.location.search);
-    const redirect = params.get("redirect") || "/account";
+    const redirect = safeRedirect(params.get("redirect"), "/account");
     window.location.href = redirect;
   }
 
@@ -207,11 +253,16 @@
     const password = form.querySelector("input[name='password']")?.value || "";
 
     showFormMessage(form, "Creating your account…", "info");
+    const appUrl = getConfiguredAppUrl();
+    if (!appUrl) {
+      showFormMessage(form, "APP_URL is not configured. Contact support.", "error");
+      return;
+    }
     const { data, error } = await state.client.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${config.APP_URL || window.location.origin}/account`
+        emailRedirectTo: `${appUrl}/account`
       }
     });
 
@@ -230,6 +281,75 @@
     showFormMessage(form, "Check your email to confirm your account.", "success");
   }
 
+  async function handleForgotPassword(form) {
+    if (!state.client) return;
+    const email = form.querySelector("input[name='email']")?.value?.trim();
+
+    if (!email) {
+      showFormMessage(form, "Enter your email first.", "error");
+      return;
+    }
+
+    showFormMessage(form, "Sending reset link…", "info");
+    const appUrl = getConfiguredAppUrl();
+    if (!appUrl) {
+      showFormMessage(form, "APP_URL is not configured. Contact support.", "error");
+      return;
+    }
+    const { error } = await state.client.auth.resetPasswordForEmail(email, {
+      redirectTo: `${appUrl}/reset-password`
+    });
+
+    if (error) {
+      showFormMessage(form, error.message, "error");
+      return;
+    }
+
+    showFormMessage(form, "Check your email for a password reset link.", "success");
+  }
+
+  async function handleResetPassword(form) {
+    if (!state.client) return;
+
+    const password = form.querySelector("input[name='password']")?.value || "";
+    const confirmPassword = form.querySelector("input[name='password_confirm']")?.value || "";
+
+    if (password.length < 8) {
+      showFormMessage(form, "Use at least 8 characters for your new password.", "error");
+      return;
+    }
+    if (password !== confirmPassword) {
+      showFormMessage(form, "Passwords do not match.", "error");
+      return;
+    }
+
+    const session = await getSession();
+    if (!session) {
+      showFormMessage(form, "Open this page from your password reset email link.", "error");
+      return;
+    }
+
+    showFormMessage(form, "Updating password…", "info");
+    const { error } = await state.client.auth.updateUser({ password });
+    if (error) {
+      showFormMessage(form, error.message, "error");
+      return;
+    }
+
+    showFormMessage(form, "Password updated. Redirecting to account…", "success");
+    window.setTimeout(() => {
+      window.location.href = "/account";
+    }, 800);
+  }
+
+  async function parseJsonSafe(response) {
+    try {
+      return await response.json();
+    } catch (_err) {
+      return {};
+    }
+  }
+
   async function startCheckout(plan) {
     initClient();
     if (!state.client) {
@@ -244,24 +364,34 @@
     }
 
     const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
-    const res = await fetch(`${functionsBase}/create-checkout-session`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`,
-        "apikey": config.SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({ plan })
-    });
+    try {
+      const res = await fetch(`${functionsBase}/create-checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+          "apikey": config.SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ plan })
+      });
 
-    const payload = await res.json();
-    if (!res.ok) {
-      alert(payload?.error || "Unable to start checkout.");
-      return;
-    }
+      const payload = await parseJsonSafe(res);
+      if (res.status === 409 && payload?.code === "active_subscription_exists") {
+        await openBillingPortal();
+        return;
+      }
+      if (!res.ok) {
+        alert(payload?.error || "Unable to start checkout.");
+        return;
+      }
 
-    if (payload?.url) {
-      window.location.href = payload.url;
+      if (payload?.url) {
+        window.location.href = payload.url;
+      } else {
+        alert("Checkout session was created but no redirect URL was returned.");
+      }
+    } catch (_err) {
+      alert("Network error while starting checkout. Please try again.");
     }
   }
 
@@ -279,23 +409,29 @@
     }
 
     const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
-    const res = await fetch(`${functionsBase}/create-portal-session`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`,
-        "apikey": config.SUPABASE_ANON_KEY
+    try {
+      const res = await fetch(`${functionsBase}/create-portal-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+          "apikey": config.SUPABASE_ANON_KEY
+        }
+      });
+
+      const payload = await parseJsonSafe(res);
+      if (!res.ok) {
+        alert(payload?.error || "Unable to open billing portal.");
+        return;
       }
-    });
 
-    const payload = await res.json();
-    if (!res.ok) {
-      alert(payload?.error || "Unable to open billing portal.");
-      return;
-    }
-
-    if (payload?.url) {
-      window.location.href = payload.url;
+      if (payload?.url) {
+        window.location.href = payload.url;
+      } else {
+        alert("Billing portal session was created but no redirect URL was returned.");
+      }
+    } catch (_err) {
+      alert("Network error while opening billing portal. Please try again.");
     }
   }
 
@@ -331,12 +467,32 @@
         handleSignup(form);
       });
     });
+
+    document.querySelectorAll("[data-auth-form='forgot']").forEach(form => {
+      form.addEventListener("submit", evt => {
+        evt.preventDefault();
+        handleForgotPassword(form);
+      });
+    });
+
+    document.querySelectorAll("[data-auth-form='reset-password']").forEach(form => {
+      form.addEventListener("submit", evt => {
+        evt.preventDefault();
+        handleResetPassword(form);
+      });
+    });
   }
 
   async function init() {
     initClient();
     if (!state.client) {
       updateAuthUI();
+      applyPaidGate();
+      wireAuthForms();
+      if (!hasConfig) {
+        showConfigWarningOnForms();
+      }
+      markReady();
       return;
     }
     await refreshUser();
@@ -344,13 +500,15 @@
     updateAuthUI();
     applyPaidGate();
     wireAuthForms();
-    state.ready = true;
+    markReady();
   }
 
   window.BudgetDadAuth = {
     getUser: () => state.user,
     getProfile: () => state.profile,
     isPaid: () => state.paid,
+    isReady: () => state.ready,
+    waitUntilReady,
     refreshProfile,
     ensureProfileReady,
     requireAuth,

@@ -38,7 +38,9 @@ Routes:
 This repo stays **static**. Auth + subscriptions are powered by Supabase (client) and Supabase Edge Functions (server).
 
 ### 1) Supabase database
-Run the migration in `supabase/migrations/20260205_profiles.sql` inside your Supabase project SQL editor.
+Run these migrations in your Supabase project SQL editor:
+- `supabase/migrations/20260205_profiles.sql`
+- `supabase/migrations/20260206_profiles_stripe_uniques.sql`
 
 This creates:
 - `profiles` table
@@ -53,7 +55,8 @@ Set these secrets in your Supabase project (Edge Functions → Secrets):
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_ID_MONTHLY`
 - `STRIPE_PRICE_ID_YEARLY`
-- `APP_URL` (your public site URL, e.g. `https://budgetdad.com`)
+- `APP_URL` (required; your public site URL, e.g. `https://budgetdad.com`)
+- `ALLOWED_ORIGINS` (optional; comma-separated allowlist for CORS)
 
 ### 3) Deploy Supabase Edge Functions
 From the repo root:
@@ -78,12 +81,13 @@ Create a webhook endpoint in Stripe:
   - `customer.subscription.deleted`
 
 ### 6) Update client config
-Edit `web/assets/app-config.js` with:
+Edit both `assets/app-config.js` and `web/assets/app-config.js` with:
 - Supabase URL + anon key
 - App URL
 
 ### 7) Test flow
 - Visit `/signup` → create account
 - `/login` → sign in
+- `/reset-password` → verify password recovery flow
 - `/pricing` → start subscription
 - `/account` → verify plan + manage billing

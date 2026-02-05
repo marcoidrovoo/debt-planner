@@ -307,9 +307,24 @@
       box.style.display = message ? "block" : "none";
     }
 
+    async function ensureSignedIn() {
+      if (!window.BudgetDadAuth) return false;
+      if (typeof window.BudgetDadAuth.waitUntilReady === "function") {
+        await window.BudgetDadAuth.waitUntilReady();
+      }
+      await window.BudgetDadAuth.ensureProfileReady();
+      const user = window.BudgetDadAuth.getUser && window.BudgetDadAuth.getUser();
+      if (user) return true;
+
+      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?redirect=${redirect}`;
+      return false;
+    }
+
     async function loadAccount() {
       if (!window.BudgetDadAuth) return;
-      if (!window.BudgetDadAuth.requireAuth()) return;
+      if (!(await ensureSignedIn())) return;
+
       await window.BudgetDadAuth.ensureProfileReady();
       const profile = window.BudgetDadAuth.getProfile();
       if (!profile) return;

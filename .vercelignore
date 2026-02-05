@@ -1,0 +1,7 @@
+.git
+.npm-cache
+.venv
+ios
+node_modules
+output
+supabase

@@ -973,7 +973,7 @@
 
       <section class="card" aria-labelledby="step5-title">
         <h2 class="section-title" id="step5-title">Step 5 — Plan Output</h2>
-        <p class="section-desc">Calculate what to do with your next paycheck. We’ll email the same plan before every paycheck until you change it.</p>
+        <p class="section-desc">Calculate what to do with your next paycheck and keep your plan saved on this device.</p>
         <div class="field" style="margin-top:6px;">
           <label>Plan focus
             <span class="tooltip" tabindex="0" data-tooltip="Controls how extra cash is split after bills and minimums.">?</span>
@@ -1012,7 +1012,7 @@
         <div class="faq">
           <details>
             <summary>Where is my data stored?</summary>
-            <div class="muted">Your data stays on your device (localStorage or sessionStorage). We don’t send it anywhere.</div>
+            <div class="muted">Planner entries stay on your device unless you create an account and use billing/account features.</div>
           </details>
           <details>
             <summary>What if my pay varies?</summary>
@@ -1047,7 +1047,7 @@
       </div>
       <div class="card" style="padding:14px; background:var(--card-2); border:1px solid var(--border);">
         <div style="font-weight:700;">Budget Dad Pro</div>
-        <div class="paywall-muted">Get the full plan and email delivery before each paycheck.</div>
+        <div class="paywall-muted">Get the full plan details and export support.</div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
           <span class="badge">$5 / month</span>
           <span class="badge">$50 / year (2 months free)</span>
@@ -1075,6 +1075,35 @@
     }
     function strVal(id) {
       return String(document.getElementById(id).value || "").trim();
+    }
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+    function daysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+    function parseDueDay(value) {
+      const dayNum = Number(value);
+      if (!Number.isInteger(dayNum) || dayNum < 1 || dayNum > 31) return null;
+      return dayNum;
+    }
+    function isDueDateInWindow(dueDate, start, end) {
+      // End-inclusive windows prevent "due on payday" items from being pushed to next paycheck.
+      // Start is exclusive so adjacent windows do not double-count a due date.
+      return dueDate > start && dueDate <= end;
+    }
+    function getDueDateForMonth(baseDate, dueDay) {
+      const dayNum = parseDueDay(dueDay);
+      if (!dayNum) return null;
+      const year = baseDate.getFullYear();
+      const month = baseDate.getMonth();
+      const clampedDay = Math.min(dayNum, daysInMonth(year, month));
+      return new Date(year, month, clampedDay);
     }
     function parseLocalDate(dateStr) {
       // "YYYY-MM-DD" -> local midnight (no UTC shift)
@@ -1431,7 +1460,7 @@
       const saved = window.localStorage.getItem("rememberData");
       const checkbox = document.getElementById("remember-data");
       if (!checkbox) return;
-      checkbox.checked = saved !== "no";
+      checkbox.checked = saved === "yes";
     }
 
     // =========================
@@ -1660,14 +1689,18 @@
     function addBill() {
       const name = strVal("bill-name");
       const amount = numVal("bill-amount");
-      const dueDay = numVal("bill-due-day");
+      const dueDay = parseDueDay(document.getElementById("bill-due-day").value);
 
       if (!name || !amount || !dueDay) {
         alert("Please fill in all bill fields first.");
         return;
       }
+      if (!Number.isFinite(amount) || amount <= 0) {
+        alert("Bill amount must be greater than 0.");
+        return;
+      }
 
-      bills.push({ name, amount: Number(amount), dueDay: Number(dueDay) });
+      bills.push({ name, amount: Number(amount), dueDay });
       saveBills();
       renderBills();
 
@@ -1682,7 +1715,17 @@
         renderBills();
         return;
       }
-      bills = JSON.parse(saved);
+      bills = JSON.parse(saved)
+        .map(bill => {
+          const dueDay = parseDueDay(bill?.dueDay);
+          if (!dueDay) return null;
+          return {
+            ...bill,
+            amount: Number(bill.amount) || 0,
+            dueDay
+          };
+        })
+        .filter(Boolean);
       renderBills();
     }
 
@@ -1776,14 +1819,18 @@
       const balance = numVal("debt-balance");
       const minimum = numVal("debt-minimum");
       const rate = numVal("debt-rate");
-      const dueDay = numVal("debt-due-day");
+      const dueDay = parseDueDay(document.getElementById("debt-due-day").value);
 
-      if (!name || !balance || !minimum || !rate || !dueDay) {
+      if (!name || !balance || !minimum || rate < 0 || !dueDay) {
         alert("Please fill in all debt fields first (including due day).");
         return;
       }
+      if (!Number.isFinite(balance) || balance <= 0 || !Number.isFinite(minimum) || minimum <= 0 || !Number.isFinite(rate) || rate <= 0) {
+        alert("Debt balance, minimum, and APR must all be greater than 0.");
+        return;
+      }
 
-      debts.push({ name, balance: Number(balance), minimum: Number(minimum), rate: Number(rate), dueDay: Number(dueDay) });
+      debts.push({ name, balance: Number(balance), minimum: Number(minimum), rate: Number(rate), dueDay });
       saveDebts();
       renderDebts();
 
@@ -1800,7 +1847,19 @@
         renderDebts();
         return;
       }
-      debts = JSON.parse(saved);
+      debts = JSON.parse(saved)
+        .map(debt => {
+          const dueDay = parseDueDay(debt?.dueDay);
+          if (!dueDay) return null;
+          return {
+            ...debt,
+            balance: Number(debt.balance) || 0,
+            minimum: Number(debt.minimum) || 0,
+            rate: Number(debt.rate) || 0,
+            dueDay
+          };
+        })
+        .filter(Boolean);
       renderDebts();
     }
     function getTargetDebt(debts, strategy) {
@@ -1951,30 +2010,35 @@
     function getDueItemsInWindow(startDateStr, endDateObj, items, amountKey) {
       const start = parseLocalDate(startDateStr);
       const end = endDateObj;
+      const monthCursorStart = new Date(start.getFullYear(), start.getMonth(), 1);
+      const monthCursorEnd = new Date(end.getFullYear(), end.getMonth(), 1);
 
-      const startDay = start.getDate();
-      const endDay = end.getDate();
+      const dueItems = items.reduce((acc, item) => {
+        const dueDay = parseDueDay(item.dueDay);
+        if (!dueDay) return acc;
 
-      const crossesMonth =
-        start.getMonth() !== end.getMonth() || start.getFullYear() !== end.getFullYear();
-
-      const dueItems = items.filter(item => {
-        const d = Number(item.dueDay);
-        if (!d) return false;
-
-        // include start day, exclude end day
-        if (!crossesMonth) {
-          return d >= startDay && d < endDay;
-        } else {
-          return d >= startDay || d < endDay;
+        let occurrences = 0;
+        const cursor = new Date(monthCursorStart.getFullYear(), monthCursorStart.getMonth(), 1);
+        while (cursor <= monthCursorEnd) {
+          const dueDate = getDueDateForMonth(cursor, dueDay);
+          if (dueDate && isDueDateInWindow(dueDate, start, end)) {
+            occurrences += 1;
+          }
+          cursor.setMonth(cursor.getMonth() + 1);
         }
-      });
 
-      const total = dueItems.reduce((sum, item) => sum + Number(item[amountKey] || 0), 0);
+        if (occurrences > 0) {
+          acc.push({ ...item, dueDay, _occurrenceCount: occurrences });
+        }
+        return acc;
+      }, []);
 
-      const rangeText = crossesMonth
-        ? `${start.toLocaleDateString()} → ${end.toLocaleDateString()} (crosses month)`
-        : `${start.toLocaleDateString()} → ${end.toLocaleDateString()}`;
+      const total = dueItems.reduce((sum, item) => {
+        const occurrences = Number(item._occurrenceCount || 1);
+        return sum + Number(item[amountKey] || 0) * occurrences;
+      }, 0);
+
+      const rangeText = `${start.toLocaleDateString()} → ${end.toLocaleDateString()}`;
 
       return { dueItems, total, rangeText };
     }
@@ -2159,10 +2223,16 @@
         const billsWindow = getDueItemsInWindow(startStr, endDate, bills, "amount");
         const activeDebts = simDebts.filter(debt => debt.balance > 0);
         const debtWindow = getDueItemsInWindow(startStr, endDate, activeDebts, "minimum");
-        const minsThisCheck = debtWindow.dueItems.reduce((sum, debt) => sum + Math.min(debt.minimum, debt.balance), 0);
+        const minsThisCheck = debtWindow.dueItems.reduce((sum, debt) => {
+          const occurrences = Number(debt._occurrenceCount || 1);
+          const dueTotal = Number(debt.minimum || 0) * occurrences;
+          return sum + Math.min(dueTotal, debt.balance);
+        }, 0);
 
         debtWindow.dueItems.forEach(debt => {
-          const pay = Math.min(debt.minimum, debt.balance);
+          const occurrences = Number(debt._occurrenceCount || 1);
+          const dueTotal = Number(debt.minimum || 0) * occurrences;
+          const pay = Math.min(dueTotal, debt.balance);
           debt.balance -= pay;
         });
 
@@ -2316,11 +2386,23 @@
       const dueMinDebts = debtWindow.dueItems;
 
       const billsListHtml = dueBills.length
-        ? "<ul>" + dueBills.map(b => `<li>${b.name}: $${money(b.amount)} (due ${b.dueDay})</li>`).join("") + "</ul>"
+        ? "<ul>" + dueBills.map(b => {
+          const safeName = escapeHtml(b.name);
+          const occurrences = Number(b._occurrenceCount || 1);
+          const amount = Number(b.amount || 0) * occurrences;
+          const occurrenceText = occurrences > 1 ? `, ${occurrences}x this window` : "";
+          return `<li>${safeName}: $${money(amount)} (due ${b.dueDay}${occurrenceText})</li>`;
+        }).join("") + "</ul>"
         : "No bills due in this window. 🎉";
 
       const minsListHtml = dueMinDebts.length
-        ? "<ul>" + dueMinDebts.map(d => `<li>${d.name}: $${money(d.minimum)} (due ${d.dueDay})</li>`).join("") + "</ul>"
+        ? "<ul>" + dueMinDebts.map(d => {
+          const safeName = escapeHtml(d.name);
+          const occurrences = Number(d._occurrenceCount || 1);
+          const minAmount = Number(d.minimum || 0) * occurrences;
+          const occurrenceText = occurrences > 1 ? `, ${occurrences}x this window` : "";
+          return `<li>${safeName}: $${money(minAmount)} (due ${d.dueDay}${occurrenceText})</li>`;
+        }).join("") + "</ul>"
         : "No minimum payments due in this window. 🎉";
 
       // available cash
@@ -2351,11 +2433,11 @@
         : totalAvailable - billsThisCheck - minsThisCheck - spendingPerCheck;
 
       const debtExtraListHtml = Object.keys(allocation.debtAllocations).length
-        ? "<ul>" + Object.entries(allocation.debtAllocations).map(([name, amt]) => `<li>${name}: $${money(amt)}</li>`).join("") + "</ul>"
+        ? "<ul>" + Object.entries(allocation.debtAllocations).map(([name, amt]) => `<li>${escapeHtml(name)}: $${money(amt)}</li>`).join("") + "</ul>"
         : "No extra debt payments this paycheck.";
 
       const savingsAllocListHtml = Object.keys(allocation.savingsAllocations).length
-        ? "<ul>" + Object.entries(allocation.savingsAllocations).map(([name, amt]) => `<li>${name}: $${money(amt)}</li>`).join("") + "</ul>"
+        ? "<ul>" + Object.entries(allocation.savingsAllocations).map(([name, amt]) => `<li>${escapeHtml(name)}: $${money(amt)}</li>`).join("") + "</ul>"
         : "No savings contributions this paycheck.";
 
       const projection = simulateProjection(income, bills, debts, goals, strategy, focusMode);
@@ -2371,6 +2453,7 @@
 
       const goalProjectionRows = projection && projection.goals?.length
         ? projection.goals.map(goal => {
+          const safeName = escapeHtml(goal.name);
           const deadlineDate = goal.deadlineDate && !Number.isNaN(goal.deadlineDate.getTime()) ? goal.deadlineDate : null;
           const deadlineText = deadlineDate ? formatMonthYear(deadlineDate) : "no deadline";
           const completionText = goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet";
@@ -2383,7 +2466,7 @@
           return `
             <div class="progress-row">
               <div class="progress-head">
-                <span>${goal.name}</span>
+                <span>${safeName}</span>
                 <span class="mono">$${money(goal.target)}</span>
               </div>
               <div class="progress-bar"><span style="width:${percentAtDeadline}%"></span></div>
@@ -2399,7 +2482,7 @@
         ? debts.map(debt => `
           <div class="progress-row">
             <div class="progress-head">
-              <span>${debt.name}</span>
+              <span>${escapeHtml(debt.name)}</span>
               <span class="mono">$${money(debt.balance)}</span>
             </div>
             <div class="progress-meta">Minimum $${money(debt.minimum)} • Due ${debt.dueDay} • ${money(debt.rate)}% APR</div>
@@ -2422,10 +2505,8 @@
         </div>
       `;
 
-      const cachedPro = getStorage().getItem("bdPro") === "yes";
-      const profile = window.BudgetDadAuth && window.BudgetDadAuth.getProfile ? window.BudgetDadAuth.getProfile() : null;
       const paidStatus = window.BudgetDadAuth && window.BudgetDadAuth.isPaid ? window.BudgetDadAuth.isPaid() : false;
-      const proUnlocked = profile ? paidStatus : cachedPro;
+      const proUnlocked = Boolean(paidStatus);
 
       if (!proUnlocked) {
         box.innerHTML = `
@@ -2472,7 +2553,7 @@
           <div style="margin-top:14px;">
             <strong>Monthly projection</strong>
             <div class="muted" style="margin-top:6px;">Debt-free date: ${debtFreeText}</div>
-            ${projection?.goals?.length ? projection.goals.map(goal => `<div class="muted">${goal.name}: ${goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet"}</div>`).join("") : ""}
+            ${projection?.goals?.length ? projection.goals.map(goal => `<div class="muted">${escapeHtml(goal.name)}: ${goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet"}</div>`).join("") : ""}
             <div class="muted" style="margin-top:6px;">${projectionNote}</div>
           </div>
         `;
@@ -2524,7 +2605,7 @@
         <div style="margin-top:14px;">
           <strong>Monthly projection</strong>
           <div class="muted" style="margin-top:6px;">Debt-free date: ${debtFreeText}</div>
-          ${projection?.goals?.length ? projection.goals.map(goal => `<div class="muted">${goal.name}: ${goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet"}</div>`).join("") : ""}
+          ${projection?.goals?.length ? projection.goals.map(goal => `<div class="muted">${escapeHtml(goal.name)}: ${goal.completedDate ? formatMonthYear(goal.completedDate) : "Not reached yet"}</div>`).join("") : ""}
           <div class="muted" style="margin-top:6px;">${projectionNote}</div>
         </div>
       `;

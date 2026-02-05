@@ -242,6 +242,14 @@
           <button class="button" type="submit">Sign in</button>
           <div class="auth-message" data-auth-message></div>
         </form>
+        <form class="form-stack" data-auth-form="forgot" style="margin-top:12px;">
+          <div class="form-field">
+            <label for="forgot-email">Forgot password?</label>
+            <input class="input" type="email" id="forgot-email" name="email" autocomplete="email" placeholder="Enter your account email" required />
+          </div>
+          <button class="button secondary" type="submit">Send reset link</button>
+          <div class="auth-message" data-auth-message></div>
+        </form>
         <p class="muted" style="margin-top:16px;">New here? <a href="/signup">Create your account</a>.</p>
       </section>
 
