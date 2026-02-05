@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Budget Dad — Sign up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Create a Budget Dad account." />
+  <meta name="theme-color" content="#0f6f6a" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
+
+    :root {
+      --bg: #f6f3ee;
+      --bg-2: #ffffff;
+      --card: #ffffff;
+      --card-2: #f5f1ea;
+      --muted: #5b6672;
+      --text: #121722;
+      --accent: #0f6f6a;
+      --accent-2: #d5b47a;
+      --accent-3: #1f2937;
+      --border: #e3dcd1;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --space-lg: 28px;
+      --space-md: 20px;
+      --space-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 32px 16px 60px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .layout {
+      width: min(1040px, 100%);
+      display: grid;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      justify-content: center;
+    }
+
+    .nav-links a { color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .auth-actions {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .auth-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .auth-link:hover { color: var(--text); }
+
+    .auth-link-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: var(--muted);
+    }
+
+    .auth-link-button:hover { color: var(--text); }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    h1 { margin: 0 0 8px; font-family: "Fraunces", "DM Sans", serif; }
+
+    .muted { color: var(--muted); }
+
+    .auth-card { max-width: 520px; margin: 0 auto; }
+
+    .form-stack {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    label { font-weight: 600; font-size: 0.9rem; }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+    }
+
+    .auth-message {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+    }
+    .auth-message[data-type="error"] { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
+    .auth-message[data-type="success"] { background: #ecfdf3; border: 1px solid #bbf7d0; color: #166534; }
+    .auth-message[data-type="info"] { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+    .footer {
+      margin-top: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--text); text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      .topbar { grid-template-columns: 1fr; justify-items: center; }
+      .topbar-actions { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="layout">
+      <div class="topbar">
+        <div class="brand"><span class="brand-badge">BD</span> Budget Dad</div>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/planner">Planner</a>
+          <a href="/strategy">Debt Strategies</a>
+          <a href="/pricing">Pricing</a>
+        </div>
+        <div class="topbar-actions">
+          <a class="button secondary" href="/planner">Start planning</a>
+          <div class="auth-actions" data-auth-nav></div>
+        </div>
+      </div>
+
+      <section class="card auth-card">
+        <h1>Create your account</h1>
+        <p class="muted">Start free, upgrade anytime.</p>
+        <form class="form-stack" data-auth-form="signup">
+          <div class="form-field">
+            <label for="signup-email">Email</label>
+            <input class="input" type="email" id="signup-email" name="email" autocomplete="email" required />
+          </div>
+          <div class="form-field">
+            <label for="signup-password">Password</label>
+            <input class="input" type="password" id="signup-password" name="password" autocomplete="new-password" required />
+          </div>
+          <button class="button" type="submit">Sign up</button>
+          <div class="auth-message" data-auth-message></div>
+        </form>
+        <p class="muted" style="margin-top:16px;">Already have an account? <a href="/login">Sign in</a>.</p>
+      </section>
+
+      <footer class="card footer">
+        <span>© 2026 Budget Dad</span>
+        <span>
+          <a href="/privacy">Privacy</a> ·
+          <a href="/terms">Terms</a>
+        </span>
+      </footer>
+    </main>
+  </div>
+
+  <script src="/assets/app-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/assets/auth.js"></script>
+</body>
+</html>

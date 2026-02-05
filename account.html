@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Budget Dad — Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Manage your Budget Dad account and subscription." />
+  <meta name="theme-color" content="#0f6f6a" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
+
+    :root {
+      --bg: #f6f3ee;
+      --bg-2: #ffffff;
+      --card: #ffffff;
+      --card-2: #f5f1ea;
+      --muted: #5b6672;
+      --text: #121722;
+      --accent: #0f6f6a;
+      --accent-2: #d5b47a;
+      --accent-3: #1f2937;
+      --border: #e3dcd1;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --space-lg: 28px;
+      --space-md: 20px;
+      --space-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 32px 16px 60px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .layout {
+      width: min(1040px, 100%);
+      display: grid;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      justify-content: center;
+    }
+
+    .nav-links a { color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .auth-actions {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .auth-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .auth-link:hover { color: var(--text); }
+
+    .auth-link-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: var(--muted);
+    }
+
+    .auth-link-button:hover { color: var(--text); }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    h1, h2 { margin: 0 0 8px; font-family: "Fraunces", "DM Sans", serif; }
+
+    .muted { color: var(--muted); }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .profile-item {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--card-2);
+    }
+
+    .form-stack {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+      max-width: 420px;
+    }
+
+    label { font-weight: 600; font-size: 0.9rem; }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+    }
+
+    .auth-message {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+    }
+    .auth-message[data-type="error"] { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
+    .auth-message[data-type="success"] { background: #ecfdf3; border: 1px solid #bbf7d0; color: #166534; }
+    .auth-message[data-type="info"] { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+    .footer {
+      margin-top: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--text); text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      .topbar { grid-template-columns: 1fr; justify-items: center; }
+      .topbar-actions { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="layout">
+      <div class="topbar">
+        <div class="brand"><span class="brand-badge">BD</span> Budget Dad</div>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/planner">Planner</a>
+          <a href="/strategy">Debt Strategies</a>
+          <a href="/pricing">Pricing</a>
+        </div>
+        <div class="topbar-actions">
+          <a class="button secondary" href="/planner">Start planning</a>
+          <div class="auth-actions" data-auth-nav></div>
+        </div>
+      </div>
+
+      <section class="card">
+        <h1>Your account</h1>
+        <p class="muted">Manage your profile and subscription.</p>
+
+        <div class="profile-grid">
+          <div class="profile-item">
+            <div class="muted">Email</div>
+            <div data-profile="email">—</div>
+          </div>
+          <div class="profile-item">
+            <div class="muted">Plan</div>
+            <div data-profile="plan">—</div>
+          </div>
+          <div class="profile-item">
+            <div class="muted">Subscription status</div>
+            <div data-profile="status">—</div>
+          </div>
+          <div class="profile-item">
+            <div class="muted">Current period end</div>
+            <div data-profile="period_end">—</div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="button" data-paid-only type="button" onclick="BudgetDadAuth.openBillingPortal()">Manage subscription</button>
+          <a class="button secondary" data-free-only href="/pricing">Upgrade to Pro</a>
+        </div>
+
+        <form id="profile-form" class="form-stack">
+          <div class="form-field">
+            <label for="full-name">Full name (optional)</label>
+            <input class="input" type="text" id="full-name" name="full_name" placeholder="Add your name" />
+          </div>
+          <button class="button secondary" type="submit">Save profile</button>
+          <div class="auth-message" data-profile-message></div>
+        </form>
+      </section>
+
+      <footer class="card footer">
+        <span>© 2026 Budget Dad</span>
+        <span>
+          <a href="/privacy">Privacy</a> ·
+          <a href="/terms">Terms</a>
+        </span>
+      </footer>
+    </main>
+  </div>
+
+  <script src="/assets/app-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/assets/auth.js"></script>
+  <script>
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const dt = new Date(dateStr);
+      if (Number.isNaN(dt.getTime())) return "—";
+      return dt.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    }
+
+    function showProfileMessage(message, type) {
+      const box = document.querySelector("[data-profile-message]");
+      if (!box) return;
+      box.textContent = message;
+      box.dataset.type = type || "info";
+      box.style.display = message ? "block" : "none";
+    }
+
+    async function loadAccount() {
+      if (!window.BudgetDadAuth) return;
+      if (!window.BudgetDadAuth.requireAuth()) return;
+      await window.BudgetDadAuth.ensureProfileReady();
+      const profile = window.BudgetDadAuth.getProfile();
+      if (!profile) return;
+
+      document.querySelector("[data-profile='email']").textContent = profile.email || "—";
+      document.querySelector("[data-profile='plan']").textContent = profile.plan || "free";
+      document.querySelector("[data-profile='status']").textContent = profile.subscription_status || "free";
+      document.querySelector("[data-profile='period_end']").textContent = formatDate(profile.current_period_end);
+
+      const nameInput = document.getElementById("full-name");
+      if (nameInput) nameInput.value = profile.full_name || "";
+    }
+
+    document.getElementById("profile-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!window.BudgetDadAuth) return;
+      const fullName = document.getElementById("full-name").value.trim();
+      showProfileMessage("Saving…", "info");
+      const { error } = await window.BudgetDadAuth.updateProfile({ full_name: fullName || null });
+      if (error) {
+        showProfileMessage(error.message || "Could not save profile.", "error");
+        return;
+      }
+      showProfileMessage("Profile updated.", "success");
+      await loadAccount();
+    });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", loadAccount);
+    } else {
+      loadAccount();
+    }
+  </script>
+</body>
+</html>

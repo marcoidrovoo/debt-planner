@@ -1,0 +1,68 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+6 0 obj
+<< /Length 2770 >>
+stream
+BT /F1 16 Tf 54 738 Td (Budget Dad \(Paycheck Plan\) - App Summary) Tj ET
+BT /F1 12 Tf 54 716 Td (What it is) Tj ET
+BT /F2 10.5 Tf 54 701 Td (Budget Dad \(Paycheck Plan\) is a client-side paycheck planner that helps users) Tj ET
+BT /F2 10.5 Tf 54 688 Td (allocate income to bills, debt payments, and spending for a single pay period.) Tj ET
+BT /F2 10.5 Tf 54 675 Td (It ships as a static web app and a Capacitor-wrapped mobile app.) Tj ET
+BT /F1 12 Tf 54 658 Td (Who it is for) Tj ET
+BT /F2 10.5 Tf 54 643 Td (People who want a simple, step-by-step plan for their next paycheck,) Tj ET
+BT /F2 10.5 Tf 54 630 Td (especially those paying down debt.) Tj ET
+BT /F1 12 Tf 54 613 Td (What it does) Tj ET
+BT /F2 10.5 Tf 54 598 Td (- Guided setup and a 4-step planner: Income -> Bills -> Debts -> Plan.) Tj ET
+BT /F2 10.5 Tf 54 585 Td (- Supports hourly or salary pay with weekly or biweekly frequency, overtime,) Tj ET
+BT /F2 10.5 Tf 54 572 Td (  and tax estimate or exact net.) Tj ET
+BT /F2 10.5 Tf 54 559 Td (- Tracks fixed bills with due dates and running totals.) Tj ET
+BT /F2 10.5 Tf 54 546 Td (- Tracks debts with balances, minimums, APR, and snowball or avalanche) Tj ET
+BT /F2 10.5 Tf 54 533 Td (  prioritization.) Tj ET
+BT /F2 10.5 Tf 54 520 Td (- Calculates a next-paycheck plan with bills due, minimums, extra-to-target) Tj ET
+BT /F2 10.5 Tf 54 507 Td (  debt, and projected balance.) Tj ET
+BT /F2 10.5 Tf 54 494 Td (- Exports the plan via browser print/PDF and stores data locally with remember) Tj ET
+BT /F2 10.5 Tf 54 481 Td (  and clear options.) Tj ET
+BT /F1 12 Tf 54 464 Td (How it works \(architecture\)) Tj ET
+BT /F2 10.5 Tf 54 449 Td (- UI: static pages in web/ \(index, planner, strategy, privacy, terms\) with) Tj ET
+BT /F2 10.5 Tf 54 436 Td (  planner logic in web/planner.html.) Tj ET
+BT /F2 10.5 Tf 54 423 Td (- Data flow: user inputs -> in-page JS computes plan -> results rendered in) Tj ET
+BT /F2 10.5 Tf 54 410 Td (  the plan output; export uses window.print.) Tj ET
+BT /F2 10.5 Tf 54 397 Td (- Storage: browser localStorage or sessionStorage. Backend/API/DB: Not found) Tj ET
+BT /F2 10.5 Tf 54 384 Td (  in repo.) Tj ET
+BT /F2 10.5 Tf 54 371 Td (- Packaging/hosting: Capacitor webDir points to web/ for iOS/Android; Vercel) Tj ET
+BT /F2 10.5 Tf 54 358 Td (  config provides static rewrites.) Tj ET
+BT /F1 12 Tf 54 341 Td (How to run \(minimal\)) Tj ET
+BT /F2 10.5 Tf 54 326 Td (- Install dependencies: npm install) Tj ET
+BT /F2 10.5 Tf 54 313 Td (- Web preview: npm run serve \(serves web/ on http://localhost:5173\)) Tj ET
+BT /F2 10.5 Tf 54 300 Td (- Mobile wrapper \(optional\): npm run cap:add:ios or npm run cap:add:android,) Tj ET
+BT /F2 10.5 Tf 54 287 Td (  then npm run cap:sync, then npm run cap:open:ios or npm run cap:open:android) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000000326 00000 n 
+0000000394 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+3216
+%%EOF

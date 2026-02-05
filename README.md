@@ -33,3 +33,57 @@ This repo is ready to deploy as a static site on Vercel.
 Routes:
 - `/` → `index.html`
 - `/strategy` → `strategy.html`
+
+## Auth + Paid Accounts (Supabase + Stripe)
+This repo stays **static**. Auth + subscriptions are powered by Supabase (client) and Supabase Edge Functions (server).
+
+### 1) Supabase database
+Run the migration in `supabase/migrations/20260205_profiles.sql` inside your Supabase project SQL editor.
+
+This creates:
+- `profiles` table
+- RLS policies (users can read/update their own profile only)
+- A trigger to auto-create a profile row on signup
+
+### 2) Configure Supabase + Stripe keys
+Set these secrets in your Supabase project (Edge Functions → Secrets):
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_ID_MONTHLY`
+- `STRIPE_PRICE_ID_YEARLY`
+- `APP_URL` (your public site URL, e.g. `https://budgetdad.com`)
+
+### 3) Deploy Supabase Edge Functions
+From the repo root:
+1. Install the Supabase CLI.
+2. Run:
+   - `supabase functions deploy create-checkout-session`
+   - `supabase functions deploy create-portal-session`
+   - `supabase functions deploy stripe-webhook`
+
+### 4) Create Stripe prices
+Create a Stripe product + prices (monthly + yearly). Store the price IDs in Supabase Function secrets:
+- `STRIPE_PRICE_ID_MONTHLY`
+- `STRIPE_PRICE_ID_YEARLY`
+
+### 5) Stripe webhook
+Create a webhook endpoint in Stripe:
+- URL: `https://<PROJECT>.supabase.co/functions/v1/stripe-webhook`
+- Events:
+  - `checkout.session.completed`
+  - `customer.subscription.created`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+
+### 6) Update client config
+Edit `web/assets/app-config.js` with:
+- Supabase URL + anon key
+- App URL
+
+### 7) Test flow
+- Visit `/signup` → create account
+- `/login` → sign in
+- `/pricing` → start subscription
+- `/account` → verify plan + manage billing
