@@ -2381,23 +2381,6 @@
         </div>
       `;
 
-      const proUnlocked = getStorage().getItem("bdPro") === "yes";
-      if (!proUnlocked) {
-        box.innerHTML = `
-          <strong>Plan preview:</strong> ${extra <= 0 ? "This paycheck is fully allocated." : "You have extra available this paycheck."}<br>
-          <div class="muted" style="margin-top:8px;">
-            Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
-          </div>
-          ${extra > 0 ? `<div class="muted" style="margin-top:6px;">Extra remaining: $${money(extra)}.</div>` : ""}
-          <div class="muted" style="margin-top:6px;">
-            Unlock Pro to see the full plan details and export.
-          </div>
-        `;
-        lockPremiumActions(true);
-        openPaywall();
-        return;
-      }
-
       lockPremiumActions(false);
 
       if (extra <= 0) {
