@@ -472,8 +472,31 @@
     .nav-links a:hover { color: var(--text); }
     .topbar-actions {
       display: flex;
+      gap: 10px;
+      align-items: center;
       justify-content: flex-end;
+      flex-wrap: wrap;
     }
+    .auth-actions {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .auth-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .auth-link:hover { color: var(--text); }
+    .auth-link-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: var(--muted);
+    }
+    .auth-link-button:hover { color: var(--text); }
 
     .hero-grid {
       display: grid;
@@ -614,8 +637,11 @@
           <a href="/">Home</a>
           <a href="/planner">Planner</a>
           <a href="/strategy">Debt Strategies</a>
+          <a href="/pricing">Pricing</a>
         </div>
-        <div class="topbar-actions"></div>
+        <div class="topbar-actions">
+          <div class="auth-actions" data-auth-nav></div>
+        </div>
       </div>
 
       <section class="card hero">
@@ -1030,7 +1056,7 @@
       <div class="paywall-actions">
         <button class="button" type="button" onclick="startCheckout('monthly')">Start monthly — $5/mo</button>
         <button class="button secondary" type="button" onclick="startCheckout('yearly')">Start yearly — $50/yr</button>
-        <button class="button secondary" type="button" onclick="startCheckout('demo')">I already subscribed</button>
+        <button class="button secondary" type="button" onclick="refreshSubscription()">I already subscribed</button>
       </div>
       <div class="paywall-muted">We don’t store your financial data. Cancel anytime.</div>
     </div>
@@ -1076,7 +1102,10 @@
     }
 
     function lockPremiumActions(isLocked) {
-      // placeholder for premium actions
+      document.body.classList.toggle("premium-locked", isLocked);
+      if (window.BudgetDadAuth && typeof window.BudgetDadAuth.applyPaidGate === "function") {
+        window.BudgetDadAuth.applyPaidGate();
+      }
     }
     function getNextPaycheckDate(startDateStr, frequency) {
       const start = parseLocalDate(startDateStr);
@@ -1146,7 +1175,8 @@
       };
     }
 
-    function calculateIncomeFromForm() {
+    function calculateIncomeFromForm(options = {}) {
+      const { forPreview = false } = options;
       const payType = getPayType();
       const frequency = strVal("pay-frequency");
       const startDate = strVal("start-date");
@@ -1159,7 +1189,7 @@
       if (!frequency) {
         return { ok: false, message: "⚠️ Choose pay frequency first." };
       }
-      if (!startDate) {
+      if (!startDate && !forPreview) {
         return { ok: false, message: "⚠️ Choose a start date for the plan (first paycheck)." };
       }
 
@@ -1285,7 +1315,7 @@
         return;
       }
 
-      const res = calculateIncomeFromForm();
+      const res = calculateIncomeFromForm({ forPreview: true });
       if (!res.ok) {
         netPreview.value = "";
         return;
@@ -1442,16 +1472,27 @@
       modal.classList.remove("active");
       modal.setAttribute("aria-hidden", "true");
     }
-    function startCheckout(plan) {
+    async function startCheckout(plan) {
       trackEvent("paywall_clicked", { plan });
-      if (plan === "demo") {
-        getStorage().setItem("bdPro", "yes");
-        closePaywall();
-        lockPremiumActions(false);
-        setShareFeedback("Pro unlocked on this device.");
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.startCheckout !== "function") {
+        alert("Checkout isn’t configured yet.");
         return;
       }
-      alert("Checkout isn’t wired yet. Tell me your payment provider and I’ll connect it.");
+      await window.BudgetDadAuth.startCheckout(plan);
+    }
+
+    async function refreshSubscription() {
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.refreshProfile !== "function") {
+        alert("Sign in to refresh your subscription.");
+        return;
+      }
+      await window.BudgetDadAuth.refreshProfile();
+      if (window.BudgetDadAuth.isPaid && window.BudgetDadAuth.isPaid()) {
+        closePaywall();
+        lockPremiumActions(false);
+      } else {
+        alert("We couldn't find an active subscription. If you just subscribed, wait a minute and try again.");
+      }
     }
 
     function saveIncome() {
@@ -2381,6 +2422,27 @@
         </div>
       `;
 
+      const cachedPro = getStorage().getItem("bdPro") === "yes";
+      const profile = window.BudgetDadAuth && window.BudgetDadAuth.getProfile ? window.BudgetDadAuth.getProfile() : null;
+      const paidStatus = window.BudgetDadAuth && window.BudgetDadAuth.isPaid ? window.BudgetDadAuth.isPaid() : false;
+      const proUnlocked = profile ? paidStatus : cachedPro;
+
+      if (!proUnlocked) {
+        box.innerHTML = `
+          <strong>Plan preview:</strong> ${extra <= 0 ? "This paycheck is fully allocated." : "You have extra available this paycheck."}<br>
+          <div class="muted" style="margin-top:8px;">
+            Available: $${money(totalAvailable)} • Bills: $${money(billsThisCheck)} • Minimums: $${money(minsThisCheck)} • Spending: $${money(spendingPerCheck)} • Buffer: $${money(buffer)}
+          </div>
+          ${extra > 0 ? `<div class="muted" style="margin-top:6px;">Extra remaining: $${money(extra)}.</div>` : ""}
+          <div class="muted" style="margin-top:6px;">
+            Unlock Pro to see the full plan details and export.
+          </div>
+        `;
+        lockPremiumActions(true);
+        openPaywall();
+        return;
+      }
+
       lockPremiumActions(false);
 
       if (extra <= 0) {
@@ -2530,6 +2592,7 @@
     document.getElementById("ot-enabled").addEventListener("change", updatePayTypeUI);
     document.getElementById("tax-estimate").addEventListener("change", updatePayTypeUI);
     document.getElementById("tax-exact").addEventListener("change", updatePayTypeUI);
+    document.getElementById("start-date").addEventListener("change", refreshNetPreview);
 
     // live net preview updates
     const liveIds = [
@@ -2563,5 +2626,8 @@
       }
     });
   </script>
+  <script src="/assets/app-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/assets/auth.js"></script>
 </body>
 </html>
