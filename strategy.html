@@ -5,24 +5,24 @@
   <title>Budget Dad — Debt Payoff Strategies</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Learn the difference between the snowball and avalanche debt payoff strategies and choose the one that fits you." />
-  <meta name="theme-color" content="#00bcd4" />
+  <meta name="theme-color" content="#0f6f6a" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/site.webmanifest" />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap");
 
     :root {
-      --bg: #fff7ee;
-      --bg-2: #eef7ff;
+      --bg: #f6f3ee;
+      --bg-2: #ffffff;
       --card: #ffffff;
-      --muted: #4f5d6b;
-      --text: #0a1220;
-      --accent: #00bcd4;
-      --accent-2: #ffb703;
-      --border: #d8e2ef;
-      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-      --radius-lg: 18px;
-      --radius-md: 14px;
+      --muted: #5b6672;
+      --text: #121722;
+      --accent: #0f6f6a;
+      --accent-2: #d5b47a;
+      --border: #e3dcd1;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+      --radius-lg: 16px;
+      --radius-md: 12px;
       --radius-sm: 10px;
       --space-lg: 28px;
       --space-md: 20px;
@@ -32,12 +32,8 @@
     * { box-sizing: border-box; }
 
     body {
-      font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
-      background:
-        radial-gradient(900px 520px at 12% 0%, rgba(0, 188, 212, 0.18), transparent 60%),
-        radial-gradient(700px 520px at 82% 10%, rgba(255, 183, 3, 0.22), transparent 60%),
-        radial-gradient(640px 480px at 50% 80%, rgba(255, 107, 107, 0.12), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg-2) 55%, #ffffff 100%);
+      font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, var(--bg), var(--bg-2) 60%);
       color: var(--text);
       margin: 0;
       min-height: 100vh;
@@ -57,7 +53,7 @@
     }
 
     .card {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 249, 252, 0.95));
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 28px;
@@ -66,17 +62,17 @@
 
     .hero {
       padding: 32px;
-      background:
-        linear-gradient(135deg, rgba(0, 188, 212, 0.18), transparent 60%),
-        linear-gradient(315deg, rgba(255, 183, 3, 0.18), transparent 50%),
-        var(--card);
-      border: 1px solid rgba(0, 188, 212, 0.25);
+      background: linear-gradient(135deg, rgba(15, 111, 106, 0.08), transparent 55%), var(--card);
+      border: 1px solid var(--border);
     }
 
+    h1, h2, h3 {
+      font-family: "Fraunces", "DM Sans", serif;
+      letter-spacing: -0.01em;
+    }
     h1 {
       margin: 0 0 10px;
-      font-size: clamp(2rem, 2.6vw, 2.6rem);
-      letter-spacing: -0.02em;
+      font-size: clamp(2rem, 2.4vw, 2.5rem);
     }
 
     .subtitle {
@@ -84,6 +80,44 @@
       color: var(--muted);
       font-size: 1.05rem;
     }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+    .nav-links a { color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
 
     .pill-row {
       display: flex;
@@ -95,8 +129,8 @@
     .pill {
       padding: 6px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(0, 188, 212, 0.25);
-      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border);
+      background: #ffffff;
       font-weight: 600;
       font-size: 0.85rem;
     }
@@ -161,6 +195,7 @@
 
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; gap: 8px; }
     }
 
     .footer {
@@ -182,6 +217,17 @@
 <body>
   <div class="page">
     <main class="layout">
+      <div class="topbar">
+        <div class="brand"><span class="brand-badge">BD</span> Budget Dad</div>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/planner">Planner</a>
+          <a href="/strategy">Debt Strategies</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+        </div>
+      </div>
+
       <section class="card hero">
         <h1>Snowball vs Avalanche</h1>
         <p class="subtitle">Two proven payoff styles. One focuses on momentum, the other on interest savings.</p>
