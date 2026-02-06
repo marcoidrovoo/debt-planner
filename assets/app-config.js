@@ -1,5 +1,5 @@
 window.BUDGET_DAD_CONFIG = {
-  SUPABASE_URL: "https://YOUR_PROJECT.supabase.co",
-  SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY",
-  APP_URL: "https://your-domain.com"
+  SUPABASE_URL: "https://tgyxthvhmhsqzmjcpyyp.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_VU6CBUIcrzu2UE2UqmorAA_4TNucJjB",
+  APP_URL: "https://budgetdad.vercel.app"
 };
