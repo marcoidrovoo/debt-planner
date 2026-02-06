@@ -34,6 +34,16 @@
     }
   }
 
+  function getProjectScopedStorageKey() {
+    try {
+      const host = new URL(String(config.SUPABASE_URL).trim()).hostname;
+      const projectRef = host.split(".")[0] || "default";
+      return `budgetdad-auth-${projectRef}`;
+    } catch (_err) {
+      return "budgetdad-auth";
+    }
+  }
+
   function markReady() {
     if (state.ready) return;
     state.ready = true;
@@ -49,7 +59,7 @@
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        storageKey: "budgetdad-auth"
+        storageKey: getProjectScopedStorageKey()
       }
     });
 
@@ -154,6 +164,37 @@
     const refreshed = data.session || null;
     if (!refreshed) return hasValidAccessToken ? session : null;
     return looksLikeJwt(refreshed.access_token) ? refreshed : (hasValidAccessToken ? session : null);
+  }
+
+  async function ensureProjectSession() {
+    if (!state.client) return null;
+
+    const session = await getFreshSession();
+    if (!session?.access_token || !looksLikeJwt(session.access_token)) {
+      return null;
+    }
+
+    const currentUser = await state.client.auth.getUser(session.access_token);
+    if (!currentUser.error && currentUser.data?.user) {
+      return session;
+    }
+
+    const { data, error } = await state.client.auth.refreshSession();
+    const refreshed = error ? null : (data.session || null);
+    if (refreshed?.access_token && looksLikeJwt(refreshed.access_token)) {
+      const refreshedUser = await state.client.auth.getUser(refreshed.access_token);
+      if (!refreshedUser.error && refreshedUser.data?.user) {
+        return refreshed;
+      }
+    }
+
+    await state.client.auth.signOut();
+    state.user = null;
+    state.profile = null;
+    state.paid = false;
+    updateAuthUI();
+    applyPaidGate();
+    return null;
   }
 
   function buildRedirectParam() {
@@ -414,55 +455,7 @@
   }
 
   async function invokeProjectFunction(path, body, session, retryOn401 = true) {
-    if (!session?.access_token || !looksLikeJwt(session.access_token)) {
-      return { ok: false, status: 401, payload: { message: "Session expired. Please sign in again." } };
-    }
-
-    const customFunctionsUrl = String(config.SUPABASE_FUNCTIONS_URL || "").trim();
-    const defaultFunctionsUrl = `${config.SUPABASE_URL}/functions/v1`;
-
-    if (customFunctionsUrl && customFunctionsUrl !== defaultFunctionsUrl) {
-      return postFunctionWithSession(path, body, session, retryOn401);
-    }
-
-    const invokeOnce = async (token) => {
-      const invokeOptions = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
-      if (body !== null && body !== undefined) {
-        invokeOptions.body = body;
-      }
-
-      const { data, error } = await state.client.functions.invoke(
-        path,
-        invokeOptions
-      );
-
-      if (!error) {
-        return { ok: true, status: 200, payload: data || {} };
-      }
-
-      let status = 500;
-      let payload = {};
-      if (error.context) {
-        status = error.context.status;
-        payload = await parseJsonSafe(error.context);
-      } else if (typeof error.status === "number") {
-        status = error.status;
-      }
-
-      const message = payload?.error || payload?.message || error.message || "Request failed.";
-      return { ok: false, status, payload: { ...payload, message } };
-    };
-
-    let result = await invokeOnce(session.access_token);
-    if (!result.ok && result.status === 401 && retryOn401) {
-      const refreshedSession = await getFreshSession();
-      if (refreshedSession?.access_token && looksLikeJwt(refreshedSession.access_token)) {
-        result = await invokeOnce(refreshedSession.access_token);
-      }
-    }
-    return result;
+    return postFunctionWithSession(path, body, session, retryOn401);
   }
 
   async function startCheckout(plan) {
@@ -472,8 +465,9 @@
       return;
     }
 
-    const session = await getFreshSession();
+    const session = await ensureProjectSession();
     if (!session) {
+      alert("Your session is invalid for this project. Please sign in again.");
       requireAuth();
       return;
     }
@@ -490,7 +484,8 @@
       }
       if (!ok) {
         if (status === 401) {
-          alert(payload?.error || payload?.message || "Session expired. Please sign in again.");
+          alert(payload?.error || payload?.message || "Session is invalid. Please sign in again.");
+          requireAuth();
           return;
         }
         const message = payload?.error || payload?.message || `Unable to start checkout (status ${status}).`;
@@ -515,8 +510,9 @@
       return;
     }
 
-    const session = await getFreshSession();
+    const session = await ensureProjectSession();
     if (!session) {
+      alert("Your session is invalid for this project. Please sign in again.");
       requireAuth();
       return;
     }
@@ -529,7 +525,8 @@
       );
       if (!ok) {
         if (status === 401) {
-          alert(payload?.error || payload?.message || "Session expired. Please sign in again.");
+          alert(payload?.error || payload?.message || "Session is invalid. Please sign in again.");
+          requireAuth();
           return;
         }
         const message = payload?.error || payload?.message || `Unable to open billing portal (status ${status}).`;
