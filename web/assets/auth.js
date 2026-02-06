@@ -134,17 +134,26 @@
     return data.session || null;
   }
 
+  function looksLikeJwt(token) {
+    if (!token || typeof token !== "string") return false;
+    const parts = token.split(".");
+    return parts.length === 3 && parts.every(part => part.length > 0);
+  }
+
   async function getFreshSession() {
     const session = await getSession();
     if (!state.client || !session) return session;
 
     const expiresAtMs = (session.expires_at || 0) * 1000;
-    const shouldRefresh = !expiresAtMs || (expiresAtMs - Date.now()) < 60 * 1000;
+    const hasValidAccessToken = looksLikeJwt(session.access_token);
+    const shouldRefresh = !hasValidAccessToken || !expiresAtMs || (expiresAtMs - Date.now()) < 60 * 1000;
     if (!shouldRefresh) return session;
 
     const { data, error } = await state.client.auth.refreshSession();
-    if (error) return session;
-    return data.session || session;
+    if (error) return hasValidAccessToken ? session : null;
+    const refreshed = data.session || null;
+    if (!refreshed) return hasValidAccessToken ? session : null;
+    return looksLikeJwt(refreshed.access_token) ? refreshed : (hasValidAccessToken ? session : null);
   }
 
   function buildRedirectParam() {
@@ -366,6 +375,10 @@
   }
 
   async function postFunctionWithSession(path, body, session, retryOn401 = true) {
+    if (!session?.access_token || !looksLikeJwt(session.access_token)) {
+      return { ok: false, status: 401, payload: { message: "Invalid JWT" } };
+    }
+
     const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
     const headers = {
       "Content-Type": "application/json",
@@ -380,12 +393,12 @@
     });
 
     if (res.status !== 401 || !retryOn401 || !state.client) {
-      return { res, payload: await parseJsonSafe(res) };
+      return { ok: res.ok, status: res.status, payload: await parseJsonSafe(res) };
     }
 
     const { data, error } = await state.client.auth.refreshSession();
-    if (error || !data?.session?.access_token) {
-      return { res, payload: await parseJsonSafe(res) };
+    if (error || !data?.session?.access_token || !looksLikeJwt(data.session.access_token)) {
+      return { ok: res.ok, status: res.status, payload: await parseJsonSafe(res) };
     }
 
     const retryRes = await fetch(`${functionsBase}/${path}`, {
@@ -397,7 +410,50 @@
       body: body ? JSON.stringify(body) : undefined
     });
 
-    return { res: retryRes, payload: await parseJsonSafe(retryRes) };
+    return { ok: retryRes.ok, status: retryRes.status, payload: await parseJsonSafe(retryRes) };
+  }
+
+  async function invokeProjectFunction(path, body, retryOn401 = true) {
+    const customFunctionsUrl = String(config.SUPABASE_FUNCTIONS_URL || "").trim();
+    const defaultFunctionsUrl = `${config.SUPABASE_URL}/functions/v1`;
+
+    if (customFunctionsUrl && customFunctionsUrl !== defaultFunctionsUrl) {
+      const session = await getFreshSession();
+      if (!session) {
+        return { ok: false, status: 401, payload: { message: "Session not found." } };
+      }
+      return postFunctionWithSession(path, body, session, retryOn401);
+    }
+
+    const invokeOnce = async () => {
+      const { data, error } = await state.client.functions.invoke(
+        path,
+        body ? { body } : {}
+      );
+
+      if (!error) {
+        return { ok: true, status: 200, payload: data || {} };
+      }
+
+      let status = 500;
+      let payload = {};
+      if (error.context) {
+        status = error.context.status;
+        payload = await parseJsonSafe(error.context);
+      } else if (typeof error.status === "number") {
+        status = error.status;
+      }
+
+      const message = payload?.error || payload?.message || error.message || "Request failed.";
+      return { ok: false, status, payload: { ...payload, message } };
+    };
+
+    let result = await invokeOnce();
+    if (!result.ok && result.status === 401 && retryOn401) {
+      await getFreshSession();
+      result = await invokeOnce();
+    }
+    return result;
   }
 
   async function startCheckout(plan) {
@@ -414,17 +470,20 @@
     }
 
     try {
-      const { res, payload } = await postFunctionWithSession(
+      const { ok, status, payload } = await invokeProjectFunction(
         "create-checkout-session",
-        { plan },
-        session
+        { plan }
       );
-      if (res.status === 409 && payload?.code === "active_subscription_exists") {
+      if (status === 409 && payload?.code === "active_subscription_exists") {
         await openBillingPortal();
         return;
       }
-      if (!res.ok) {
-        const message = payload?.error || payload?.message || `Unable to start checkout (status ${res.status}).`;
+      if (!ok) {
+        if (status === 401) {
+          window.location.href = `/login?redirect=${buildRedirectParam()}`;
+          return;
+        }
+        const message = payload?.error || payload?.message || `Unable to start checkout (status ${status}).`;
         alert(message);
         return;
       }
@@ -453,13 +512,16 @@
     }
 
     try {
-      const { res, payload } = await postFunctionWithSession(
+      const { ok, status, payload } = await invokeProjectFunction(
         "create-portal-session",
-        null,
-        session
+        null
       );
-      if (!res.ok) {
-        const message = payload?.error || payload?.message || `Unable to open billing portal (status ${res.status}).`;
+      if (!ok) {
+        if (status === 401) {
+          window.location.href = `/login?redirect=${buildRedirectParam()}`;
+          return;
+        }
+        const message = payload?.error || payload?.message || `Unable to open billing portal (status ${status}).`;
         alert(message);
         return;
       }
