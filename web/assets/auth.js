@@ -365,6 +365,41 @@
     }
   }
 
+  async function postFunctionWithSession(path, body, session, retryOn401 = true) {
+    const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${session.access_token}`,
+      "apikey": config.SUPABASE_ANON_KEY
+    };
+
+    const res = await fetch(`${functionsBase}/${path}`, {
+      method: "POST",
+      headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    if (res.status !== 401 || !retryOn401 || !state.client) {
+      return { res, payload: await parseJsonSafe(res) };
+    }
+
+    const { data, error } = await state.client.auth.refreshSession();
+    if (error || !data?.session?.access_token) {
+      return { res, payload: await parseJsonSafe(res) };
+    }
+
+    const retryRes = await fetch(`${functionsBase}/${path}`, {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Authorization": `Bearer ${data.session.access_token}`
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    return { res: retryRes, payload: await parseJsonSafe(retryRes) };
+  }
+
   async function startCheckout(plan) {
     initClient();
     if (!state.client) {
@@ -378,31 +413,18 @@
       return;
     }
 
-    const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
     try {
-      const res = await fetch(`${functionsBase}/create-checkout-session`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-          "apikey": config.SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({ plan })
-      });
-
-      const payload = await parseJsonSafe(res);
+      const { res, payload } = await postFunctionWithSession(
+        "create-checkout-session",
+        { plan },
+        session
+      );
       if (res.status === 409 && payload?.code === "active_subscription_exists") {
         await openBillingPortal();
         return;
       }
       if (!res.ok) {
         const message = payload?.error || payload?.message || `Unable to start checkout (status ${res.status}).`;
-        if (res.status === 401) {
-          await state.client.auth.signOut();
-          alert("Your session expired. Please sign in again.");
-          requireAuth();
-          return;
-        }
         alert(message);
         return;
       }
@@ -430,26 +452,14 @@
       return;
     }
 
-    const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
     try {
-      const res = await fetch(`${functionsBase}/create-portal-session`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-          "apikey": config.SUPABASE_ANON_KEY
-        }
-      });
-
-      const payload = await parseJsonSafe(res);
+      const { res, payload } = await postFunctionWithSession(
+        "create-portal-session",
+        null,
+        session
+      );
       if (!res.ok) {
         const message = payload?.error || payload?.message || `Unable to open billing portal (status ${res.status}).`;
-        if (res.status === 401) {
-          await state.client.auth.signOut();
-          alert("Your session expired. Please sign in again.");
-          requireAuth();
-          return;
-        }
         alert(message);
         return;
       }
