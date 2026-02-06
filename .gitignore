@@ -6,3 +6,4 @@ dist/
 build/
 .npm-cache/
 output/
+supabase/.temp/
