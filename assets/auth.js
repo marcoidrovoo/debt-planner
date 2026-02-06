@@ -413,22 +413,29 @@
     return { ok: retryRes.ok, status: retryRes.status, payload: await parseJsonSafe(retryRes) };
   }
 
-  async function invokeProjectFunction(path, body, retryOn401 = true) {
+  async function invokeProjectFunction(path, body, session, retryOn401 = true) {
+    if (!session?.access_token || !looksLikeJwt(session.access_token)) {
+      return { ok: false, status: 401, payload: { message: "Session expired. Please sign in again." } };
+    }
+
     const customFunctionsUrl = String(config.SUPABASE_FUNCTIONS_URL || "").trim();
     const defaultFunctionsUrl = `${config.SUPABASE_URL}/functions/v1`;
 
     if (customFunctionsUrl && customFunctionsUrl !== defaultFunctionsUrl) {
-      const session = await getFreshSession();
-      if (!session) {
-        return { ok: false, status: 401, payload: { message: "Session not found." } };
-      }
       return postFunctionWithSession(path, body, session, retryOn401);
     }
 
-    const invokeOnce = async () => {
+    const invokeOnce = async (token) => {
+      const invokeOptions = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+      if (body !== null && body !== undefined) {
+        invokeOptions.body = body;
+      }
+
       const { data, error } = await state.client.functions.invoke(
         path,
-        body ? { body } : {}
+        invokeOptions
       );
 
       if (!error) {
@@ -448,10 +455,12 @@
       return { ok: false, status, payload: { ...payload, message } };
     };
 
-    let result = await invokeOnce();
+    let result = await invokeOnce(session.access_token);
     if (!result.ok && result.status === 401 && retryOn401) {
-      await getFreshSession();
-      result = await invokeOnce();
+      const refreshedSession = await getFreshSession();
+      if (refreshedSession?.access_token && looksLikeJwt(refreshedSession.access_token)) {
+        result = await invokeOnce(refreshedSession.access_token);
+      }
     }
     return result;
   }
@@ -472,7 +481,8 @@
     try {
       const { ok, status, payload } = await invokeProjectFunction(
         "create-checkout-session",
-        { plan }
+        { plan },
+        session
       );
       if (status === 409 && payload?.code === "active_subscription_exists") {
         await openBillingPortal();
@@ -480,7 +490,7 @@
       }
       if (!ok) {
         if (status === 401) {
-          window.location.href = `/login?redirect=${buildRedirectParam()}`;
+          alert(payload?.error || payload?.message || "Session expired. Please sign in again.");
           return;
         }
         const message = payload?.error || payload?.message || `Unable to start checkout (status ${status}).`;
@@ -514,11 +524,12 @@
     try {
       const { ok, status, payload } = await invokeProjectFunction(
         "create-portal-session",
-        null
+        null,
+        session
       );
       if (!ok) {
         if (status === 401) {
-          window.location.href = `/login?redirect=${buildRedirectParam()}`;
+          alert(payload?.error || payload?.message || "Session expired. Please sign in again.");
           return;
         }
         const message = payload?.error || payload?.message || `Unable to open billing portal (status ${status}).`;
