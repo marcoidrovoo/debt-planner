@@ -134,6 +134,19 @@
     return data.session || null;
   }
 
+  async function getFreshSession() {
+    const session = await getSession();
+    if (!state.client || !session) return session;
+
+    const expiresAtMs = (session.expires_at || 0) * 1000;
+    const shouldRefresh = !expiresAtMs || (expiresAtMs - Date.now()) < 60 * 1000;
+    if (!shouldRefresh) return session;
+
+    const { data, error } = await state.client.auth.refreshSession();
+    if (error) return session;
+    return data.session || session;
+  }
+
   function buildRedirectParam() {
     const url = window.location.pathname + window.location.search;
     return encodeURIComponent(url);
@@ -343,10 +356,12 @@
   }
 
   async function parseJsonSafe(response) {
+    const text = await response.text();
+    if (!text) return {};
     try {
-      return await response.json();
+      return JSON.parse(text);
     } catch (_err) {
-      return {};
+      return { message: text };
     }
   }
 
@@ -357,7 +372,7 @@
       return;
     }
 
-    const session = await getSession();
+    const session = await getFreshSession();
     if (!session) {
       requireAuth();
       return;
@@ -381,7 +396,14 @@
         return;
       }
       if (!res.ok) {
-        alert(payload?.error || "Unable to start checkout.");
+        const message = payload?.error || payload?.message || `Unable to start checkout (status ${res.status}).`;
+        if (res.status === 401) {
+          await state.client.auth.signOut();
+          alert("Your session expired. Please sign in again.");
+          requireAuth();
+          return;
+        }
+        alert(message);
         return;
       }
 
@@ -402,7 +424,7 @@
       return;
     }
 
-    const session = await getSession();
+    const session = await getFreshSession();
     if (!session) {
       requireAuth();
       return;
@@ -421,7 +443,14 @@
 
       const payload = await parseJsonSafe(res);
       if (!res.ok) {
-        alert(payload?.error || "Unable to open billing portal.");
+        const message = payload?.error || payload?.message || `Unable to open billing portal (status ${res.status}).`;
+        if (res.status === 401) {
+          await state.client.auth.signOut();
+          alert("Your session expired. Please sign in again.");
+          requireAuth();
+          return;
+        }
+        alert(message);
         return;
       }
 
