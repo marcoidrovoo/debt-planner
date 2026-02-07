@@ -73,7 +73,7 @@ serve(async (req) => {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, stripeWebhookSecret);
+    event = await stripe.webhooks.constructEventAsync(body, signature, stripeWebhookSecret);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return jsonResponse({ error: `Webhook signature error: ${message}` }, 400);
