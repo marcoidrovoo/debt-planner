@@ -442,27 +442,58 @@
     return { message: String(input) };
   }
 
+  function getFunctionTargets(path) {
+    const directBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
+    const directUrl = `${directBase}/${path}`;
+    const targets = [directUrl];
+
+    if (typeof window !== "undefined" && window.location?.origin && /^https?:$/.test(window.location.protocol)) {
+      targets.unshift(`${window.location.origin}/api/${path}`);
+    }
+
+    return Array.from(new Set(targets));
+  }
+
   async function postFunctionWithSession(path, body, session, retryOn401 = true) {
     if (!session?.access_token || !looksLikeJwt(session.access_token)) {
       return { ok: false, status: 401, payload: { message: "Invalid JWT" } };
     }
 
-    const functionsBase = config.SUPABASE_FUNCTIONS_URL || `${config.SUPABASE_URL}/functions/v1`;
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${session.access_token}`,
       "apikey": config.SUPABASE_ANON_KEY
     };
 
-    let res;
-    try {
-      res = await fetch(`${functionsBase}/${path}`, {
-        method: "POST",
-        headers,
-        body: body ? JSON.stringify(body) : undefined
-      });
-    } catch (err) {
+    const targetUrls = getFunctionTargets(path);
+    let res = null;
+    let firstNetworkError = null;
+
+    for (const targetUrl of targetUrls) {
       // Fallback path when browser blocks/aborts raw fetch for any reason.
+      try {
+        const candidateRes = await fetch(targetUrl, {
+          method: "POST",
+          headers,
+          body: body ? JSON.stringify(body) : undefined
+        });
+
+        // Allow local environments without Vercel API routes to fall back to direct Supabase URL.
+        if (candidateRes.status === 404 && targetUrl.includes("/api/")) {
+          continue;
+        }
+
+        res = candidateRes;
+        break;
+      } catch (err) {
+        if (!firstNetworkError) {
+          firstNetworkError = err;
+        }
+      }
+    }
+
+    if (!res) {
+      // Last-resort path via Supabase JS invoke helper.
       try {
         const invokeOptions = {
           headers: {
@@ -490,7 +521,7 @@
         return { ok: false, status, payload: { ...payload, message } };
       } catch (fallbackErr) {
         const message = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
-        const original = err instanceof Error ? err.message : String(err);
+        const original = firstNetworkError instanceof Error ? firstNetworkError.message : String(firstNetworkError || "unknown");
         return {
           ok: false,
           status: 0,
