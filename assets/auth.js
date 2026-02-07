@@ -405,14 +405,41 @@
     }, 800);
   }
 
-  async function parseJsonSafe(response) {
-    const text = await response.text();
-    if (!text) return {};
+  async function parseJsonSafe(input) {
+    if (input === null || input === undefined) return {};
+
     try {
-      return JSON.parse(text);
+      if (typeof input.text === "function") {
+        const text = await input.text();
+        if (!text) return {};
+        try {
+          return JSON.parse(text);
+        } catch (_err) {
+          return { message: text };
+        }
+      }
+
+      if (typeof input.json === "function") {
+        const json = await input.json();
+        return json || {};
+      }
     } catch (_err) {
-      return { message: text };
+      // Fall through to type-based parsing.
     }
+
+    if (typeof input === "string") {
+      try {
+        return JSON.parse(input);
+      } catch (_err) {
+        return { message: input };
+      }
+    }
+
+    if (typeof input === "object") {
+      return input;
+    }
+
+    return { message: String(input) };
   }
 
   async function postFunctionWithSession(path, body, session, retryOn401 = true) {
