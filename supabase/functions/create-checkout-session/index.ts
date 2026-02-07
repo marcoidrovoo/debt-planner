@@ -22,6 +22,29 @@ function jsonResponse(
   });
 }
 
+function buildErrorPayload(err: unknown) {
+  const fallbackMessage = "Internal server error while creating checkout session.";
+  const message = err instanceof Error ? err.message : String(err || fallbackMessage);
+  const details = typeof err === "object" && err !== null ? (err as Record<string, unknown>) : {};
+
+  const rawStatus = details.statusCode ?? details.status;
+  const status = typeof rawStatus === "number" && rawStatus >= 400 && rawStatus <= 599
+    ? rawStatus
+    : 500;
+
+  const code = typeof details.code === "string" ? details.code : undefined;
+  const type = typeof details.type === "string" ? details.type : undefined;
+
+  return {
+    status,
+    body: {
+      error: message || fallbackMessage,
+      ...(code ? { code } : {}),
+      ...(type ? { type } : {})
+    }
+  };
+}
+
 function normalizeAppUrl(raw: string): string | null {
   if (!raw) return null;
   try {
@@ -40,85 +63,53 @@ function hasBlockingSubscriptionStatus(status: string | null | undefined) {
 serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
 
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405, corsHeaders);
-  }
-
-  if (!stripeSecretKey || !supabaseUrl || !supabaseServiceKey) {
-    return jsonResponse({ error: "Server is missing configuration." }, 500, corsHeaders);
-  }
-
-  const authHeader = req.headers.get("Authorization") ?? "";
-  const token = authHeader.replace("Bearer ", "").trim();
-  if (!token) {
-    return jsonResponse({ error: "Missing authorization token." }, 401, corsHeaders);
-  }
-
-  let payload: { plan?: string } = {};
   try {
-    payload = await req.json();
-  } catch (_err) {
-    return jsonResponse({ error: "Invalid JSON body." }, 400, corsHeaders);
-  }
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: corsHeaders });
+    }
 
-  if (payload.plan !== "monthly" && payload.plan !== "yearly") {
-    return jsonResponse({ error: "Invalid plan. Use monthly or yearly." }, 400, corsHeaders);
-  }
+    if (req.method !== "POST") {
+      return jsonResponse({ error: "Method not allowed" }, 405, corsHeaders);
+    }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
-  });
+    if (!stripeSecretKey || !supabaseUrl || !supabaseServiceKey) {
+      return jsonResponse({ error: "Server is missing configuration." }, 500, corsHeaders);
+    }
 
-  const { data: authData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !authData?.user) {
-    return jsonResponse({ error: "Unauthorized." }, 401, corsHeaders);
-  }
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) {
+      return jsonResponse({ error: "Missing authorization token." }, 401, corsHeaders);
+    }
 
-  const user = authData.user;
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id,email,plan,stripe_customer_id,stripe_subscription_id,subscription_status")
-    .eq("id", user.id)
-    .single();
+    let payload: { plan?: string } = {};
+    try {
+      payload = await req.json();
+    } catch (_err) {
+      return jsonResponse({ error: "Invalid JSON body." }, 400, corsHeaders);
+    }
 
-  if (hasBlockingSubscriptionStatus(profile?.subscription_status)) {
-    return jsonResponse(
-      {
-        error: "You already have an active subscription. Open billing portal to manage it.",
-        code: "active_subscription_exists"
-      },
-      409,
-      corsHeaders
-    );
-  }
+    if (payload.plan !== "monthly" && payload.plan !== "yearly") {
+      return jsonResponse({ error: "Invalid plan. Use monthly or yearly." }, 400, corsHeaders);
+    }
 
-  let customerId = profile?.stripe_customer_id || null;
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email ?? undefined,
-      metadata: { supabase_uid: user.id }
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
     });
-    customerId = customer.id;
-    await supabase
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData?.user) {
+      return jsonResponse({ error: "Unauthorized." }, 401, corsHeaders);
+    }
+
+    const user = authData.user;
+    const { data: profile } = await supabase
       .from("profiles")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", user.id);
-  }
+      .select("id,email,plan,stripe_customer_id,stripe_subscription_id,subscription_status")
+      .eq("id", user.id)
+      .single();
 
-  if (customerId) {
-    const existingSubscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "all",
-      limit: 10
-    });
-    const hasActiveSubscription = existingSubscriptions.data.some((subscription) =>
-      hasBlockingSubscriptionStatus(subscription.status)
-    );
-    if (hasActiveSubscription) {
+    if (hasBlockingSubscriptionStatus(profile?.subscription_status)) {
       return jsonResponse(
         {
           error: "You already have an active subscription. Open billing portal to manage it.",
@@ -128,33 +119,70 @@ serve(async (req) => {
         corsHeaders
       );
     }
+
+    let customerId = profile?.stripe_customer_id || null;
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { supabase_uid: user.id }
+      });
+      customerId = customer.id;
+      await supabase
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", user.id);
+    }
+
+    if (customerId) {
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 10
+      });
+      const hasActiveSubscription = existingSubscriptions.data.some((subscription) =>
+        hasBlockingSubscriptionStatus(subscription.status)
+      );
+      if (hasActiveSubscription) {
+        return jsonResponse(
+          {
+            error: "You already have an active subscription. Open billing portal to manage it.",
+            code: "active_subscription_exists"
+          },
+          409,
+          corsHeaders
+        );
+      }
+    }
+
+    const appUrl = normalizeAppUrl(Deno.env.get("APP_URL") ?? "");
+    if (!appUrl) {
+      return jsonResponse({ error: "APP_URL is not configured." }, 500, corsHeaders);
+    }
+
+    const monthlyPriceId = Deno.env.get("STRIPE_PRICE_ID_MONTHLY") ?? "";
+    const yearlyPriceId = Deno.env.get("STRIPE_PRICE_ID_YEARLY") ?? "";
+    const plan = payload.plan;
+    const priceId = plan === "monthly" ? monthlyPriceId : plan === "yearly" ? yearlyPriceId : "";
+    if (!priceId) {
+      return jsonResponse({ error: "Price ID not configured for plan." }, 400, corsHeaders);
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
+      client_reference_id: user.id,
+      subscription_data: {
+        metadata: { supabase_uid: user.id }
+      },
+      success_url: `${appUrl}/account?checkout=success`,
+      cancel_url: `${appUrl}/pricing?checkout=cancel`
+    });
+
+    return jsonResponse({ url: session.url }, 200, corsHeaders);
+  } catch (err) {
+    const payload = buildErrorPayload(err);
+    return jsonResponse(payload.body, payload.status, corsHeaders);
   }
-
-  const appUrl = normalizeAppUrl(Deno.env.get("APP_URL") ?? "");
-  if (!appUrl) {
-    return jsonResponse({ error: "APP_URL is not configured." }, 500, corsHeaders);
-  }
-
-  const monthlyPriceId = Deno.env.get("STRIPE_PRICE_ID_MONTHLY") ?? "";
-  const yearlyPriceId = Deno.env.get("STRIPE_PRICE_ID_YEARLY") ?? "";
-  const plan = payload.plan;
-  const priceId = plan === "monthly" ? monthlyPriceId : plan === "yearly" ? yearlyPriceId : "";
-  if (!priceId) {
-    return jsonResponse({ error: "Price ID not configured for plan." }, 400, corsHeaders);
-  }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    allow_promotion_codes: true,
-    client_reference_id: user.id,
-    subscription_data: {
-      metadata: { supabase_uid: user.id }
-    },
-    success_url: `${appUrl}/account?checkout=success`,
-    cancel_url: `${appUrl}/pricing?checkout=cancel`
-  });
-
-  return jsonResponse({ url: session.url }, 200, corsHeaders);
 });

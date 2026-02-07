@@ -22,6 +22,29 @@ function jsonResponse(
   });
 }
 
+function buildErrorPayload(err: unknown) {
+  const fallbackMessage = "Internal server error while creating billing portal session.";
+  const message = err instanceof Error ? err.message : String(err || fallbackMessage);
+  const details = typeof err === "object" && err !== null ? (err as Record<string, unknown>) : {};
+
+  const rawStatus = details.statusCode ?? details.status;
+  const status = typeof rawStatus === "number" && rawStatus >= 400 && rawStatus <= 599
+    ? rawStatus
+    : 500;
+
+  const code = typeof details.code === "string" ? details.code : undefined;
+  const type = typeof details.type === "string" ? details.type : undefined;
+
+  return {
+    status,
+    body: {
+      error: message || fallbackMessage,
+      ...(code ? { code } : {}),
+      ...(type ? { type } : {})
+    }
+  };
+}
+
 function normalizeAppUrl(raw: string): string | null {
   if (!raw) return null;
   try {
@@ -36,51 +59,57 @@ function normalizeAppUrl(raw: string): string | null {
 serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
 
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  try {
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: corsHeaders });
+    }
+
+    if (req.method !== "POST") {
+      return jsonResponse({ error: "Method not allowed" }, 405, corsHeaders);
+    }
+
+    if (!stripeSecretKey || !supabaseUrl || !supabaseServiceKey) {
+      return jsonResponse({ error: "Server is missing configuration." }, 500, corsHeaders);
+    }
+
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) {
+      return jsonResponse({ error: "Missing authorization token." }, 401, corsHeaders);
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
+    });
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData?.user) {
+      return jsonResponse({ error: "Unauthorized." }, 401, corsHeaders);
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", authData.user.id)
+      .single();
+
+    if (!profile?.stripe_customer_id) {
+      return jsonResponse({ error: "No Stripe customer found." }, 400, corsHeaders);
+    }
+
+    const appUrl = normalizeAppUrl(Deno.env.get("APP_URL") ?? "");
+    if (!appUrl) {
+      return jsonResponse({ error: "APP_URL is not configured." }, 500, corsHeaders);
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${appUrl}/account`
+    });
+
+    return jsonResponse({ url: session.url }, 200, corsHeaders);
+  } catch (err) {
+    const payload = buildErrorPayload(err);
+    return jsonResponse(payload.body, payload.status, corsHeaders);
   }
-
-  if (req.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405, corsHeaders);
-  }
-
-  if (!stripeSecretKey || !supabaseUrl || !supabaseServiceKey) {
-    return jsonResponse({ error: "Server is missing configuration." }, 500, corsHeaders);
-  }
-
-  const authHeader = req.headers.get("Authorization") ?? "";
-  const token = authHeader.replace("Bearer ", "").trim();
-  if (!token) {
-    return jsonResponse({ error: "Missing authorization token." }, 401, corsHeaders);
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
-  });
-
-  const { data: authData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !authData?.user) {
-    return jsonResponse({ error: "Unauthorized." }, 401, corsHeaders);
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("stripe_customer_id")
-    .eq("id", authData.user.id)
-    .single();
-
-  if (!profile?.stripe_customer_id) {
-    return jsonResponse({ error: "No Stripe customer found." }, 400, corsHeaders);
-  }
-
-  const appUrl = normalizeAppUrl(Deno.env.get("APP_URL") ?? "");
-  if (!appUrl) {
-    return jsonResponse({ error: "APP_URL is not configured." }, 500, corsHeaders);
-  }
-  const session = await stripe.billingPortal.sessions.create({
-    customer: profile.stripe_customer_id,
-    return_url: `${appUrl}/account`
-  });
-
-  return jsonResponse({ url: session.url }, 200, corsHeaders);
 });
