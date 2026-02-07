@@ -427,11 +427,50 @@
       "apikey": config.SUPABASE_ANON_KEY
     };
 
-    const res = await fetch(`${functionsBase}/${path}`, {
-      method: "POST",
-      headers,
-      body: body ? JSON.stringify(body) : undefined
-    });
+    let res;
+    try {
+      res = await fetch(`${functionsBase}/${path}`, {
+        method: "POST",
+        headers,
+        body: body ? JSON.stringify(body) : undefined
+      });
+    } catch (err) {
+      // Fallback path when browser blocks/aborts raw fetch for any reason.
+      try {
+        const invokeOptions = {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          }
+        };
+        if (body !== null && body !== undefined) {
+          invokeOptions.body = body;
+        }
+        const { data, error } = await state.client.functions.invoke(path, invokeOptions);
+        if (!error) {
+          return { ok: true, status: 200, payload: data || {} };
+        }
+
+        let status = 500;
+        let payload = {};
+        if (error.context) {
+          status = error.context.status;
+          payload = await parseJsonSafe(error.context);
+        } else if (typeof error.status === "number") {
+          status = error.status;
+        }
+
+        const message = payload?.error || payload?.message || error.message || "Function invoke failed.";
+        return { ok: false, status, payload: { ...payload, message } };
+      } catch (fallbackErr) {
+        const message = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+        const original = err instanceof Error ? err.message : String(err);
+        return {
+          ok: false,
+          status: 0,
+          payload: { message: `Network error while calling billing service. (${original}; fallback: ${message})` }
+        };
+      }
+    }
 
     if (res.status !== 401 || !retryOn401 || !state.client) {
       return { ok: res.ok, status: res.status, payload: await parseJsonSafe(res) };
@@ -498,8 +537,9 @@
       } else {
         alert("Checkout session was created but no redirect URL was returned.");
       }
-    } catch (_err) {
-      alert("Network error while starting checkout. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error.";
+      alert(`Unexpected checkout error: ${message}`);
     }
   }
 
@@ -539,8 +579,9 @@
       } else {
         alert("Billing portal session was created but no redirect URL was returned.");
       }
-    } catch (_err) {
-      alert("Network error while opening billing portal. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error.";
+      alert(`Unexpected billing portal error: ${message}`);
     }
   }
 
