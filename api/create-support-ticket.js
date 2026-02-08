@@ -27,33 +27,62 @@ export default async function handler(req, res) {
     return sendJson(res, 405, { error: "Method not allowed." });
   }
 
-  const authorization = req.headers.authorization || "";
-  if (!authorization) {
-    return sendJson(res, 401, { error: "Missing authorization token." });
-  }
-
-  const apikey = req.headers.apikey || process.env.SUPABASE_ANON_KEY || "";
-  if (!apikey) {
-    return sendJson(res, 500, { error: "Missing Supabase anon key on proxy." });
+  const serviceRoleKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  if (!serviceRoleKey) {
+    return sendJson(res, 500, { error: "Server missing SUPABASE_SERVICE_ROLE_KEY." });
   }
 
   try {
-    const upstream = await fetch(`${getSupabaseUrl()}/functions/v1/create-support-ticket`, {
+    const payload = JSON.parse(getBodyText(req));
+    const email = String(payload?.email || "").trim();
+    const subject = String(payload?.subject || "Message board").trim().slice(0, 140);
+    const message = String(payload?.message || "").trim().slice(0, 5000);
+
+    if (!email || !email.includes("@")) {
+      return sendJson(res, 400, { error: "Valid email is required." });
+    }
+    if (!message || message.length < 2) {
+      return sendJson(res, 400, { error: "Message is required." });
+    }
+
+    const upstream = await fetch(`${getSupabaseUrl()}/rest/v1/support_tickets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": authorization,
-        "apikey": apikey
+        "Authorization": `Bearer ${serviceRoleKey}`,
+        "apikey": serviceRoleKey,
+        "Prefer": "return=representation"
       },
-      body: getBodyText(req)
+      body: JSON.stringify({
+        user_id: null,
+        email,
+        subject: subject || "Message board",
+        message,
+        status: "open"
+      })
     });
 
     const text = await upstream.text();
-    res.statusCode = upstream.status;
-    res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/json");
-    res.end(text);
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (_err) {
+      data = null;
+    }
+
+    if (!upstream.ok) {
+      const error =
+        data?.message ||
+        data?.error_description ||
+        data?.error ||
+        `Message insert failed (status ${upstream.status}).`;
+      return sendJson(res, upstream.status, { error });
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    return sendJson(res, 200, { ticketId: row?.id || null });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    sendJson(res, 502, { error: `Support proxy upstream request failed: ${message}` });
+    sendJson(res, 502, { error: `Could not post message: ${message}` });
   }
 }

@@ -279,22 +279,22 @@
 
         <hr class="divider" style="margin:20px 0;">
 
-        <h2 style="margin:0;">Contact support</h2>
-        <p class="muted" style="margin-top:8px;">Need help with billing, account, or your plan? Send us a ticket here.</p>
+        <h2 style="margin:0;">Message board</h2>
+        <p class="muted" style="margin-top:8px;">Leave a message and we will see it in our dashboard.</p>
         <form id="support-form" class="form-stack">
           <div class="form-field">
             <label for="support-email">Your email</label>
             <input class="input" type="email" id="support-email" name="email" autocomplete="email" required />
           </div>
           <div class="form-field">
-            <label for="support-subject">Subject</label>
-            <input class="input" type="text" id="support-subject" name="subject" maxlength="140" placeholder="What do you need help with?" required />
+            <label for="support-subject">Subject (optional)</label>
+            <input class="input" type="text" id="support-subject" name="subject" maxlength="140" placeholder="Optional subject" />
           </div>
           <div class="form-field">
             <label for="support-message">Message</label>
-            <textarea class="input" id="support-message" name="message" rows="5" maxlength="5000" placeholder="Share details so we can help quickly." required></textarea>
+            <textarea class="input" id="support-message" name="message" rows="5" maxlength="5000" placeholder="Write your message here." required></textarea>
           </div>
-          <button class="button" type="submit">Send support ticket</button>
+          <button class="button" type="submit">Post message</button>
           <div class="auth-message" data-support-message></div>
         </form>
       </section>
@@ -388,30 +388,40 @@
 
     document.getElementById("support-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.createSupportTicket !== "function") {
-        showSupportMessage("Support is not configured yet. Email marco@idrovofox.com.", "error");
-        return;
-      }
 
       const email = document.getElementById("support-email").value.trim();
       const subject = document.getElementById("support-subject").value.trim();
       const message = document.getElementById("support-message").value.trim();
-      if (!email || !subject || !message) {
-        showSupportMessage("Fill in email, subject, and message first.", "error");
+      if (!email || !message) {
+        showSupportMessage("Fill in email and message first.", "error");
         return;
       }
 
-      showSupportMessage("Sending your ticket…", "info");
-      const { data, error } = await window.BudgetDadAuth.createSupportTicket({ email, subject, message });
-      if (error) {
-        showSupportMessage(error.message || "Could not send support ticket.", "error");
+      showSupportMessage("Posting your message…", "info");
+      try {
+        const response = await fetch("/api/create-support-ticket", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            subject: subject || "Message board",
+            message
+          })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          showSupportMessage(payload.error || payload.message || "Could not post message.", "error");
+          return;
+        }
+
+        showSupportMessage(`Message posted. ID: ${payload.ticketId || "created"}.`, "success");
+        document.getElementById("support-subject").value = "";
+        document.getElementById("support-message").value = "";
+      } catch (_err) {
+        showSupportMessage("Could not post message right now. Try again in a moment.", "error");
         return;
       }
-
-      const warning = data?.warning ? ` ${data.warning}` : "";
-      showSupportMessage(`Ticket sent. ID: ${data?.ticketId || "created"}.${warning}`, "success");
-      document.getElementById("support-subject").value = "";
-      document.getElementById("support-message").value = "";
     });
 
     if (document.readyState === "loading") {
