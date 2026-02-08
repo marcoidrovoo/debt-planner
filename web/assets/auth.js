@@ -469,6 +469,7 @@
     const targetUrls = getFunctionTargets(path);
     let res = null;
     let firstNetworkError = null;
+    let apiUnauthorizedRes = null;
 
     for (const targetUrl of targetUrls) {
       // Fallback path when browser blocks/aborts raw fetch for any reason.
@@ -483,6 +484,13 @@
         if (candidateRes.status === 404 && targetUrl.includes("/api/")) {
           continue;
         }
+        // If Vercel API proxy rejects auth, try direct Supabase function URL.
+        if ((candidateRes.status === 401 || candidateRes.status === 403) && targetUrl.includes("/api/")) {
+          if (!apiUnauthorizedRes) {
+            apiUnauthorizedRes = candidateRes;
+          }
+          continue;
+        }
 
         res = candidateRes;
         break;
@@ -491,6 +499,10 @@
           firstNetworkError = err;
         }
       }
+    }
+
+    if (!res && apiUnauthorizedRes) {
+      res = apiUnauthorizedRes;
     }
 
     if (!res) {
@@ -551,6 +563,7 @@
     }
 
     let retryRes = null;
+    let retryApiUnauthorizedRes = null;
     for (const targetUrl of targetUrls) {
       try {
         const candidateRes = await fetch(targetUrl, {
@@ -565,12 +578,22 @@
         if (candidateRes.status === 404 && targetUrl.includes("/api/")) {
           continue;
         }
+        if ((candidateRes.status === 401 || candidateRes.status === 403) && targetUrl.includes("/api/")) {
+          if (!retryApiUnauthorizedRes) {
+            retryApiUnauthorizedRes = candidateRes;
+          }
+          continue;
+        }
 
         retryRes = candidateRes;
         break;
       } catch (_err) {
         // Try next function target URL.
       }
+    }
+
+    if (!retryRes && retryApiUnauthorizedRes) {
+      retryRes = retryApiUnauthorizedRes;
     }
 
     if (!retryRes) {
@@ -791,7 +814,16 @@
 
     if (!ok) {
       if (status === 401) {
-        requireAuth();
+        if (state.client) {
+          await state.client.auth.signOut();
+        }
+        state.user = null;
+        state.profile = null;
+        state.paid = false;
+        updateAuthUI();
+        applyPaidGate();
+        const redirect = buildRedirectParam();
+        window.location.href = `/login?redirect=${redirect}`;
         return { data: null, error: { message: "Session expired. Please sign in again." } };
       }
       return {
