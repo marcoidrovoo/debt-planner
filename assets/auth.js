@@ -147,10 +147,8 @@
     return data.session || null;
   }
 
-  function looksLikeJwt(token) {
-    if (!token || typeof token !== "string") return false;
-    const parts = token.split(".");
-    return parts.length === 3 && parts.every(part => part.length > 0);
+  function hasAccessToken(token) {
+    return typeof token === "string" && token.trim().length > 0;
   }
 
   async function getFreshSession() {
@@ -158,7 +156,7 @@
     if (!state.client || !session) return session;
 
     const expiresAtMs = (session.expires_at || 0) * 1000;
-    const hasValidAccessToken = looksLikeJwt(session.access_token);
+    const hasValidAccessToken = hasAccessToken(session.access_token);
     const shouldRefresh = !hasValidAccessToken || !expiresAtMs || (expiresAtMs - Date.now()) < 60 * 1000;
     if (!shouldRefresh) return session;
 
@@ -166,14 +164,14 @@
     if (error) return hasValidAccessToken ? session : null;
     const refreshed = data.session || null;
     if (!refreshed) return hasValidAccessToken ? session : null;
-    return looksLikeJwt(refreshed.access_token) ? refreshed : (hasValidAccessToken ? session : null);
+    return hasAccessToken(refreshed.access_token) ? refreshed : (hasValidAccessToken ? session : null);
   }
 
   async function ensureProjectSession() {
     if (!state.client) return null;
 
     const session = await getFreshSession();
-    if (!session?.access_token || !looksLikeJwt(session.access_token)) {
+    if (!hasAccessToken(session?.access_token)) {
       return null;
     }
 
@@ -184,7 +182,7 @@
 
     const { data, error } = await state.client.auth.refreshSession();
     const refreshed = error ? null : (data.session || null);
-    if (refreshed?.access_token && looksLikeJwt(refreshed.access_token)) {
+    if (hasAccessToken(refreshed?.access_token)) {
       const refreshedUser = await state.client.auth.getUser(refreshed.access_token);
       if (!refreshedUser.error && refreshedUser.data?.user) {
         return refreshed;
@@ -458,8 +456,8 @@
   }
 
   async function postFunctionWithSession(path, body, session, retryOn401 = true) {
-    if (!session?.access_token || !looksLikeJwt(session.access_token)) {
-      return { ok: false, status: 401, payload: { message: "Invalid JWT" } };
+    if (!hasAccessToken(session?.access_token)) {
+      return { ok: false, status: 401, payload: { message: "Session token missing. Please sign in again." } };
     }
 
     const headers = {
@@ -538,8 +536,18 @@
     }
 
     const { data, error } = await state.client.auth.refreshSession();
-    if (error || !data?.session?.access_token || !looksLikeJwt(data.session.access_token)) {
-      return { ok: res.ok, status: res.status, payload: await parseJsonSafe(res) };
+    if (error || !hasAccessToken(data?.session?.access_token)) {
+      await state.client.auth.signOut();
+      state.user = null;
+      state.profile = null;
+      state.paid = false;
+      updateAuthUI();
+      applyPaidGate();
+      return {
+        ok: false,
+        status: 401,
+        payload: { message: "Session expired. Please sign in again." }
+      };
     }
 
     let retryRes = null;
@@ -775,13 +783,17 @@
       email: String(payload?.email || state.user?.email || "").trim()
     };
 
-    const { ok, payload: responsePayload } = await invokeProjectFunction(
+    const { ok, status, payload: responsePayload } = await invokeProjectFunction(
       "create-support-ticket",
       body,
       session
     );
 
     if (!ok) {
+      if (status === 401) {
+        requireAuth();
+        return { data: null, error: { message: "Session expired. Please sign in again." } };
+      }
       return {
         data: null,
         error: {
