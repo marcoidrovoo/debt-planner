@@ -276,20 +276,42 @@
           <button class="button secondary" type="submit">Save profile</button>
           <div class="auth-message" data-profile-message></div>
         </form>
+
+        <hr class="divider" style="margin:20px 0;">
+
+        <h2 style="margin:0;">Contact support</h2>
+        <p class="muted" style="margin-top:8px;">Need help with billing, account, or your plan? Send us a ticket here.</p>
+        <form id="support-form" class="form-stack">
+          <div class="form-field">
+            <label for="support-email">Your email</label>
+            <input class="input" type="email" id="support-email" name="email" autocomplete="email" required />
+          </div>
+          <div class="form-field">
+            <label for="support-subject">Subject</label>
+            <input class="input" type="text" id="support-subject" name="subject" maxlength="140" placeholder="What do you need help with?" required />
+          </div>
+          <div class="form-field">
+            <label for="support-message">Message</label>
+            <textarea class="input" id="support-message" name="message" rows="5" maxlength="5000" placeholder="Share details so we can help quickly." required></textarea>
+          </div>
+          <button class="button" type="submit">Send support ticket</button>
+          <div class="auth-message" data-support-message></div>
+        </form>
       </section>
 
       <footer class="card footer">
         <span>© 2026 Budget Dad</span>
         <span>
           <a href="/privacy">Privacy</a> ·
-          <a href="/terms">Terms</a>
+          <a href="/terms">Terms</a> ·
+          <a href="mailto:marco@idrovofox.com">Email support</a>
         </span>
       </footer>
     </main>
   </div>
 
   <script src="/assets/app-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/assets/vendor/supabase-2.45.0.min.js"></script>
   <script src="/assets/auth.js"></script>
   <script>
     function formatDate(dateStr) {
@@ -301,6 +323,14 @@
 
     function showProfileMessage(message, type) {
       const box = document.querySelector("[data-profile-message]");
+      if (!box) return;
+      box.textContent = message;
+      box.dataset.type = type || "info";
+      box.style.display = message ? "block" : "none";
+    }
+
+    function showSupportMessage(message, type) {
+      const box = document.querySelector("[data-support-message]");
       if (!box) return;
       box.textContent = message;
       box.dataset.type = type || "info";
@@ -336,6 +366,10 @@
 
       const nameInput = document.getElementById("full-name");
       if (nameInput) nameInput.value = profile.full_name || "";
+      const supportEmailInput = document.getElementById("support-email");
+      if (supportEmailInput && !supportEmailInput.value) {
+        supportEmailInput.value = profile.email || "";
+      }
     }
 
     document.getElementById("profile-form").addEventListener("submit", async (event) => {
@@ -350,6 +384,34 @@
       }
       showProfileMessage("Profile updated.", "success");
       await loadAccount();
+    });
+
+    document.getElementById("support-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.createSupportTicket !== "function") {
+        showSupportMessage("Support is not configured yet. Email marco@idrovofox.com.", "error");
+        return;
+      }
+
+      const email = document.getElementById("support-email").value.trim();
+      const subject = document.getElementById("support-subject").value.trim();
+      const message = document.getElementById("support-message").value.trim();
+      if (!email || !subject || !message) {
+        showSupportMessage("Fill in email, subject, and message first.", "error");
+        return;
+      }
+
+      showSupportMessage("Sending your ticket…", "info");
+      const { data, error } = await window.BudgetDadAuth.createSupportTicket({ email, subject, message });
+      if (error) {
+        showSupportMessage(error.message || "Could not send support ticket.", "error");
+        return;
+      }
+
+      const warning = data?.warning ? ` ${data.warning}` : "";
+      showSupportMessage(`Ticket sent. ID: ${data?.ticketId || "created"}.${warning}`, "success");
+      document.getElementById("support-subject").value = "";
+      document.getElementById("support-message").value = "";
     });
 
     if (document.readyState === "loading") {

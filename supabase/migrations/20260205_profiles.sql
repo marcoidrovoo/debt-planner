@@ -31,10 +31,12 @@ create index if not exists profiles_stripe_subscription_id_idx on public.profile
 alter table public.profiles enable row level security;
 
 -- Only owners can view/update their profile row
+drop policy if exists "Profiles are viewable by owner" on public.profiles;
 create policy "Profiles are viewable by owner" on public.profiles
   for select
   using (auth.uid() = id);
 
+drop policy if exists "Profiles are updatable by owner" on public.profiles;
 create policy "Profiles are updatable by owner" on public.profiles
   for update
   using (auth.uid() = id)

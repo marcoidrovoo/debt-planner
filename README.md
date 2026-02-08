@@ -85,6 +85,10 @@ Edit both `assets/app-config.js` and `web/assets/app-config.js` with:
 - Supabase URL + anon key
 - App URL
 
+Security note:
+- The Supabase browser SDK is vendored locally at `assets/vendor/supabase-2.45.0.min.js` and `web/assets/vendor/supabase-2.45.0.min.js` to avoid runtime CDN dependency.
+- When upgrading SDK versions, replace both files with the same version and verify checksums match.
+
 ### 7) Test flow
 - Visit `/signup` → create account
 - `/login` → sign in

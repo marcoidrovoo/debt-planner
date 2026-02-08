@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "serve": "npx http-server web -p 5173",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",
     "cap:add:android": "npx cap add android",
@@ -12,7 +14,11 @@
     "cap:open:android": "npx cap open android"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@capacitor/cli": "^6.1.0"
+  },
+  "overrides": {
+    "tar": "^7.5.7"
   },
   "dependencies": {
     "@capacitor/core": "^6.1.0",

@@ -8,6 +8,8 @@ function normalizeOrigin(raw: string): string | null {
   }
 }
 
+const DEFAULT_APP_ORIGIN = "https://budgetdad.vercel.app";
+
 function getAllowedOrigins(): string[] {
   const envOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
     .split(",")
@@ -15,7 +17,7 @@ function getAllowedOrigins(): string[] {
     .filter(Boolean);
   const appUrl = Deno.env.get("APP_URL") ?? "";
 
-  const origins = [...envOrigins, appUrl]
+  const origins = [...envOrigins, appUrl, DEFAULT_APP_ORIGIN]
     .map(normalizeOrigin)
     .filter((origin): origin is string => Boolean(origin));
 
@@ -34,6 +36,7 @@ export function buildCorsHeaders(req: Request) {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
 }

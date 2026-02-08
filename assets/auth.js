@@ -1,5 +1,8 @@
 (function () {
   const config = window.BUDGET_DAD_CONFIG || {};
+  const SUPPORT_EMAIL = "marco@idrovofox.com";
+  const DEFAULT_POST_LOGIN_REDIRECT = "/planner";
+  const DEFAULT_POST_CHECKOUT_REDIRECT = "/planner?checkout=success";
   function isConfiguredValue(value) {
     if (!value) return false;
     const normalized = String(value).trim();
@@ -201,7 +204,7 @@
     const url = window.location.pathname + window.location.search;
     return encodeURIComponent(url);
   }
-  function safeRedirect(value, fallback = "/account") {
+  function safeRedirect(value, fallback = DEFAULT_POST_LOGIN_REDIRECT) {
     if (!value) return fallback;
     try {
       const url = new URL(value, window.location.origin);
@@ -306,7 +309,7 @@
     await refreshUser();
     await refreshProfile();
     const params = new URLSearchParams(window.location.search);
-    const redirect = safeRedirect(params.get("redirect"), "/account");
+    const redirect = safeRedirect(params.get("redirect"), DEFAULT_POST_LOGIN_REDIRECT);
     window.location.href = redirect;
   }
 
@@ -318,14 +321,14 @@
     showFormMessage(form, "Creating your account…", "info");
     const appUrl = getConfiguredAppUrl();
     if (!appUrl) {
-      showFormMessage(form, "APP_URL is not configured. Contact support.", "error");
+      showFormMessage(form, `APP_URL is not configured. Contact support at ${SUPPORT_EMAIL}.`, "error");
       return;
     }
     const { data, error } = await state.client.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${appUrl}/account`
+        emailRedirectTo: `${appUrl}/planner`
       }
     });
 
@@ -337,7 +340,7 @@
     if (data?.user && data?.session) {
       await refreshUser();
       await refreshProfile();
-      window.location.href = "/account";
+      window.location.href = DEFAULT_POST_LOGIN_REDIRECT;
       return;
     }
 
@@ -356,7 +359,7 @@
     showFormMessage(form, "Sending reset link…", "info");
     const appUrl = getConfiguredAppUrl();
     if (!appUrl) {
-      showFormMessage(form, "APP_URL is not configured. Contact support.", "error");
+      showFormMessage(form, `APP_URL is not configured. Contact support at ${SUPPORT_EMAIL}.`, "error");
       return;
     }
     const { error } = await state.client.auth.resetPasswordForEmail(email, {
@@ -539,14 +542,36 @@
       return { ok: res.ok, status: res.status, payload: await parseJsonSafe(res) };
     }
 
-    const retryRes = await fetch(`${functionsBase}/${path}`, {
-      method: "POST",
-      headers: {
-        ...headers,
-        "Authorization": `Bearer ${data.session.access_token}`
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
+    let retryRes = null;
+    for (const targetUrl of targetUrls) {
+      try {
+        const candidateRes = await fetch(targetUrl, {
+          method: "POST",
+          headers: {
+            ...headers,
+            "Authorization": `Bearer ${data.session.access_token}`
+          },
+          body: body ? JSON.stringify(body) : undefined
+        });
+
+        if (candidateRes.status === 404 && targetUrl.includes("/api/")) {
+          continue;
+        }
+
+        retryRes = candidateRes;
+        break;
+      } catch (_err) {
+        // Try next function target URL.
+      }
+    }
+
+    if (!retryRes) {
+      return {
+        ok: false,
+        status: 0,
+        payload: { message: "Could not reach billing service after refreshing session." }
+      };
+    }
 
     return { ok: retryRes.ok, status: retryRes.status, payload: await parseJsonSafe(retryRes) };
   }
@@ -555,12 +580,17 @@
     return postFunctionWithSession(path, body, session, retryOn401);
   }
 
-  async function startCheckout(plan) {
+  async function startCheckout(plan, options = {}) {
     initClient();
     if (!state.client) {
       alert("Subscriptions are not configured yet.");
       return;
     }
+
+    const postCheckoutRedirect = safeRedirect(
+      options.postCheckoutRedirect,
+      DEFAULT_POST_CHECKOUT_REDIRECT
+    );
 
     const session = await ensureProjectSession();
     if (!session) {
@@ -572,7 +602,7 @@
     try {
       const { ok, status, payload } = await invokeProjectFunction(
         "create-checkout-session",
-        { plan },
+        { plan, postCheckoutRedirect },
         session
       );
       if (status === 409 && payload?.code === "active_subscription_exists") {
@@ -661,6 +691,108 @@
     return { error };
   }
 
+  async function getPlannerSnapshot() {
+    initClient();
+    if (!state.client) {
+      return { data: null, error: { message: "Auth is not configured." } };
+    }
+    if (!state.user) {
+      return { data: null, error: { message: "You must be signed in." } };
+    }
+
+    const { data, error } = await state.client
+      .from("planner_snapshots")
+      .select("snapshot,updated_at")
+      .eq("user_id", state.user.id)
+      .maybeSingle();
+
+    if (error) {
+      return { data: null, error };
+    }
+
+    return {
+      data: data
+        ? { snapshot: data.snapshot || {}, updatedAt: data.updated_at || null }
+        : null,
+      error: null
+    };
+  }
+
+  async function savePlannerSnapshot(snapshot) {
+    initClient();
+    if (!state.client) {
+      return { error: { message: "Auth is not configured." } };
+    }
+    if (!state.user) {
+      return { error: { message: "You must be signed in." } };
+    }
+
+    const payload = (snapshot && typeof snapshot === "object") ? snapshot : {};
+
+    const { error } = await state.client
+      .from("planner_snapshots")
+      .upsert(
+        {
+          user_id: state.user.id,
+          snapshot: payload
+        },
+        { onConflict: "user_id" }
+      );
+
+    return { error };
+  }
+
+  async function clearPlannerSnapshot() {
+    initClient();
+    if (!state.client) {
+      return { error: { message: "Auth is not configured." } };
+    }
+    if (!state.user) {
+      return { error: { message: "You must be signed in." } };
+    }
+
+    const { error } = await state.client
+      .from("planner_snapshots")
+      .delete()
+      .eq("user_id", state.user.id);
+    return { error };
+  }
+
+  async function createSupportTicket(payload) {
+    initClient();
+    if (!state.client) {
+      return { data: null, error: { message: "Support is not configured yet." } };
+    }
+
+    const session = await ensureProjectSession();
+    if (!session) {
+      return { data: null, error: { message: "Session is invalid. Please sign in again." } };
+    }
+
+    const body = {
+      subject: String(payload?.subject || "").trim(),
+      message: String(payload?.message || "").trim(),
+      email: String(payload?.email || state.user?.email || "").trim()
+    };
+
+    const { ok, payload: responsePayload } = await invokeProjectFunction(
+      "create-support-ticket",
+      body,
+      session
+    );
+
+    if (!ok) {
+      return {
+        data: null,
+        error: {
+          message: responsePayload?.error || responsePayload?.message || `Could not submit support ticket. Contact ${SUPPORT_EMAIL}.`
+        }
+      };
+    }
+
+    return { data: responsePayload, error: null };
+  }
+
   function wireAuthForms() {
     document.querySelectorAll("[data-auth-form='login']").forEach(form => {
       form.addEventListener("submit", evt => {
@@ -724,7 +856,11 @@
     startCheckout,
     openBillingPortal,
     updateProfile,
-    applyPaidGate
+    applyPaidGate,
+    getPlannerSnapshot,
+    savePlannerSnapshot,
+    clearPlannerSnapshot,
+    createSupportTicket
   };
 
   if (document.readyState === "loading") {

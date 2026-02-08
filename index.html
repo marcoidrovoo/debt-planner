@@ -467,7 +467,7 @@
         <div class="faq">
           <details>
             <summary>Where is my data stored?</summary>
-            <div class="section-desc">Planner entries stay on your device unless you create an account and use billing/account features.</div>
+            <div class="section-desc">Sign-in is required to use the planner. Entries stay on your device unless you choose billing/account actions.</div>
           </details>
           <details>
             <summary>How long does setup take?</summary>
@@ -485,14 +485,15 @@
         <span>
           <a href="/planner">Planner</a> ·
           <a href="/privacy">Privacy</a> ·
-          <a href="/terms">Terms</a>
+          <a href="/terms">Terms</a> ·
+          <a href="mailto:marco@idrovofox.com">Email support</a>
         </span>
       </footer>
     </main>
   </div>
 
   <script>
-    const EMAIL_TO = "support@budgetdad.com";
+    const EMAIL_TO = "marco@idrovofox.com";
     const form = document.getElementById("email-capture-form");
     const feedback = document.getElementById("email-feedback");
 
@@ -511,7 +512,7 @@
     }
   </script>
   <script src="/assets/app-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/assets/vendor/supabase-2.45.0.min.js"></script>
   <script src="/assets/auth.js"></script>
 </body>
 </html>

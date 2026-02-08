@@ -18,7 +18,7 @@ function jsonResponse(
 ) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" }
+    headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" }
   });
 }
 
@@ -56,6 +56,32 @@ function normalizeAppUrl(raw: string): string | null {
   }
 }
 
+function normalizeRelativePath(raw: unknown, fallback: string) {
+  if (typeof raw !== "string") return fallback;
+  const trimmed = raw.trim();
+  if (!trimmed || !trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    return fallback;
+  }
+  try {
+    const parsed = new URL(trimmed, "https://budgetdad.local");
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch (_err) {
+    return fallback;
+  }
+}
+
+function ensureCheckoutSuccessFlag(path: string) {
+  try {
+    const parsed = new URL(path, "https://budgetdad.local");
+    if (parsed.searchParams.get("checkout") !== "success") {
+      parsed.searchParams.set("checkout", "success");
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch (_err) {
+    return "/planner?checkout=success";
+  }
+}
+
 function hasBlockingSubscriptionStatus(status: string | null | undefined) {
   return status === "active" || status === "trialing" || status === "past_due" || status === "unpaid";
 }
@@ -82,7 +108,7 @@ serve(async (req) => {
       return jsonResponse({ error: "Missing authorization token." }, 401, corsHeaders);
     }
 
-    let payload: { plan?: string } = {};
+    let payload: { plan?: string; postCheckoutRedirect?: string } = {};
     try {
       payload = await req.json();
     } catch (_err) {
@@ -163,6 +189,9 @@ serve(async (req) => {
     const yearlyPriceId = Deno.env.get("STRIPE_PRICE_ID_YEARLY") ?? "";
     const plan = payload.plan;
     const priceId = plan === "monthly" ? monthlyPriceId : plan === "yearly" ? yearlyPriceId : "";
+    const postCheckoutRedirect = ensureCheckoutSuccessFlag(
+      normalizeRelativePath(payload.postCheckoutRedirect, "/planner?checkout=success")
+    );
     if (!priceId) {
       return jsonResponse({ error: "Price ID not configured for plan." }, 400, corsHeaders);
     }
@@ -176,7 +205,7 @@ serve(async (req) => {
       subscription_data: {
         metadata: { supabase_uid: user.id }
       },
-      success_url: `${appUrl}/account?checkout=success`,
+      success_url: `${appUrl}${postCheckoutRedirect}`,
       cancel_url: `${appUrl}/pricing?checkout=cancel`
     });
 

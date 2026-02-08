@@ -974,6 +974,7 @@
       <section class="card" aria-labelledby="step5-title">
         <h2 class="section-title" id="step5-title">Step 5 — Plan Output</h2>
         <p class="section-desc">Calculate what to do with your next paycheck and keep your plan saved on this device.</p>
+        <div id="planner-status-message" class="muted" style="display:none; margin-bottom:12px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-2);"></div>
         <div class="field" style="margin-top:6px;">
           <label>Plan focus
             <span class="tooltip" tabindex="0" data-tooltip="Controls how extra cash is split after bills and minimums.">?</span>
@@ -1012,7 +1013,7 @@
         <div class="faq">
           <details>
             <summary>Where is my data stored?</summary>
-            <div class="muted">Planner entries stay on your device unless you create an account and use billing/account features.</div>
+            <div class="muted">Sign-in is required to use the planner. Your entries stay on your device unless you choose billing/account actions.</div>
           </details>
           <details>
             <summary>What if my pay varies?</summary>
@@ -1030,7 +1031,8 @@
         <span>
           <a href="/">Home</a> ·
           <a href="/privacy">Privacy</a> ·
-          <a href="/terms">Terms</a>
+          <a href="/terms">Terms</a> ·
+          <a href="mailto:marco@idrovofox.com">Email support</a>
         </span>
       </footer>
     </main>
@@ -1430,13 +1432,106 @@
     // =========================
     // Storage (local or session)
     // =========================
+    const SNAPSHOT_KEYS = ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode"];
+    let plannerSyncReady = false;
+    let plannerSyncTimer = null;
+    let applyingRemoteSnapshot = false;
+
     function getStorage() {
       const preferLocal = document.getElementById("remember-data")?.checked;
       return preferLocal ? window.localStorage : window.sessionStorage;
     }
+    function getPlannerValue(key) {
+      const localVal = window.localStorage.getItem(key);
+      if (localVal !== null) return localVal;
+      return window.sessionStorage.getItem(key);
+    }
+    function buildPlannerSnapshot() {
+      const snapshot = {
+        rememberData: window.localStorage.getItem("rememberData") === "yes" ? "yes" : "no",
+        values: {},
+        version: 1
+      };
+
+      SNAPSHOT_KEYS.forEach(key => {
+        const value = getPlannerValue(key);
+        if (value !== null) {
+          snapshot.values[key] = value;
+        }
+      });
+
+      return snapshot;
+    }
+    function applyPlannerSnapshot(snapshot) {
+      if (!snapshot || typeof snapshot !== "object") return;
+      const values = snapshot.values && typeof snapshot.values === "object" ? snapshot.values : {};
+      const rememberData = snapshot.rememberData === "yes" ? "yes" : "no";
+      const preferLocal = rememberData === "yes";
+      const target = preferLocal ? window.localStorage : window.sessionStorage;
+      const other = preferLocal ? window.sessionStorage : window.localStorage;
+
+      applyingRemoteSnapshot = true;
+      try {
+        window.localStorage.setItem("rememberData", rememberData);
+        SNAPSHOT_KEYS.forEach(key => {
+          window.localStorage.removeItem(key);
+          window.sessionStorage.removeItem(key);
+          const value = values[key];
+          if (typeof value === "string") {
+            target.setItem(key, value);
+            other.removeItem(key);
+          }
+        });
+
+        const checkbox = document.getElementById("remember-data");
+        if (checkbox) {
+          checkbox.checked = preferLocal;
+        }
+      } finally {
+        applyingRemoteSnapshot = false;
+      }
+    }
+    async function savePlannerSnapshotToCloud() {
+      if (!plannerSyncReady || applyingRemoteSnapshot) return;
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.savePlannerSnapshot !== "function") return;
+
+      const { error } = await window.BudgetDadAuth.savePlannerSnapshot(buildPlannerSnapshot());
+      if (error) {
+        console.warn("Planner cloud save failed", error);
+      }
+    }
+    function schedulePlannerSnapshotSave() {
+      if (!plannerSyncReady || applyingRemoteSnapshot) return;
+      if (plannerSyncTimer) {
+        window.clearTimeout(plannerSyncTimer);
+      }
+      plannerSyncTimer = window.setTimeout(() => {
+        savePlannerSnapshotToCloud();
+      }, 700);
+    }
+    async function hydratePlannerFromCloud() {
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.getPlannerSnapshot !== "function") {
+        plannerSyncReady = true;
+        return;
+      }
+
+      const { data, error } = await window.BudgetDadAuth.getPlannerSnapshot();
+      if (error) {
+        console.warn("Planner cloud load failed", error);
+        plannerSyncReady = true;
+        return;
+      }
+
+      if (data?.snapshot) {
+        applyPlannerSnapshot(data.snapshot);
+      }
+
+      plannerSyncReady = true;
+    }
     function saveDebtStrategy() {
       const strategy = strVal("debt-strategy") || "snowball";
       getStorage().setItem("debtStrategy", strategy);
+      schedulePlannerSnapshotSave();
     }
     function loadDebtStrategy() {
       const saved = getStorage().getItem("debtStrategy");
@@ -1455,6 +1550,7 @@
           source.removeItem(key);
         }
       });
+      schedulePlannerSnapshotSave();
     }
     function initStoragePreference() {
       const saved = window.localStorage.getItem("rememberData");
@@ -1501,26 +1597,88 @@
       modal.classList.remove("active");
       modal.setAttribute("aria-hidden", "true");
     }
+    function showPlannerStatus(message, type = "info") {
+      const box = document.getElementById("planner-status-message");
+      if (!box) return;
+      if (!message) {
+        box.style.display = "none";
+        box.textContent = "";
+        return;
+      }
+      const palette = {
+        info: { bg: "#eff6ff", border: "#bfdbfe", text: "#1e40af" },
+        success: { bg: "#ecfdf3", border: "#bbf7d0", text: "#166534" },
+        error: { bg: "#fff1f2", border: "#fecdd3", text: "#9f1239" }
+      };
+      const colors = palette[type] || palette.info;
+      box.style.display = "block";
+      box.style.background = colors.bg;
+      box.style.borderColor = colors.border;
+      box.style.color = colors.text;
+      box.textContent = message;
+    }
+    async function ensurePlannerAccess() {
+      if (!window.BudgetDadAuth) {
+        const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?redirect=${redirect}`;
+        return false;
+      }
+      if (typeof window.BudgetDadAuth.waitUntilReady === "function") {
+        await window.BudgetDadAuth.waitUntilReady();
+      }
+      if (typeof window.BudgetDadAuth.ensureProfileReady === "function") {
+        await window.BudgetDadAuth.ensureProfileReady();
+      }
+      if (window.BudgetDadAuth.getUser && window.BudgetDadAuth.getUser()) {
+        return true;
+      }
+      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?redirect=${redirect}`;
+      return false;
+    }
+    async function syncCheckoutSubscription(maxAttempts = 6, delayMs = 1200) {
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.refreshProfile !== "function") {
+        return false;
+      }
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        await window.BudgetDadAuth.refreshProfile();
+        if (window.BudgetDadAuth.isPaid && window.BudgetDadAuth.isPaid()) {
+          return true;
+        }
+        if (attempt < maxAttempts) {
+          await new Promise(resolve => window.setTimeout(resolve, delayMs));
+        }
+      }
+      return false;
+    }
+    function replaceUrlWithoutCheckoutParam(params) {
+      params.delete("checkout");
+      const query = params.toString();
+      const hash = window.location.hash || "";
+      const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
     async function startCheckout(plan) {
       trackEvent("paywall_clicked", { plan });
       if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.startCheckout !== "function") {
         alert("Checkout isn’t configured yet.");
         return;
       }
-      await window.BudgetDadAuth.startCheckout(plan);
+      await window.BudgetDadAuth.startCheckout(plan, { postCheckoutRedirect: "/planner?checkout=success" });
     }
 
     async function refreshSubscription() {
       if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.refreshProfile !== "function") {
-        alert("Sign in to refresh your subscription.");
+        showPlannerStatus("Sign in to refresh your subscription.", "error");
         return;
       }
       await window.BudgetDadAuth.refreshProfile();
       if (window.BudgetDadAuth.isPaid && window.BudgetDadAuth.isPaid()) {
         closePaywall();
         lockPremiumActions(false);
+        showPlannerStatus("Subscription active. Your full planner is unlocked.", "success");
       } else {
-        alert("We couldn't find an active subscription. If you just subscribed, wait a minute and try again.");
+        showPlannerStatus("No active subscription yet. If you just subscribed, wait a few seconds and try again.", "info");
       }
     }
 
@@ -1535,6 +1693,7 @@
       }
 
       getStorage().setItem("incomeData", JSON.stringify(result.data));
+      schedulePlannerSnapshotSave();
       renderStep1Summary(result.data);
       summaryBox.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -1614,6 +1773,7 @@
     }
     function saveBills() {
       getStorage().setItem("billsData", JSON.stringify(bills));
+      schedulePlannerSnapshotSave();
     }
     function renderBills() {
       const list = document.getElementById("bills-list");
@@ -1740,6 +1900,7 @@
     }
     function saveDebts() {
       getStorage().setItem("debtsData", JSON.stringify(debts));
+      schedulePlannerSnapshotSave();
     }
     function renderDebts() {
       const list = document.getElementById("debts-list");
@@ -1882,6 +2043,7 @@
     }
     function saveSavingsGoals() {
       getStorage().setItem("savingsGoalsData", JSON.stringify(savingsGoals));
+      schedulePlannerSnapshotSave();
     }
     function updateGoalTypeUI() {
       const type = strVal("goal-type");
@@ -2050,6 +2212,7 @@
     }
     function saveFocusMode(mode) {
       getStorage().setItem("focusMode", mode);
+      schedulePlannerSnapshotSave();
     }
     function loadFocusMode() {
       return getStorage().getItem("focusMode");
@@ -2619,7 +2782,7 @@
     document.getElementById("add-debt-button").addEventListener("click", addDebt);
     document.getElementById("add-goal-button").addEventListener("click", addSavingsGoal);
     document.getElementById("calc-button").addEventListener("click", calculatePlanUI);
-    document.getElementById("clear-button").addEventListener("click", () => {
+    document.getElementById("clear-button").addEventListener("click", async () => {
       const ok = confirm("Clear all saved income, bills, and debts?");
       if (!ok) return;
       window.localStorage.removeItem("incomeData");
@@ -2634,6 +2797,9 @@
       window.sessionStorage.removeItem("savingsGoalsData");
       window.sessionStorage.removeItem("debtStrategy");
       window.sessionStorage.removeItem("focusMode");
+      if (window.BudgetDadAuth && typeof window.BudgetDadAuth.clearPlannerSnapshot === "function") {
+        await window.BudgetDadAuth.clearPlannerSnapshot();
+      }
       window.location.reload();
     });
     document.getElementById("remember-data").addEventListener("change", () => {
@@ -2685,8 +2851,22 @@
       if (el) el.addEventListener("input", refreshNetPreview);
     });
 
+    window.addEventListener("beforeunload", () => {
+      if (plannerSyncTimer) {
+        window.clearTimeout(plannerSyncTimer);
+        plannerSyncTimer = null;
+      }
+      if (plannerSyncReady && !applyingRemoteSnapshot && window.BudgetDadAuth && typeof window.BudgetDadAuth.savePlannerSnapshot === "function") {
+        window.BudgetDadAuth.savePlannerSnapshot(buildPlannerSnapshot());
+      }
+    });
+
     // Load on start
-    window.addEventListener("load", () => {
+    window.addEventListener("load", async () => {
+      if (!(await ensurePlannerAccess())) return;
+
+      showPlannerStatus("Loading your saved planner...", "info");
+      await hydratePlannerFromCloud();
       initStoragePreference();
       loadIncome();
       loadBills();
@@ -2701,14 +2881,33 @@
       if (savedStrategy) {
         document.getElementById("debt-strategy").value = savedStrategy;
       }
+      showPlannerStatus("", "info");
+
       const params = new URLSearchParams(window.location.search);
-      if (params.get("paywall") === "1") {
+      const fromCheckout = params.get("checkout") === "success";
+      const shouldOpenPaywall = params.get("paywall") === "1";
+
+      if (fromCheckout) {
+        showPlannerStatus("Finalizing your subscription...", "info");
+        const paidNow = await syncCheckoutSubscription();
+        if (paidNow) {
+          closePaywall();
+          lockPremiumActions(false);
+          showPlannerStatus("Payment confirmed. Your full planner is now unlocked.", "success");
+        } else {
+          openPaywall();
+          showPlannerStatus("Payment received. We are still syncing your subscription. Click \"I already subscribed\" in a few seconds.", "info");
+        }
+        replaceUrlWithoutCheckoutParam(params);
+      }
+
+      if (shouldOpenPaywall && !fromCheckout) {
         setTimeout(openPaywall, 200);
       }
     });
   </script>
   <script src="/assets/app-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/assets/vendor/supabase-2.45.0.min.js"></script>
   <script src="/assets/auth.js"></script>
 </body>
 </html>

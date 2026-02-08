@@ -7,3 +7,6 @@ build/
 .npm-cache/
 output/
 supabase/.temp/
+.env
+.env.*
+!.env.example
