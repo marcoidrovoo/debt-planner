@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Budget Dad — Full Plan Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Follow your complete debt payoff and savings roadmap paycheck by paycheck." />
+  <meta name="theme-color" content="#0f6f6a" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
+
+    :root {
+      --bg: #f6f3ee;
+      --bg-2: #ffffff;
+      --card: #ffffff;
+      --card-2: #f5f1ea;
+      --muted: #5b6672;
+      --text: #121722;
+      --accent: #0f6f6a;
+      --accent-2: #d5b47a;
+      --accent-3: #1f2937;
+      --border: #e3dcd1;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --space-lg: 28px;
+      --space-md: 20px;
+      --space-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, var(--bg), var(--bg-2) 60%);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .page {
+      display: flex;
+      justify-content: center;
+      padding: 56px 24px 96px;
+    }
+
+    .layout {
+      width: min(1120px, 100%);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .topbar {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 16px;
+      z-index: 20;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      justify-content: center;
+    }
+
+    .nav-links a { color: var(--muted); text-decoration: none; }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--text); font-weight: 700; }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .auth-actions {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(15, 111, 106, 0.08), transparent 56%), var(--card);
+    }
+
+    h1, h2, h3 {
+      font-family: "Fraunces", "DM Sans", serif;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+
+    h1 { font-size: clamp(1.8rem, 2.4vw, 2.4rem); }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 10px;
+      margin-bottom: 0;
+      font-size: 1rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-3);
+    }
+
+    .status-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--card-2);
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      min-height: 48px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 14px;
+    }
+
+    .stat h3 {
+      font-family: "DM Sans", sans-serif;
+      font-size: 1.2rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .stat .muted {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      margin: 0 0 10px;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      margin: 0 0 var(--space-md);
+      font-size: 0.92rem;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      background: var(--accent);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .button:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12); }
+
+    .button.secondary {
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .button.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .progress-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.2);
+      overflow: hidden;
+    }
+
+    .progress-bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      width: 0;
+      transition: width 0.35s ease;
+    }
+
+    .progress-meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .empty {
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      padding: 12px;
+      text-align: center;
+      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .timeline-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .cycle-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .cycle-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .cycle-title {
+      font-weight: 700;
+      font-size: 0.98rem;
+      margin: 0;
+    }
+
+    .cycle-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 2px;
+    }
+
+    .target-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .target-col {
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: var(--radius-sm);
+      background: rgba(248, 250, 252, 0.9);
+      padding: 10px;
+    }
+
+    .target-col-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-3);
+      margin-bottom: 6px;
+    }
+
+    .target-summary {
+      font-size: 0.78rem;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .target-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .target-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .target-row.ontrack {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .target-row.offtrack {
+      border-color: #fecaca;
+      background: #fff1f2;
+    }
+
+    .target-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .target-values {
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-align: right;
+      font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .cycle-completion {
+      min-width: 180px;
+    }
+
+    .task-list {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: #ffffff;
+    }
+
+    .task-row.done {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .task-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .task-meta {
+      margin-top: 3px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .task-amount {
+      font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88rem;
+      font-weight: 600;
+      min-width: 96px;
+      text-align: right;
+    }
+
+    .task-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      min-width: 135px;
+    }
+
+    .tiny {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tiny.done {
+      border-color: #15803d;
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer a:hover { color: var(--text); }
+
+    .mono {
+      font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88rem;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 32px 16px 60px; }
+      .topbar { grid-template-columns: 1fr; justify-items: center; }
+      .topbar-actions { width: 100%; justify-content: center; }
+      .stat-row { grid-template-columns: 1fr; }
+      .target-grid { grid-template-columns: 1fr; }
+      .task-row { flex-direction: column; align-items: flex-start; }
+      .task-actions { width: 100%; align-items: flex-start; }
+      .task-amount { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="layout">
+      <div class="topbar">
+        <div class="brand"><span class="brand-badge">BD</span> Budget Dad</div>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/planner">Planner</a>
+          <a href="/plan" class="active">Full Plan</a>
+          <a href="/strategy">Debt Strategies</a>
+        </div>
+        <div class="topbar-actions">
+          <div class="auth-actions" data-auth-nav></div>
+        </div>
+      </div>
+
+      <section class="card hero">
+        <div>
+          <h1>Your full money plan, paycheck by paycheck.</h1>
+          <p class="subtitle">Track debt payoff and savings goals through the entire timeline, then mark payments complete as you go.</p>
+          <div class="hero-badges" id="hero-badges"></div>
+          <div class="button-row">
+            <a class="button secondary" href="/planner#step5-title">Edit plan inputs</a>
+            <button type="button" id="reset-progress" class="button ghost">Reset progress</button>
+          </div>
+        </div>
+        <div class="stat-row" id="headline-stats"></div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Plan Status</h2>
+        <p class="section-desc">This status updates automatically when you mark payments complete.</p>
+        <div id="plan-status" class="status-box"></div>
+      </section>
+
+      <section class="card grid-2">
+        <div>
+          <h2 class="section-title">Debt Progress</h2>
+          <p class="section-desc">Each completed minimum or extra debt payment updates these bars.</p>
+          <div id="debt-progress-list"></div>
+        </div>
+        <div>
+          <h2 class="section-title">Savings Progress</h2>
+          <p class="section-desc">Goal contributions roll up here as each planned transfer is marked done.</p>
+          <div id="goal-progress-list"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Paycheck Timeline</h2>
+        <p class="section-desc">Follow each cycle in order. Mark each line item when it’s actually paid or transferred.</p>
+        <div class="button-row" style="margin-bottom: 12px;">
+          <button type="button" id="toggle-timeline" class="button secondary hidden"></button>
+        </div>
+        <div id="timeline-list" class="timeline-list"></div>
+      </section>
+
+      <footer class="card footer">
+        <span>© 2026 Budget Dad</span>
+        <span>
+          <a href="/planner">Planner</a> ·
+          <a href="/privacy">Privacy</a> ·
+          <a href="/terms">Terms</a> ·
+          <a href="mailto:marco@idrovofox.com">Email support</a>
+        </span>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    function money(n) {
+      const num = Number(n || 0);
+      return num.toFixed(2);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function parseLocalDate(dateStr) {
+      const [y, m, d] = String(dateStr || "").split("-").map(Number);
+      return new Date(y, (m || 1) - 1, d || 1);
+    }
+
+    function addDays(dateObj, days) {
+      const d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function formatDateInput(dateObj) {
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateObj.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatFullDate(dateObj) {
+      if (!dateObj || Number.isNaN(dateObj.getTime())) return "-";
+      return dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    }
+
+    function formatMonthYear(dateObj) {
+      if (!dateObj || Number.isNaN(dateObj.getTime())) return "-";
+      return dateObj.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+    }
+
+    function daysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+
+    function parseDueDay(value) {
+      const dayNum = Number(value);
+      if (!Number.isInteger(dayNum) || dayNum < 1 || dayNum > 31) return null;
+      return dayNum;
+    }
+
+    function isDueDateInWindow(dueDate, start, end) {
+      return dueDate > start && dueDate <= end;
+    }
+
+    function getDueDateForMonth(baseDate, dueDay) {
+      const dayNum = parseDueDay(dueDay);
+      if (!dayNum) return null;
+      const year = baseDate.getFullYear();
+      const month = baseDate.getMonth();
+      const clampedDay = Math.min(dayNum, daysInMonth(year, month));
+      return new Date(year, month, clampedDay);
+    }
+
+    function getNextPaycheckDate(startDateStr, frequency) {
+      const start = parseLocalDate(startDateStr);
+      if (frequency === "weekly") return addDays(start, 7);
+      if (frequency === "biweekly") return addDays(start, 14);
+      return addDays(start, 14);
+    }
+
+    function getDueItemsInWindow(startDateStr, endDateObj, items, amountKey) {
+      const start = parseLocalDate(startDateStr);
+      const end = endDateObj;
+      const monthCursorStart = new Date(start.getFullYear(), start.getMonth(), 1);
+      const monthCursorEnd = new Date(end.getFullYear(), end.getMonth(), 1);
+
+      const dueItems = items.reduce((acc, item) => {
+        const dueDay = parseDueDay(item.dueDay);
+        if (!dueDay) return acc;
+
+        let occurrences = 0;
+        const cursor = new Date(monthCursorStart.getFullYear(), monthCursorStart.getMonth(), 1);
+        while (cursor <= monthCursorEnd) {
+          const dueDate = getDueDateForMonth(cursor, dueDay);
+          if (dueDate && isDueDateInWindow(dueDate, start, end)) {
+            occurrences += 1;
+          }
+          cursor.setMonth(cursor.getMonth() + 1);
+        }
+
+        if (occurrences > 0) {
+          acc.push({ ...item, dueDay, _occurrenceCount: occurrences });
+        }
+        return acc;
+      }, []);
+
+      const total = dueItems.reduce((sum, item) => {
+        const occurrences = Number(item._occurrenceCount || 1);
+        return sum + Number(item[amountKey] || 0) * occurrences;
+      }, 0);
+
+      return { dueItems, total };
+    }
+
+    function getTargetDebt(debts, strategy) {
+      const active = debts.filter(debt => Number(debt.balance) > 0.01);
+      if (!active.length) return null;
+      if (strategy === "avalanche") {
+        return active.slice().sort((a, b) => b.rate - a.rate)[0];
+      }
+      return active.slice().sort((a, b) => a.balance - b.balance)[0];
+    }
+
+    function getFocusSplit(mode, hasDebts, hasGoals) {
+      if (!hasDebts && !hasGoals) return { debtRatio: 0, savingsRatio: 0 };
+      if (!hasDebts) return { debtRatio: 0, savingsRatio: 1 };
+      if (!hasGoals) return { debtRatio: 1, savingsRatio: 0 };
+      if (mode === "debt") return { debtRatio: 0.8, savingsRatio: 0.2 };
+      if (mode === "saving") return { debtRatio: 0.2, savingsRatio: 0.8 };
+      return { debtRatio: 0.5, savingsRatio: 0.5 };
+    }
+
+    function priorityWeight(priority) {
+      if (priority === "high") return 1.4;
+      if (priority === "low") return 0.85;
+      return 1.1;
+    }
+
+    function deadlineUrgencyWeight(deadlineDate, currentDate) {
+      if (!deadlineDate || Number.isNaN(deadlineDate.getTime())) return 1;
+      const days = (deadlineDate - currentDate) / (1000 * 60 * 60 * 24);
+      if (days <= 0) return 2;
+      const months = days / 30;
+      return 1 + Math.max(0, (12 - months)) / 12;
+    }
+
+    function goalWeight(goal, currentDate) {
+      return priorityWeight(goal.priority) * deadlineUrgencyWeight(goal.deadlineDate, currentDate);
+    }
+
+    function mergeAllocationMaps(base, add) {
+      Object.entries(add).forEach(([key, value]) => {
+        base[key] = (base[key] || 0) + value;
+      });
+    }
+
+    function applyExtraToDebts(debts, amount, strategy) {
+      const allocations = {};
+      let remaining = amount;
+      let guard = 0;
+
+      while (remaining > 0.01 && debts.some(debt => debt.balance > 0.01) && guard < 200) {
+        const target = getTargetDebt(debts, strategy);
+        if (!target) break;
+        const pay = Math.min(remaining, target.balance);
+        target.balance -= pay;
+        allocations[target.name] = (allocations[target.name] || 0) + pay;
+        remaining -= pay;
+        guard += 1;
+      }
+
+      return { allocations, remaining };
+    }
+
+    function allocateSavings(goals, amount, currentDate) {
+      const allocations = {};
+      let remaining = amount;
+      let guard = 0;
+      let active = goals.filter(goal => goal.saved < goal.target - 0.01);
+
+      while (remaining > 0.01 && active.length && guard < 20) {
+        const totalWeight = active.reduce((sum, goal) => sum + goalWeight(goal, currentDate), 0);
+        let usedThisRound = 0;
+
+        active.forEach(goal => {
+          const weight = totalWeight ? goalWeight(goal, currentDate) : 0;
+          const share = totalWeight ? remaining * (weight / totalWeight) : 0;
+          const cap = goal.target - goal.saved;
+          const allocation = Math.min(share, cap);
+          if (allocation > 0) {
+            goal.saved += allocation;
+            allocations[goal.name] = (allocations[goal.name] || 0) + allocation;
+            usedThisRound += allocation;
+          }
+        });
+
+        if (usedThisRound <= 0.01) break;
+        remaining -= usedThisRound;
+        active = goals.filter(goal => goal.saved < goal.target - 0.01);
+        guard += 1;
+      }
+
+      return { allocations, remaining };
+    }
+
+    function calculateAllocationForCheck(extra, debts, goals, strategy, focusMode, currentDate) {
+      const hasDebts = debts.some(debt => debt.balance > 0.01);
+      const hasGoals = goals.some(goal => goal.target - goal.saved > 0.01);
+      const split = getFocusSplit(focusMode, hasDebts, hasGoals);
+      let debtPool = extra * split.debtRatio;
+      let savingsPool = extra * split.savingsRatio;
+
+      const debtAlloc = applyExtraToDebts(debts, debtPool, strategy);
+      const debtAllocations = { ...debtAlloc.allocations };
+
+      if (debtAlloc.remaining > 0 && hasGoals) {
+        savingsPool += debtAlloc.remaining;
+      }
+
+      const savingsAlloc = allocateSavings(goals, savingsPool, currentDate);
+      const savingsAllocations = { ...savingsAlloc.allocations };
+
+      if (savingsAlloc.remaining > 0 && hasDebts) {
+        const extraDebtAlloc = applyExtraToDebts(debts, savingsAlloc.remaining, strategy);
+        mergeAllocationMaps(debtAllocations, extraDebtAlloc.allocations);
+      }
+
+      return { debtAllocations, savingsAllocations, split };
+    }
+
+    function slugify(value) {
+      const normalized = String(value || "item")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+        .slice(0, 40);
+      return normalized || "item";
+    }
+
+    function hashString(input) {
+      let hash = 0;
+      for (let i = 0; i < input.length; i += 1) {
+        hash = (hash << 5) - hash + input.charCodeAt(i);
+        hash |= 0;
+      }
+      return String(hash >>> 0);
+    }
+
+    const SNAPSHOT_KEYS = ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode", "planProgressData"];
+    let plannerSyncReady = false;
+    let plannerSyncTimer = null;
+    let applyingRemoteSnapshot = false;
+
+    function getPlannerValue(key) {
+      const localVal = window.localStorage.getItem(key);
+      if (localVal !== null) return localVal;
+      return window.sessionStorage.getItem(key);
+    }
+
+    function getStorage() {
+      return window.localStorage.getItem("rememberData") === "yes" ? window.localStorage : window.sessionStorage;
+    }
+
+    function buildPlannerSnapshot() {
+      const snapshot = {
+        rememberData: window.localStorage.getItem("rememberData") === "yes" ? "yes" : "no",
+        values: {},
+        version: 2
+      };
+
+      SNAPSHOT_KEYS.forEach(key => {
+        const value = getPlannerValue(key);
+        if (value !== null) {
+          snapshot.values[key] = value;
+        }
+      });
+
+      return snapshot;
+    }
+
+    function applyPlannerSnapshot(snapshot) {
+      if (!snapshot || typeof snapshot !== "object") return;
+      const values = snapshot.values && typeof snapshot.values === "object" ? snapshot.values : {};
+      const rememberData = snapshot.rememberData === "yes" ? "yes" : "no";
+      const preferLocal = rememberData === "yes";
+      const target = preferLocal ? window.localStorage : window.sessionStorage;
+      const other = preferLocal ? window.sessionStorage : window.localStorage;
+
+      applyingRemoteSnapshot = true;
+      try {
+        window.localStorage.setItem("rememberData", rememberData);
+        SNAPSHOT_KEYS.forEach(key => {
+          window.localStorage.removeItem(key);
+          window.sessionStorage.removeItem(key);
+          const value = values[key];
+          if (typeof value === "string") {
+            target.setItem(key, value);
+            other.removeItem(key);
+          }
+        });
+      } finally {
+        applyingRemoteSnapshot = false;
+      }
+    }
+
+    function schedulePlannerSnapshotSave() {
+      if (!plannerSyncReady || applyingRemoteSnapshot) return;
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.savePlannerSnapshot !== "function") return;
+      if (plannerSyncTimer) {
+        window.clearTimeout(plannerSyncTimer);
+      }
+      plannerSyncTimer = window.setTimeout(() => {
+        window.BudgetDadAuth.savePlannerSnapshot(buildPlannerSnapshot());
+      }, 700);
+    }
+
+    async function hydratePlannerFromCloud() {
+      if (!window.BudgetDadAuth || typeof window.BudgetDadAuth.getPlannerSnapshot !== "function") {
+        plannerSyncReady = true;
+        return;
+      }
+
+      const { data, error } = await window.BudgetDadAuth.getPlannerSnapshot();
+      if (error) {
+        plannerSyncReady = true;
+        return;
+      }
+
+      if (data?.snapshot) {
+        applyPlannerSnapshot(data.snapshot);
+      }
+
+      plannerSyncReady = true;
+    }
+
+    function ensurePlannerData() {
+      const incomeRaw = getPlannerValue("incomeData");
+      if (!incomeRaw) {
+        return { ok: false, message: "Set up your paycheck inputs first in the planner." };
+      }
+
+      let income;
+      try {
+        income = JSON.parse(incomeRaw);
+      } catch (err) {
+        return { ok: false, message: "Your saved paycheck data could not be read. Re-save Step 1 in planner." };
+      }
+
+      const bills = (() => {
+        try {
+          return JSON.parse(getPlannerValue("billsData") || "[]");
+        } catch (err) {
+          return [];
+        }
+      })()
+        .map(item => {
+          const dueDay = parseDueDay(item?.dueDay);
+          return dueDay ? { name: item.name, amount: Number(item.amount) || 0, dueDay } : null;
+        })
+        .filter(Boolean);
+
+      const debts = (() => {
+        try {
+          return JSON.parse(getPlannerValue("debtsData") || "[]");
+        } catch (err) {
+          return [];
+        }
+      })()
+        .map(item => {
+          const dueDay = parseDueDay(item?.dueDay);
+          return dueDay ? {
+            name: item.name,
+            balance: Number(item.balance) || 0,
+            minimum: Number(item.minimum) || 0,
+            rate: Number(item.rate) || 0,
+            dueDay
+          } : null;
+        })
+        .filter(Boolean);
+
+      const goals = (() => {
+        try {
+          return JSON.parse(getPlannerValue("savingsGoalsData") || "[]");
+        } catch (err) {
+          return [];
+        }
+      })()
+        .map(item => ({
+          type: item.type || "Custom",
+          name: item.name,
+          target: Number(item.target) || 0,
+          deadline: item.deadline || "",
+          priority: item.priority || "medium"
+        }))
+        .filter(item => item.name && item.target > 0);
+
+      const strategy = getPlannerValue("debtStrategy") || income.debtStrategy || "snowball";
+      const focusMode = getPlannerValue("focusMode") || "balanced";
+
+      const payAmount = Number(income.payAmountForThisCheck || 0);
+      if (!payAmount || !income.frequency || !income.startDate) {
+        return { ok: false, message: "Step 1 is incomplete. Save paycheck setup again in planner." };
+      }
+
+      return {
+        ok: true,
+        data: {
+          income,
+          bills,
+          debts,
+          goals,
+          strategy,
+          focusMode
+        }
+      };
+    }
+
+    function buildPlanSignature(input) {
+      const payload = {
+        income: {
+          payAmountForThisCheck: Number(input.income.payAmountForThisCheck || 0),
+          frequency: input.income.frequency,
+          startDate: input.income.startDate,
+          startingBalance: Number(input.income.startingBalance || 0),
+          buffer: Number(input.income.buffer || 0),
+          spending: Number(input.income.spending || 0)
+        },
+        bills: input.bills,
+        debts: input.debts,
+        goals: input.goals,
+        strategy: input.strategy,
+        focusMode: input.focusMode
+      };
+      return hashString(JSON.stringify(payload));
+    }
+
+    function buildFullPlan(input) {
+      const income = input.income;
+      const bills = input.bills;
+      const debts = input.debts;
+      const goals = input.goals;
+      const strategy = input.strategy;
+      const focusMode = input.focusMode;
+
+      const payAmount = Number(income.payAmountForThisCheck || 0);
+      const frequency = income.frequency;
+      const payDays = frequency === "weekly" ? 7 : 14;
+      const startingBalance = Number(income.startingBalance || 0);
+      const buffer = Number(income.buffer || 0);
+      const spending = Number(income.spending || 0);
+
+      const simDebts = debts.map(debt => ({ ...debt, balance: Number(debt.balance) || 0 }));
+      const simGoals = goals.map(goal => ({
+        ...goal,
+        target: Number(goal.target) || 0,
+        saved: 0,
+        deadlineDate: goal.deadline ? parseLocalDate(goal.deadline) : null
+      }));
+
+      let currentStart = parseLocalDate(income.startDate);
+      let currentBalance = startingBalance;
+      const cycles = [];
+      const maxCycles = frequency === "weekly" ? 260 : 130;
+      let noProgressStreak = 0;
+      let lastRemaining = simDebts.reduce((sum, debt) => sum + Math.max(0, debt.balance), 0)
+        + simGoals.reduce((sum, goal) => sum + Math.max(0, goal.target - goal.saved), 0);
+      let completionDate = null;
+
+      for (let i = 0; i < maxCycles; i += 1) {
+        const cycleId = `cycle-${i + 1}`;
+        const endDate = addDays(currentStart, payDays);
+        const startStr = formatDateInput(currentStart);
+
+        const billsWindow = getDueItemsInWindow(startStr, endDate, bills, "amount");
+        const activeDebts = simDebts.filter(debt => debt.balance > 0.01);
+        const debtWindow = getDueItemsInWindow(startStr, endDate, activeDebts, "minimum");
+
+        const cycle = {
+          id: cycleId,
+          number: i + 1,
+          startDate: new Date(currentStart.getFullYear(), currentStart.getMonth(), currentStart.getDate()),
+          endDate,
+          items: [],
+          totals: {
+            paycheck: payAmount,
+            carriedBalance: currentBalance,
+            bills: 0,
+            debtMinimums: 0,
+            debtExtra: 0,
+            savings: 0,
+            spending,
+            buffer,
+            totalAvailable: 0,
+            extra: 0,
+            endBalance: 0
+          }
+        };
+
+        billsWindow.dueItems.forEach((bill, index) => {
+          const occurrences = Number(bill._occurrenceCount || 1);
+          const amount = Number(bill.amount || 0) * occurrences;
+          if (amount <= 0) return;
+          cycle.items.push({
+            id: `${cycleId}-bill-${slugify(bill.name)}-${index}`,
+            kind: "bill",
+            target: bill.name,
+            label: `Pay ${bill.name}`,
+            detail: `Bill due day ${bill.dueDay}${occurrences > 1 ? ` (${occurrences}x this window)` : ""}`,
+            amount
+          });
+          cycle.totals.bills += amount;
+        });
+
+        debtWindow.dueItems.forEach((debt, index) => {
+          const occurrences = Number(debt._occurrenceCount || 1);
+          const dueTotal = Number(debt.minimum || 0) * occurrences;
+          const simDebt = simDebts.find(item => item.name === debt.name && item.balance > 0.01);
+          if (!simDebt) return;
+          const pay = Math.min(dueTotal, simDebt.balance);
+          if (pay <= 0) return;
+
+          simDebt.balance -= pay;
+          cycle.items.push({
+            id: `${cycleId}-debt-min-${slugify(debt.name)}-${index}`,
+            kind: "debt-min",
+            target: debt.name,
+            label: `Debt minimum: ${debt.name}`,
+            detail: `Due day ${debt.dueDay}${occurrences > 1 ? ` (${occurrences}x this window)` : ""}`,
+            amount: pay
+          });
+          cycle.totals.debtMinimums += pay;
+        });
+
+        const totalAvailable = payAmount + currentBalance;
+        const required = cycle.totals.bills + cycle.totals.debtMinimums + spending + buffer;
+        let extra = totalAvailable - required;
+        if (extra < 0) extra = 0;
+
+        cycle.totals.totalAvailable = totalAvailable;
+        cycle.totals.extra = extra;
+
+        if (extra > 0.01 && (simDebts.some(debt => debt.balance > 0.01) || simGoals.some(goal => goal.saved < goal.target - 0.01))) {
+          const alloc = calculateAllocationForCheck(extra, simDebts, simGoals, strategy, focusMode, currentStart);
+
+          Object.entries(alloc.debtAllocations).forEach(([name, amount], index) => {
+            if (amount <= 0.01) return;
+            cycle.items.push({
+              id: `${cycleId}-debt-extra-${slugify(name)}-${index}`,
+              kind: "debt-extra",
+              target: name,
+              label: `Extra debt payment: ${name}`,
+              detail: "Strategy-driven extra payment",
+              amount
+            });
+            cycle.totals.debtExtra += amount;
+          });
+
+          Object.entries(alloc.savingsAllocations).forEach(([name, amount], index) => {
+            if (amount <= 0.01) return;
+            cycle.items.push({
+              id: `${cycleId}-goal-save-${slugify(name)}-${index}`,
+              kind: "goal-save",
+              target: name,
+              label: `Savings transfer: ${name}`,
+              detail: "Priority and deadline weighted",
+              amount
+            });
+            cycle.totals.savings += amount;
+          });
+        }
+
+        if (totalAvailable >= required) {
+          currentBalance = buffer;
+        } else {
+          currentBalance = totalAvailable - cycle.totals.bills - cycle.totals.debtMinimums - spending;
+        }
+
+        cycle.totals.endBalance = currentBalance;
+        cycle.targets = {
+          debtRemainingByName: simDebts.reduce((acc, debt) => {
+            acc[debt.name] = Math.max(0, Number(debt.balance) || 0);
+            return acc;
+          }, {}),
+          goalFundedByName: simGoals.reduce((acc, goal) => {
+            acc[goal.name] = Math.min(Number(goal.target) || 0, Number(goal.saved) || 0);
+            return acc;
+          }, {}),
+          totalDebtRemaining: simDebts.reduce((sum, debt) => sum + Math.max(0, Number(debt.balance) || 0), 0),
+          totalGoalFunded: simGoals.reduce((sum, goal) => sum + Math.min(Number(goal.target) || 0, Number(goal.saved) || 0), 0)
+        };
+
+        const remaining = simDebts.reduce((sum, debt) => sum + Math.max(0, debt.balance), 0)
+          + simGoals.reduce((sum, goal) => sum + Math.max(0, goal.target - goal.saved), 0);
+
+        if (Math.abs(remaining - lastRemaining) < 0.01) {
+          noProgressStreak += 1;
+        } else {
+          noProgressStreak = 0;
+        }
+        lastRemaining = remaining;
+
+        cycles.push(cycle);
+
+        const debtsDone = simDebts.every(debt => debt.balance <= 0.01);
+        const goalsDone = simGoals.every(goal => goal.saved >= goal.target - 0.01);
+        if (debtsDone && goalsDone) {
+          completionDate = endDate;
+          break;
+        }
+
+        if (noProgressStreak >= 6) {
+          break;
+        }
+
+        currentStart = endDate;
+      }
+
+      return {
+        signature: buildPlanSignature(input),
+        createdAt: new Date().toISOString(),
+        income,
+        strategy,
+        focusMode,
+        cycles,
+        baselineDebts: debts,
+        baselineGoals: goals,
+        completionDate,
+        nextPayDate: getNextPaycheckDate(income.startDate, income.frequency),
+        stalled: noProgressStreak >= 6,
+        maxedOut: cycles.length >= (frequency === "weekly" ? 260 : 130),
+        totalScheduledItems: cycles.reduce((sum, cycle) => sum + cycle.items.length, 0)
+      };
+    }
+
+    function getProgressState(signature) {
+      let local = null;
+      let session = null;
+      try {
+        local = JSON.parse(window.localStorage.getItem("planProgressData") || "null");
+      } catch (err) {
+        local = null;
+      }
+      try {
+        session = JSON.parse(window.sessionStorage.getItem("planProgressData") || "null");
+      } catch (err) {
+        session = null;
+      }
+
+      const validLocal = local && local.signature === signature ? local : null;
+      const validSession = session && session.signature === signature ? session : null;
+      const pick = validLocal || validSession;
+
+      if (!pick) {
+        return { signature, completed: {} };
+      }
+
+      return {
+        signature,
+        completed: pick.completed && typeof pick.completed === "object" ? pick.completed : {}
+      };
+    }
+
+    function saveProgressState(progressState) {
+      const payload = JSON.stringify(progressState);
+      const storage = getStorage();
+      const otherStorage = storage === window.localStorage ? window.sessionStorage : window.localStorage;
+      storage.setItem("planProgressData", payload);
+      otherStorage.removeItem("planProgressData");
+      schedulePlannerSnapshotSave();
+    }
+
+    function computeProgress(plan, progressState) {
+      const completed = progressState.completed || {};
+      const debtPaid = {};
+      const goalSaved = {};
+      const cycleCompletion = {};
+      const runningSnapshots = {};
+
+      const debtRunning = {};
+      plan.baselineDebts.forEach(debt => {
+        debtRunning[debt.name] = Number(debt.balance || 0);
+      });
+
+      const goalTargetsByName = {};
+      const goalRunning = {};
+      plan.baselineGoals.forEach(goal => {
+        const target = Number(goal.target || 0);
+        goalTargetsByName[goal.name] = target;
+        goalRunning[goal.name] = 0;
+      });
+
+      let completedItemsCount = 0;
+
+      plan.cycles.forEach(cycle => {
+        let doneInCycle = 0;
+        cycle.items.forEach(item => {
+          if (completed[item.id]) {
+            doneInCycle += 1;
+            completedItemsCount += 1;
+            if (item.kind === "debt-min" || item.kind === "debt-extra") {
+              debtPaid[item.target] = (debtPaid[item.target] || 0) + Number(item.amount || 0);
+              debtRunning[item.target] = Math.max(0, Number(debtRunning[item.target] || 0) - Number(item.amount || 0));
+            }
+            if (item.kind === "goal-save") {
+              goalSaved[item.target] = (goalSaved[item.target] || 0) + Number(item.amount || 0);
+              const goalTarget = Number(goalTargetsByName[item.target] || 0);
+              goalRunning[item.target] = Math.min(goalTarget, Number(goalRunning[item.target] || 0) + Number(item.amount || 0));
+            }
+          }
+        });
+        cycleCompletion[cycle.id] = cycle.items.length ? doneInCycle / cycle.items.length : 1;
+        runningSnapshots[cycle.id] = {
+          debtRemainingByName: { ...debtRunning },
+          goalFundedByName: { ...goalRunning },
+          totalDebtRemaining: Object.values(debtRunning).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0),
+          totalGoalFunded: Object.values(goalRunning).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0)
+        };
+      });
+
+      const debtProgress = plan.baselineDebts.map(debt => {
+        const balance = Number(debt.balance || 0);
+        const paid = Math.min(balance, debtPaid[debt.name] || 0);
+        const remaining = Math.max(0, balance - paid);
+        const percent = balance > 0 ? Math.round((paid / balance) * 100) : 100;
+        return {
+          name: debt.name,
+          balance,
+          paid,
+          remaining,
+          percent
+        };
+      });
+
+      const goalProgress = plan.baselineGoals.map(goal => {
+        const target = Number(goal.target || 0);
+        const funded = Math.min(target, goalSaved[goal.name] || 0);
+        const remaining = Math.max(0, target - funded);
+        const percent = target > 0 ? Math.round((funded / target) * 100) : 100;
+        return {
+          name: goal.name,
+          target,
+          funded,
+          remaining,
+          percent,
+          deadline: goal.deadline ? parseLocalDate(goal.deadline) : null
+        };
+      });
+
+      const debtTotal = debtProgress.reduce((sum, item) => sum + item.balance, 0);
+      const debtPaidTotal = debtProgress.reduce((sum, item) => sum + item.paid, 0);
+      const goalTotal = goalProgress.reduce((sum, item) => sum + item.target, 0);
+      const goalFundedTotal = goalProgress.reduce((sum, item) => sum + item.funded, 0);
+
+      const totalTarget = debtTotal + goalTotal;
+      const totalDone = debtPaidTotal + goalFundedTotal;
+      const overallPercent = totalTarget > 0 ? Math.round((totalDone / totalTarget) * 100) : 100;
+
+      return {
+        debtProgress,
+        goalProgress,
+        cycleCompletion,
+        runningSnapshots,
+        completedItemsCount,
+        totalItemsCount: plan.totalScheduledItems,
+        debtPaidTotal,
+        debtTotal,
+        goalFundedTotal,
+        goalTotal,
+        overallPercent
+      };
+    }
+
+    const appState = {
+      plan: null,
+      progress: null,
+      showAllCycles: false,
+      paidUnlocked: false
+    };
+
+    function renderHeadline(plan, progress) {
+      const badges = document.getElementById("hero-badges");
+      badges.innerHTML = "";
+
+      const badgeItems = [
+        `${plan.income.frequency === "weekly" ? "Weekly" : "Biweekly"} paycheck`,
+        `Debt strategy: ${plan.strategy === "avalanche" ? "Avalanche" : "Snowball"}`,
+        `Focus: ${plan.focusMode === "debt" ? "Debt" : plan.focusMode === "saving" ? "Saving" : "Balanced"}`
+      ];
+
+      badgeItems.forEach(text => {
+        const span = document.createElement("span");
+        span.className = "badge";
+        span.textContent = text;
+        badges.appendChild(span);
+      });
+
+      const stats = document.getElementById("headline-stats");
+      const remainingCycles = plan.cycles.filter(cycle => (progress.cycleCompletion[cycle.id] || 0) < 1).length;
+      stats.innerHTML = `
+        <div class="stat">
+          <h3>${progress.overallPercent}%</h3>
+          <div class="muted">Overall completion</div>
+        </div>
+        <div class="stat">
+          <h3>${remainingCycles}</h3>
+          <div class="muted">Cycles left to execute</div>
+        </div>
+        <div class="stat">
+          <h3>${plan.completionDate ? formatMonthYear(plan.completionDate) : "In progress"}</h3>
+          <div class="muted">Projected completion</div>
+        </div>
+      `;
+    }
+
+    function renderStatus(plan, progress) {
+      const statusBox = document.getElementById("plan-status");
+
+      const completionText = plan.completionDate
+        ? `Projected completion date: ${formatFullDate(plan.completionDate)}.`
+        : "Projected completion date is not reachable yet with current inputs.";
+
+      const notes = [];
+      if (plan.stalled) {
+        notes.push("Projection stalled because no extra money remained after bills, debt minimums, spending, and buffer.");
+      }
+      if (plan.maxedOut && !plan.completionDate) {
+        notes.push("Timeline stopped at the projection limit. Increase extra cash flow to shorten payoff time.");
+      }
+      if (!appState.paidUnlocked) {
+        notes.push("Unlock Pro to interact with payment tracking on every cycle.");
+      }
+
+      statusBox.innerHTML = `
+        <strong>${progress.completedItemsCount}/${progress.totalItemsCount} tasks marked complete (${progress.overallPercent}%).</strong><br>
+        <span>${completionText}</span><br>
+        <span>Debt paid: $${money(progress.debtPaidTotal)} of $${money(progress.debtTotal)} • Savings funded: $${money(progress.goalFundedTotal)} of $${money(progress.goalTotal)}</span>
+        ${notes.length ? `<div style="margin-top:6px;">${notes.map(note => `<div>${escapeHtml(note)}</div>`).join("")}</div>` : ""}
+      `;
+    }
+
+    function renderProgressColumns(plan, progress) {
+      const debtContainer = document.getElementById("debt-progress-list");
+      const goalContainer = document.getElementById("goal-progress-list");
+
+      if (!progress.debtProgress.length) {
+        debtContainer.innerHTML = '<div class="empty">No debts tracked yet.</div>';
+      } else {
+        debtContainer.innerHTML = progress.debtProgress.map(item => `
+          <div class="progress-row">
+            <div class="progress-head">
+              <span>${escapeHtml(item.name)}</span>
+              <span class="mono">$${money(item.remaining)} left</span>
+            </div>
+            <div class="progress-bar"><span style="width:${Math.min(100, item.percent)}%;"></span></div>
+            <div class="progress-meta">$${money(item.paid)} paid of $${money(item.balance)} (${item.percent}%)</div>
+          </div>
+        `).join("");
+      }
+
+      if (!progress.goalProgress.length) {
+        goalContainer.innerHTML = '<div class="empty">No savings goals tracked yet.</div>';
+      } else {
+        goalContainer.innerHTML = progress.goalProgress.map(item => `
+          <div class="progress-row">
+            <div class="progress-head">
+              <span>${escapeHtml(item.name)}</span>
+              <span class="mono">$${money(item.remaining)} left</span>
+            </div>
+            <div class="progress-bar"><span style="width:${Math.min(100, item.percent)}%;"></span></div>
+            <div class="progress-meta">$${money(item.funded)} funded of $${money(item.target)} (${item.percent}%)${item.deadline ? ` • Deadline ${formatMonthYear(item.deadline)}` : ""}</div>
+          </div>
+        `).join("");
+      }
+    }
+
+    function itemTypeLabel(kind) {
+      if (kind === "bill") return "Bill";
+      if (kind === "debt-min") return "Debt minimum";
+      if (kind === "debt-extra") return "Debt extra";
+      if (kind === "goal-save") return "Savings";
+      return "Planned";
+    }
+
+    function renderTimeline(plan, progress) {
+      const timeline = document.getElementById("timeline-list");
+      const toggleButton = document.getElementById("toggle-timeline");
+
+      if (!plan.cycles.length) {
+        timeline.innerHTML = '<div class="empty">No timeline could be generated yet.</div>';
+        toggleButton.classList.add("hidden");
+        return;
+      }
+
+      const previewCount = 10;
+      const canToggle = plan.cycles.length > previewCount;
+      const cycles = appState.showAllCycles ? plan.cycles : plan.cycles.slice(0, previewCount);
+
+      if (canToggle) {
+        toggleButton.classList.remove("hidden");
+        toggleButton.textContent = appState.showAllCycles
+          ? `Show first ${previewCount} cycles`
+          : `Show full timeline (${plan.cycles.length} cycles)`;
+      } else {
+        toggleButton.classList.add("hidden");
+      }
+
+      timeline.innerHTML = cycles.map(cycle => {
+        const completion = Math.round((progress.cycleCompletion[cycle.id] || 0) * 100);
+        const actualSnapshot = progress.runningSnapshots[cycle.id] || {
+          debtRemainingByName: {},
+          goalFundedByName: {},
+          totalDebtRemaining: plan.baselineDebts.reduce((sum, debt) => sum + Number(debt.balance || 0), 0),
+          totalGoalFunded: 0
+        };
+        const targetTotals = cycle.targets || { totalDebtRemaining: actualSnapshot.totalDebtRemaining, totalGoalFunded: actualSnapshot.totalGoalFunded };
+
+        const debtSummaryOnTrack = actualSnapshot.totalDebtRemaining <= Number(targetTotals.totalDebtRemaining || 0) + 0.01;
+        const goalSummaryOnTrack = actualSnapshot.totalGoalFunded + 0.01 >= Number(targetTotals.totalGoalFunded || 0);
+
+        const debtTargetRows = plan.baselineDebts.length
+          ? plan.baselineDebts.map(debt => {
+            const planned = Number((cycle.targets?.debtRemainingByName || {})[debt.name] ?? debt.balance ?? 0);
+            const actual = Number(actualSnapshot.debtRemainingByName[debt.name] ?? debt.balance ?? 0);
+            const onTrack = actual <= planned + 0.01;
+            return `
+              <div class="target-row ${onTrack ? "ontrack" : "offtrack"}">
+                <div class="target-label">${escapeHtml(debt.name)}</div>
+                <div class="target-values">target $${money(planned)}<br>actual $${money(actual)}</div>
+              </div>
+            `;
+          }).join("")
+          : '<div class="empty" style="font-size:0.78rem;">No debt targets in this cycle.</div>';
+
+        const goalTargetRows = plan.baselineGoals.length
+          ? plan.baselineGoals.map(goal => {
+            const planned = Number((cycle.targets?.goalFundedByName || {})[goal.name] || 0);
+            const actual = Number(actualSnapshot.goalFundedByName[goal.name] || 0);
+            const target = Number(goal.target || 0);
+            const onTrack = actual + 0.01 >= planned;
+            return `
+              <div class="target-row ${onTrack ? "ontrack" : "offtrack"}">
+                <div class="target-label">${escapeHtml(goal.name)}</div>
+                <div class="target-values">target $${money(planned)} / $${money(target)}<br>actual $${money(actual)} / $${money(target)}</div>
+              </div>
+            `;
+          }).join("")
+          : '<div class="empty" style="font-size:0.78rem;">No savings targets in this cycle.</div>';
+
+        const taskRows = cycle.items.length
+          ? cycle.items.map(item => {
+            const done = Boolean(appState.progress.completed[item.id]);
+            const locked = !appState.paidUnlocked;
+            return `
+              <div class="task-row ${done ? "done" : ""}">
+                <div>
+                  <p class="task-title">${escapeHtml(item.label)}</p>
+                  <div class="task-meta">${escapeHtml(itemTypeLabel(item.kind))} • ${escapeHtml(item.detail || "")}</div>
+                </div>
+                <div class="task-actions">
+                  <div class="task-amount">$${money(item.amount)}</div>
+                  <button type="button" class="tiny ${done ? "done" : ""}" data-action="toggle-item" data-item-id="${escapeHtml(item.id)}" ${locked ? "disabled" : ""}>${done ? "Paid" : "Mark paid"}</button>
+                </div>
+              </div>
+            `;
+          }).join("")
+          : '<div class="empty">No payments required in this cycle.</div>';
+
+        return `
+          <div class="cycle-card">
+            <div class="cycle-head">
+              <div>
+                <p class="cycle-title">Paycheck ${cycle.number}: ${formatFullDate(cycle.startDate)} to ${formatFullDate(cycle.endDate)}</p>
+                <div class="cycle-meta">Available $${money(cycle.totals.totalAvailable)} • Required $${money(cycle.totals.bills + cycle.totals.debtMinimums + cycle.totals.spending + cycle.totals.buffer)} • Extra $${money(cycle.totals.extra)}</div>
+              </div>
+              <div class="cycle-completion">
+                <div class="progress-bar"><span style="width:${completion}%;"></span></div>
+                <div class="cycle-meta" style="margin-top:4px;">${completion}% cycle complete</div>
+              </div>
+            </div>
+            <div class="target-grid">
+              <div class="target-col">
+                <div class="target-col-title">Debt balances by end of this paycheck</div>
+                <div class="target-summary ${debtSummaryOnTrack ? "target-row ontrack" : "target-row offtrack"}" style="display:block; padding:6px 8px;">
+                  Total target left $${money(targetTotals.totalDebtRemaining || 0)} • actual left $${money(actualSnapshot.totalDebtRemaining || 0)}
+                </div>
+                ${debtTargetRows}
+              </div>
+              <div class="target-col">
+                <div class="target-col-title">Savings targets by end of this paycheck</div>
+                <div class="target-summary ${goalSummaryOnTrack ? "target-row ontrack" : "target-row offtrack"}" style="display:block; padding:6px 8px;">
+                  Total target funded $${money(targetTotals.totalGoalFunded || 0)} • actual funded $${money(actualSnapshot.totalGoalFunded || 0)}
+                </div>
+                ${goalTargetRows}
+              </div>
+            </div>
+            <div class="task-list">${taskRows}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAll() {
+      if (!appState.plan || !appState.progress) return;
+      const progress = computeProgress(appState.plan, appState.progress);
+      renderHeadline(appState.plan, progress);
+      renderStatus(appState.plan, progress);
+      renderProgressColumns(appState.plan, progress);
+      renderTimeline(appState.plan, progress);
+    }
+
+    function bindEvents() {
+      document.getElementById("timeline-list").addEventListener("click", event => {
+        const button = event.target.closest('[data-action="toggle-item"]');
+        if (!button) return;
+        if (!appState.paidUnlocked) return;
+
+        const itemId = button.getAttribute("data-item-id");
+        if (!itemId || !appState.progress) return;
+
+        if (appState.progress.completed[itemId]) {
+          delete appState.progress.completed[itemId];
+        } else {
+          appState.progress.completed[itemId] = true;
+        }
+
+        saveProgressState(appState.progress);
+        renderAll();
+      });
+
+      document.getElementById("toggle-timeline").addEventListener("click", () => {
+        appState.showAllCycles = !appState.showAllCycles;
+        renderAll();
+      });
+
+      document.getElementById("reset-progress").addEventListener("click", () => {
+        if (!appState.plan) return;
+        const ok = window.confirm("Reset all payment checkmarks for this plan?");
+        if (!ok) return;
+
+        appState.progress = { signature: appState.plan.signature, completed: {} };
+        saveProgressState(appState.progress);
+        renderAll();
+      });
+
+      window.addEventListener("beforeunload", () => {
+        if (plannerSyncTimer) {
+          window.clearTimeout(plannerSyncTimer);
+          plannerSyncTimer = null;
+        }
+        if (plannerSyncReady && !applyingRemoteSnapshot && window.BudgetDadAuth && typeof window.BudgetDadAuth.savePlannerSnapshot === "function") {
+          window.BudgetDadAuth.savePlannerSnapshot(buildPlannerSnapshot());
+        }
+      });
+    }
+
+    function showError(message) {
+      document.getElementById("headline-stats").innerHTML = "";
+      document.getElementById("hero-badges").innerHTML = "";
+      document.getElementById("plan-status").innerHTML = `
+        <strong>Full plan unavailable.</strong><br>
+        <span>${escapeHtml(message)}</span><br>
+        <span>Open the planner and save Step 1 through Step 4 first.</span>
+      `;
+      document.getElementById("debt-progress-list").innerHTML = '<div class="empty">No debt data loaded.</div>';
+      document.getElementById("goal-progress-list").innerHTML = '<div class="empty">No savings data loaded.</div>';
+      document.getElementById("timeline-list").innerHTML = '<div class="empty">No timeline available.</div>';
+    }
+
+    async function ensurePlannerAccess() {
+      if (!window.BudgetDadAuth) {
+        const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?redirect=${redirect}`;
+        return false;
+      }
+      if (typeof window.BudgetDadAuth.waitUntilReady === "function") {
+        await window.BudgetDadAuth.waitUntilReady();
+      }
+      if (typeof window.BudgetDadAuth.ensureProfileReady === "function") {
+        await window.BudgetDadAuth.ensureProfileReady();
+      }
+      if (window.BudgetDadAuth.getUser && window.BudgetDadAuth.getUser()) {
+        return true;
+      }
+      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?redirect=${redirect}`;
+      return false;
+    }
+
+    window.addEventListener("load", async () => {
+      if (!(await ensurePlannerAccess())) return;
+
+      await hydratePlannerFromCloud();
+      appState.paidUnlocked = Boolean(window.BudgetDadAuth && window.BudgetDadAuth.isPaid && window.BudgetDadAuth.isPaid());
+
+      const loaded = ensurePlannerData();
+      if (!loaded.ok) {
+        showError(loaded.message);
+        return;
+      }
+
+      appState.plan = buildFullPlan(loaded.data);
+      appState.progress = getProgressState(appState.plan.signature);
+
+      if (!appState.paidUnlocked) {
+        appState.showAllCycles = false;
+      }
+
+      saveProgressState(appState.progress);
+      bindEvents();
+      renderAll();
+    });
+  </script>
+  <script src="/assets/app-config.js"></script>
+  <script src="/assets/vendor/supabase-2.45.0.min.js"></script>
+  <script src="/assets/auth.js"></script>
+</body>
+</html>

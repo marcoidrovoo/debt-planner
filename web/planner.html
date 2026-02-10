@@ -636,6 +636,7 @@
         <div class="nav-links">
           <a href="/">Home</a>
           <a href="/planner">Planner</a>
+          <a href="/plan">Full Plan</a>
           <a href="/strategy">Debt Strategies</a>
           <a href="/pricing">Pricing</a>
         </div>
@@ -973,7 +974,7 @@
 
       <section class="card" aria-labelledby="step5-title">
         <h2 class="section-title" id="step5-title">Step 5 — Plan Output</h2>
-        <p class="section-desc">Calculate what to do with your next paycheck and keep your plan saved on this device.</p>
+        <p class="section-desc">Calculate your next paycheck actions, then launch the full paycheck-by-paycheck tracker.</p>
         <div id="planner-status-message" class="muted" style="display:none; margin-bottom:12px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-2);"></div>
         <div class="field" style="margin-top:6px;">
           <label>Plan focus
@@ -999,6 +1000,7 @@
           👇 Click the button below to calculate what to do with your next paycheck.
         </div>
         <button id="calc-button" class="button">Calculate Plan</button>
+        <a id="open-full-plan" class="button secondary" href="/plan">Open Full Plan Tracker</a>
         <button id="clear-button" class="button secondary">Clear Saved Data</button>
         <label class="check-row" style="margin-top:10px;">
           <input id="remember-data" type="checkbox" />
@@ -1432,7 +1434,7 @@
     // =========================
     // Storage (local or session)
     // =========================
-    const SNAPSHOT_KEYS = ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode"];
+    const SNAPSHOT_KEYS = ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode", "planProgressData"];
     let plannerSyncReady = false;
     let plannerSyncTimer = null;
     let applyingRemoteSnapshot = false;
@@ -1543,7 +1545,7 @@
       // Move data to the selected storage so behavior matches UI.
       const source = preferLocal ? window.sessionStorage : window.localStorage;
       const target = preferLocal ? window.localStorage : window.sessionStorage;
-      ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode"].forEach(key => {
+      ["incomeData", "billsData", "debtsData", "savingsGoalsData", "debtStrategy", "focusMode", "planProgressData"].forEach(key => {
         const val = source.getItem(key);
         if (val) {
           target.setItem(key, val);
@@ -2389,15 +2391,12 @@
         const minsThisCheck = debtWindow.dueItems.reduce((sum, debt) => {
           const occurrences = Number(debt._occurrenceCount || 1);
           const dueTotal = Number(debt.minimum || 0) * occurrences;
-          return sum + Math.min(dueTotal, debt.balance);
+          const simDebt = simDebts.find(item => item.name === debt.name && item.balance > 0);
+          if (!simDebt) return sum;
+          const pay = Math.min(dueTotal, simDebt.balance);
+          simDebt.balance -= pay;
+          return sum + pay;
         }, 0);
-
-        debtWindow.dueItems.forEach(debt => {
-          const occurrences = Number(debt._occurrenceCount || 1);
-          const dueTotal = Number(debt.minimum || 0) * occurrences;
-          const pay = Math.min(dueTotal, debt.balance);
-          debt.balance -= pay;
-        });
 
         const totalAvailable = payAmount + currentBalance;
         const required = billsWindow.total + minsThisCheck + spending + buffer;
@@ -2545,8 +2544,26 @@
       const rangeText = billsWindow.rangeText;
 
       const debtWindow = getDueItemsInWindow(startDateStr, nextPayDate, debts, "minimum");
-      const minsThisCheck = debtWindow.total;
-      const dueMinDebts = debtWindow.dueItems;
+      const debtBalancesAfterMinimums = debts.map(debt => ({
+        ...debt,
+        balance: Number(debt.balance) || 0
+      }));
+      const dueMinDebts = debtWindow.dueItems
+        .map(debt => {
+          const occurrences = Number(debt._occurrenceCount || 1);
+          const dueTotal = Number(debt.minimum || 0) * occurrences;
+          const debtRef = debtBalancesAfterMinimums.find(item => item.name === debt.name && item.balance > 0.01);
+          const plannedPay = debtRef ? Math.min(dueTotal, debtRef.balance) : 0;
+          if (debtRef) {
+            debtRef.balance -= plannedPay;
+          }
+          return {
+            ...debt,
+            _plannedPay: plannedPay
+          };
+        })
+        .filter(debt => Number(debt._plannedPay || 0) > 0.01);
+      const minsThisCheck = dueMinDebts.reduce((sum, debt) => sum + Number(debt._plannedPay || 0), 0);
 
       const billsListHtml = dueBills.length
         ? "<ul>" + dueBills.map(b => {
@@ -2562,7 +2579,7 @@
         ? "<ul>" + dueMinDebts.map(d => {
           const safeName = escapeHtml(d.name);
           const occurrences = Number(d._occurrenceCount || 1);
-          const minAmount = Number(d.minimum || 0) * occurrences;
+          const minAmount = Number(d._plannedPay || 0);
           const occurrenceText = occurrences > 1 ? `, ${occurrences}x this window` : "";
           return `<li>${safeName}: $${money(minAmount)} (due ${d.dueDay}${occurrenceText})</li>`;
         }).join("") + "</ul>"
@@ -2575,7 +2592,7 @@
       const extraRaw = totalAvailable - neededForBillsAndSpending;
       const extra = Math.max(0, extraRaw);
 
-      const hasDebts = debts.length > 0;
+      const hasDebts = debtBalancesAfterMinimums.some(debt => Number(debt.balance || 0) > 0.01);
       const hasGoals = goals.length > 0;
 
       let allocation = {
@@ -2587,10 +2604,9 @@
       };
 
       if (extra > 0 && (hasDebts || hasGoals)) {
-        allocation = calculateAllocationForCheck(extra, debts, goals, strategy, focusMode, start);
+        allocation = calculateAllocationForCheck(extra, debtBalancesAfterMinimums, goals, strategy, focusMode, start);
       }
 
-      const targetDebt = getTargetDebt(debts, strategy);
       const endBalance = totalAvailable >= neededForBillsAndSpending
         ? buffer
         : totalAvailable - billsThisCheck - minsThisCheck - spendingPerCheck;
@@ -2791,12 +2807,14 @@
       window.localStorage.removeItem("savingsGoalsData");
       window.localStorage.removeItem("debtStrategy");
       window.localStorage.removeItem("focusMode");
+      window.localStorage.removeItem("planProgressData");
       window.sessionStorage.removeItem("incomeData");
       window.sessionStorage.removeItem("billsData");
       window.sessionStorage.removeItem("debtsData");
       window.sessionStorage.removeItem("savingsGoalsData");
       window.sessionStorage.removeItem("debtStrategy");
       window.sessionStorage.removeItem("focusMode");
+      window.sessionStorage.removeItem("planProgressData");
       if (window.BudgetDadAuth && typeof window.BudgetDadAuth.clearPlannerSnapshot === "function") {
         await window.BudgetDadAuth.clearPlannerSnapshot();
       }

@@ -16,6 +16,7 @@ const rewrites = new Map([
   ['/pricing', '/pricing.html'],
   ['/upgrade', '/pricing.html'],
   ['/planner', '/planner.html'],
+  ['/plan', '/plan.html'],
   ['/privacy', '/privacy.html'],
   ['/terms', '/terms.html'],
   ['/strategy', '/strategy.html']

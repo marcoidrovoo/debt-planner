@@ -8,6 +8,7 @@
     { "source": "/pricing", "destination": "/pricing.html" },
     { "source": "/upgrade", "destination": "/pricing.html" },
     { "source": "/planner", "destination": "/planner.html" },
+    { "source": "/plan", "destination": "/plan.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/strategy", "destination": "/strategy.html" }
