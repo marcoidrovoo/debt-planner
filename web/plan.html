@@ -345,6 +345,16 @@
       margin-top: 2px;
     }
 
+    .cycle-warning {
+      margin-top: 8px;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      background: #fff1f2;
+      color: #9f1239;
+      font-size: 0.8rem;
+      padding: 7px 9px;
+    }
+
     .target-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1078,6 +1088,8 @@
             spending,
             buffer,
             totalAvailable: 0,
+            required: 0,
+            shortfall: 0,
             extra: 0,
             endBalance: 0
           }
@@ -1124,6 +1136,8 @@
         if (extra < 0) extra = 0;
 
         cycle.totals.totalAvailable = totalAvailable;
+        cycle.totals.required = required;
+        cycle.totals.shortfall = Math.max(0, required - totalAvailable);
         cycle.totals.extra = extra;
 
         if (extra > 0.01 && (simDebts.some(debt => debt.balance > 0.01) || simGoals.some(goal => goal.saved < goal.target - 0.01))) {
@@ -1261,6 +1275,8 @@
       const debtPaid = {};
       const goalSaved = {};
       const cycleCompletion = {};
+      const taskCompletionByCycle = {};
+      const fundingCoverageByCycle = {};
       const runningSnapshots = {};
 
       const debtRunning = {};
@@ -1295,7 +1311,13 @@
             }
           }
         });
-        cycleCompletion[cycle.id] = cycle.items.length ? doneInCycle / cycle.items.length : 1;
+        const taskCompletion = cycle.items.length ? doneInCycle / cycle.items.length : 1;
+        const required = Number(cycle.totals.required || 0);
+        const available = Number(cycle.totals.totalAvailable || 0);
+        const fundingCoverage = required > 0 ? Math.min(1, available / required) : 1;
+        taskCompletionByCycle[cycle.id] = taskCompletion;
+        fundingCoverageByCycle[cycle.id] = fundingCoverage;
+        cycleCompletion[cycle.id] = Math.min(taskCompletion, fundingCoverage);
         runningSnapshots[cycle.id] = {
           debtRemainingByName: { ...debtRunning },
           goalFundedByName: { ...goalRunning },
@@ -1346,6 +1368,8 @@
         debtProgress,
         goalProgress,
         cycleCompletion,
+        taskCompletionByCycle,
+        fundingCoverageByCycle,
         runningSnapshots,
         completedItemsCount,
         totalItemsCount: plan.totalScheduledItems,
@@ -1493,6 +1517,9 @@
 
       timeline.innerHTML = cycles.map(cycle => {
         const completion = Math.round((progress.cycleCompletion[cycle.id] || 0) * 100);
+        const taskCompletion = Math.round((progress.taskCompletionByCycle[cycle.id] || 0) * 100);
+        const fundingCoverage = Math.round((progress.fundingCoverageByCycle[cycle.id] || 0) * 100);
+        const cycleShortfall = Number(cycle.totals.shortfall || 0);
         const actualSnapshot = progress.runningSnapshots[cycle.id] || {
           debtRemainingByName: {},
           goalFundedByName: {},
@@ -1501,8 +1528,10 @@
         };
         const targetTotals = cycle.targets || { totalDebtRemaining: actualSnapshot.totalDebtRemaining, totalGoalFunded: actualSnapshot.totalGoalFunded };
 
-        const debtSummaryOnTrack = actualSnapshot.totalDebtRemaining <= Number(targetTotals.totalDebtRemaining || 0) + 0.01;
-        const goalSummaryOnTrack = actualSnapshot.totalGoalFunded + 0.01 >= Number(targetTotals.totalGoalFunded || 0);
+        const debtSummaryOnTrack = cycleShortfall <= 0.01
+          && actualSnapshot.totalDebtRemaining <= Number(targetTotals.totalDebtRemaining || 0) + 0.01;
+        const goalSummaryOnTrack = cycleShortfall <= 0.01
+          && actualSnapshot.totalGoalFunded + 0.01 >= Number(targetTotals.totalGoalFunded || 0);
 
         const debtTargetRows = plan.baselineDebts.length
           ? plan.baselineDebts.map(debt => {
@@ -1557,11 +1586,13 @@
             <div class="cycle-head">
               <div>
                 <p class="cycle-title">Paycheck ${cycle.number}: ${formatFullDate(cycle.startDate)} to ${formatFullDate(cycle.endDate)}</p>
-                <div class="cycle-meta">Available $${money(cycle.totals.totalAvailable)} • Required $${money(cycle.totals.bills + cycle.totals.debtMinimums + cycle.totals.spending + cycle.totals.buffer)} • Extra $${money(cycle.totals.extra)}</div>
+                <div class="cycle-meta">Available $${money(cycle.totals.totalAvailable)} • Required $${money(cycle.totals.required)} • Extra $${money(cycle.totals.extra)}</div>
+                ${cycleShortfall > 0.01 ? `<div class="cycle-warning">Shortfall: $${money(cycleShortfall)}. This paycheck cannot fully cover required spending and target buffer.</div>` : ""}
               </div>
               <div class="cycle-completion">
                 <div class="progress-bar"><span style="width:${completion}%;"></span></div>
                 <div class="cycle-meta" style="margin-top:4px;">${completion}% cycle complete</div>
+                <div class="cycle-meta">${taskCompletion}% tasks paid • ${fundingCoverage}% funding coverage</div>
               </div>
             </div>
             <div class="target-grid">
